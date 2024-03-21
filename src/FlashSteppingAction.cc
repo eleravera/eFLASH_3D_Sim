@@ -43,19 +43,12 @@
 #include <string>
 
 FlashSteppingAction::FlashSteppingAction(FlashEventAction *)
-    : G4UserSteppingAction()
-     
-{
+    : G4UserSteppingAction() {}
 
-
-}
-
-FlashSteppingAction::~FlashSteppingAction() {
-}
+FlashSteppingAction::~FlashSteppingAction() {}
 
 void FlashSteppingAction::UserSteppingAction(const G4Step *aStep)
 {
-
   G4int eventid =
       G4RunManager::GetRunManager()->GetCurrentEvent()->GetEventID();
   G4StepPoint *postStep = aStep->GetPostStepPoint();
@@ -86,8 +79,6 @@ void FlashSteppingAction::UserSteppingAction(const G4Step *aStep)
  G4double cos_z = aStep->GetTrack()->GetMomentum().z();
  
  G4double momentum = std::sqrt(cos_x*cos_x+cos_y*cos_y+cos_z*cos_z);
- 
-
 
  if (aStep->GetTrack()->GetDefinition()==G4Electron::ElectronDefinition() && prevolumeName == "logicTreatmentRoom" && volumeName == "phantomLog")
 

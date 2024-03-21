@@ -33,28 +33,18 @@
 #include "FlashSteppingAction.hh"
 #include "FlashRunAction.hh"
 
-
-
-
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
 FlashActionInitialization::FlashActionInitialization()
     : G4VUserActionInitialization() {}
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-FlashActionInitialization::~FlashActionInitialization()
+FlashActionInitialization::~FlashActionInitialization() {}
 
-{}
-
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 void FlashActionInitialization::BuildForMaster() const {
   FlashRunAction *runAction = new FlashRunAction;
   SetUserAction(runAction);
 }
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 void FlashActionInitialization::Build() const {
   SetUserAction(new FlashPrimaryGeneratorAction);
@@ -68,11 +58,5 @@ void FlashActionInitialization::Build() const {
    
   
   SetUserAction(new FlashSteppingAction(eventAction));
-    
-
-  
-  
   
 }
-
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

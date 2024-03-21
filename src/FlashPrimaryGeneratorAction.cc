@@ -96,12 +96,12 @@ void FlashPrimaryGeneratorAction::GeneratePrimaries(G4Event *anEvent) {
 
   particleGun->GetCurrentSource()->GetPosDist()->SetCentreCoords(G4ThreeVector(x, y, z));
 
-      particleGun->GetCurrentSource()->GetAngDist()->SetAngDistType("beam2d"); //define angular divergence
-        particleGun->GetCurrentSource()->GetAngDist()->DefineAngRefAxes("angref1", G4ThreeVector( 0, 0,1.));//define reference axis for divergence
+  particleGun->GetCurrentSource()->GetAngDist()->SetAngDistType("beam2d"); //define angular divergence
+  particleGun->GetCurrentSource()->GetAngDist()->DefineAngRefAxes("angref1", G4ThreeVector( 0, 0,1.));//define reference axis for divergence
         
-        particleGun->GetCurrentSource()->GetAngDist()->SetBeamSigmaInAngX(Theta);//set planar divergence
-        particleGun->GetCurrentSource()->GetAngDist()->SetBeamSigmaInAngY(Theta);//set planar divergence
-        particleGun->GetCurrentSource()->GetAngDist()->SetParticleMomentumDirection(G4ThreeVector(1,0,0));//beam propagates in the x direction
+  particleGun->GetCurrentSource()->GetAngDist()->SetBeamSigmaInAngX(Theta);//set planar divergence
+  particleGun->GetCurrentSource()->GetAngDist()->SetBeamSigmaInAngY(Theta);//set planar divergence
+  particleGun->GetCurrentSource()->GetAngDist()->SetParticleMomentumDirection(G4ThreeVector(1,0,0));//beam propagates in the x direction
 
   particleGun->GeneratePrimaryVertex(anEvent);
 }

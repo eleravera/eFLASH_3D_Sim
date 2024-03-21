@@ -49,14 +49,14 @@ FlashEventAction::FlashEventAction()
 FlashEventAction::~FlashEventAction() {}
 
 void FlashEventAction::BeginOfEventAction(const G4Event * evt) {
- G4int evtNb = evt->GetEventID();
+	G4int evtNb = evt->GetEventID();
 	if (evtNb%printModulo == 0) { //this prints every 100000 events
 		G4cout << "\n---> Begin of event: " << evtNb << G4endl;
 }}
 
 void FlashEventAction::EndOfEventAction(const G4Event *evt) {
- G4int evtNb = evt->GetEventID();
-		if (evtNb%printModulo == 0) {//this prints every 100000 events
-			G4cout << "---> End of event: " << evtNb << G4endl;
+	G4int evtNb = evt->GetEventID();
+	if (evtNb%printModulo == 0) {//this prints every 100000 events
+		G4cout << "---> End of event: " << evtNb << G4endl;
 }
 }

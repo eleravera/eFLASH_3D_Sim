@@ -55,7 +55,7 @@ FlashDetectorMessenger::FlashDetectorMessenger(FlashDetectorConstruction* detect
     fChangeTheDetectorDir = new G4UIdirectory("/changeDetector/");
     fChangeTheDetectorDir -> SetGuidance("Command to fChange the Detector Size");
 
-// fChange Detector material 
+    // fChange Detector material 
     fChangeTheDetectorMaterialCmd = new G4UIcmdWithAString("/changeDetector/material", this);
     fChangeTheDetectorMaterialCmd  -> SetGuidance("fChange the Phantom and the detector material"); 
     fChangeTheDetectorMaterialCmd  -> SetParameterName("PhantomMaterial", false);
@@ -76,16 +76,12 @@ FlashDetectorMessenger::FlashDetectorMessenger(FlashDetectorConstruction* detect
     fUpdateCmd_d->SetGuidance("if you fChanged geometrical value(s).");
     fUpdateCmd_d->AvailableForStates(G4State_Idle);
     
-
-
    }
 
 /////////////////////////////////////////////////////////////////////////////
-FlashDetectorMessenger::~FlashDetectorMessenger()
-{
-
-
-  delete fChangeThePhantomDir;
+FlashDetectorMessenger::~FlashDetectorMessenger() {
+    
+    delete fChangeThePhantomDir;
     delete fChangeTheDetectorDir;
   
     delete fChangeThePhantomMaterialCmd;
@@ -96,8 +92,6 @@ FlashDetectorMessenger::~FlashDetectorMessenger()
 /////////////////////////////////////////////////////////////////////////////
 void FlashDetectorMessenger::SetNewValue(G4UIcommand* command,G4String newValue)
 {
-	
- 
   if (command == fChangeThePhantomMaterialCmd)
   {
       flashDetector -> SetPhantomMaterial(newValue);
@@ -107,7 +101,5 @@ void FlashDetectorMessenger::SetNewValue(G4UIcommand* command,G4String newValue)
   {
       flashDetector -> SetDetectorMaterial(newValue);
   }
-  
-  
-  
+
 }

@@ -48,8 +48,6 @@ FlashPhysicsList::FlashPhysicsList() : G4VModularPhysicsList() {
   // Radioactive decay
   RegisterPhysics(new G4RadioactiveDecayPhysics());
 
- 
-
   // EM physics
   //RegisterPhysics(new G4EmPenelopePhysics());
   RegisterPhysics(new G4EmStandardPhysics_option4());
@@ -64,8 +62,6 @@ void FlashPhysicsList::SetCuts() {//set cuts based on region name defined in det
   G4String regName;
   G4ProductionCuts *cuts;
 
-
-
   regName = "Phantom_reg";
   region = G4RegionStore::GetInstance()->GetRegion(regName);
   cuts = new G4ProductionCuts;
@@ -74,6 +70,5 @@ void FlashPhysicsList::SetCuts() {//set cuts based on region name defined in det
   cuts->SetProductionCut(0.1 * mm, G4ProductionCuts::GetIndex("e+"));
   region->SetProductionCuts(cuts);
   
- 
 }
 
