@@ -61,7 +61,7 @@ Applicator::~Applicator() {}
 void Applicator::ConstructCollimator(G4VPhysicalVolume *) {
   // Sets default geometry and materials
   SetDefaultDimensions();
-   SetOuterRadius(55*mm);
+   SetOuterRadius(15*mm);
    SetApplicatorLength(300*mm);
   // Construct the whole Applicator Beam Line
   ConstructApplicator();

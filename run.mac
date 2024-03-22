@@ -28,16 +28,19 @@
 
 # scorer for dose in water phantom
 
-/score/mesh/boxSize 60 2 2 mm
-/score/mesh/nBin 120 1 1
-/score/mesh/translate/xyz 60 0 0 mm 
+/score/mesh/boxSize 50 50 50 mm
+/score/mesh/nBin 100 100 100 
+/score/mesh/translate/xyz 50 0 0 mm 
 /score/quantity/doseDeposit dose Gy
 
-/score/close
+/run/beamOn	100
+
+#/score/drawProjection boxMesh_1 dose
+
+#/score/close
 
 /score/list  
+/run/beamOn	100000
 
-/run/beamOn	500000
-
-/score/dumpQuantityToFile boxMesh_1 dose dose.out
+/score/dumpQuantityToFile boxMesh_1 dose boxmesh3D.out
 

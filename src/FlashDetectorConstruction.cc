@@ -75,7 +75,7 @@ FlashDetectorConstruction::FlashDetectorConstruction()
     DefineMaterials();
     fDetectorMessenger = new FlashDetectorMessenger(this);
 
-    SetPhantomSize(30. *cm, 30. *cm, 30. *cm);
+    SetPhantomSize(10. *cm, 10. *cm, 10. *cm);
     SetAirGap(0*cm); // Set the air gap between the water phantom and the end of the applicator
     SetDetectorThickness(10*um);
     SetDetector_subThickness(370*um);
@@ -104,7 +104,7 @@ G4VPhysicalVolume *
 FlashDetectorConstruction::ConstructPhantom(G4double CollPos) {
     //This function creates a cubic phantom with the point Collpos on the surface of the cube.
 
-    fPhantomMaterial = nist->FindOrBuildMaterial("G4_WATER");
+    fPhantomMaterial = nist->FindOrBuildMaterial("G4_PLASTIC_SC_VINYLTOLUENE");//(EJ200
 
     fPosition_coefficient = CollPos;
     
@@ -211,7 +211,7 @@ G4VPhysicalVolume *FlashDetectorConstruction::Construct() {
     fPhantom_physical =
             ConstructPhantom(Collimator->fFinalApplicatorXPositionFlash +
     Collimator->fHightFinalApplicatorFlash+fAirGap);
-    ConstructDetector();
+    //ConstructDetector();
     
      return physicalTreatmentRoom;
 }
