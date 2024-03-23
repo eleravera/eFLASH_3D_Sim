@@ -9,6 +9,12 @@
 # Initialize kernel
 #
 # Visualization setting
+#/process/optical/processActivation Cerenkov true
+/process/optical/processActivation Scintillation true
+
 /run/initialize
 /control/execute vis.mac
+
+
+
 
