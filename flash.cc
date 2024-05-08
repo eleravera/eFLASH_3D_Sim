@@ -28,6 +28,8 @@
 // Authors: J.Pensavalle, G.Milluzzo, F. Romano
 // jake.pensavalle@pi.infn.it, giuliana.milluzzo@ct.infn.it, francesco.romano@ct.infn.it
 
+
+
 #include "G4Types.hh"
 
 #include "G4RunManagerFactory.hh"
@@ -43,6 +45,12 @@
 #include "G4ScoringManager.hh"
 
 #include "Randomize.hh"
+#include <common.hh>
+
+// concurrent vector to write output in multithread mode without conflicts 
+// currently multithread not active
+tbb::concurrent_vector<detection> detection_vector1;
+tbb::concurrent_vector<detection> detection_vector2;
 
 int main(int argc, char **argv) {
 
@@ -50,8 +58,8 @@ int main(int argc, char **argv) {
 
   //  G4Random::setTheEngine(new CLHEP::MTwistEngine);
 
-   auto *runManager=G4RunManagerFactory::CreateRunManager();
-  G4int nThreads = 4;
+  auto *runManager=G4RunManagerFactory::CreateRunManager();
+  G4int nThreads = 1;
   runManager->SetNumberOfThreads(nThreads);
  
   G4Random::setTheSeed(45698);
@@ -69,6 +77,7 @@ int main(int argc, char **argv) {
   G4UImanager *UImanager = G4UImanager::GetUIpointer();
   G4ScoringManager::GetScoringManager();
   
+ 
 G4UIExecutive *ui = 0;
   if (argc == 1) {
     ui = new G4UIExecutive(argc, argv);
@@ -83,6 +92,28 @@ G4UIExecutive *ui = 0;
     UImanager->ApplyCommand(command + fileName);
 
        }
+  
+
+  // clears output vectors before run
+  detection_vector1.clear();         
+  detection_vector2.clear();
+
+  runManager->BeamOn(1);
+  // Write results to output
+    
+    std::ofstream file_out2("./detect1.raw");
+    for (uint32_t i=0; i<detection_vector1.size(); i++) {
+      file_out2.write(reinterpret_cast<char*>(&detection_vector1[i]), sizeof(detection));
+    }
+    file_out2.close();
+  
+    std::ofstream file_out3("./detect2.raw");
+    for (uint32_t i=0; i<detection_vector2.size(); i++) {
+      file_out3.write(reinterpret_cast<char*>(&detection_vector2[i]), sizeof(detection));
+    }
+    file_out3.close();
+
+
 
   delete visManager;
   delete runManager;

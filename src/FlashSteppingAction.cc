@@ -41,6 +41,10 @@
 #include "G4Track.hh"
 #include <sstream>
 #include <string>
+#include "G4OpticalPhoton.hh"
+#include <common.hh>
+#include "G4UnitsTable.hh"
+#include "G4SystemOfUnits.hh"
 
 FlashSteppingAction::FlashSteppingAction(FlashEventAction *)
     : G4UserSteppingAction() {}
@@ -79,6 +83,14 @@ void FlashSteppingAction::UserSteppingAction(const G4Step *aStep)
  G4double cos_z = aStep->GetTrack()->GetMomentum().z();
  
  G4double momentum = std::sqrt(cos_x*cos_x+cos_y*cos_y+cos_z*cos_z);
+    G4Track* track = aStep->GetTrack();
+    
+  if(track->GetDefinition() == G4OpticalPhoton::OpticalPhotonDefinition()) { // if optical photon
+    if (prevolumeName == "phantomLog" && volumeName ==  "logicTreatmentRoom"){
+    // append to detection_vector the current info
+    detection_vector1.push_back(  detection(pos_x/mm, pos_y/mm, pos_z/mm));
+} }
+
 
  if (aStep->GetTrack()->GetDefinition()==G4Electron::ElectronDefinition() && prevolumeName == "logicTreatmentRoom" && volumeName == "phantomLog")
 
@@ -89,7 +101,6 @@ void FlashSteppingAction::UserSteppingAction(const G4Step *aStep)
 
 	    << parentid << "\t"<< eventid << "\t" << kineticEnergy << "\t" <<pos_x<<"\t"<<pos_y<<"\t"<<pos_z<<"\t"<<momentum<<"\t"<<cos_x<<"\t"<<cos_y<<"\t"<<cos_z<<"\t"<<G4endl;
        
-	
 	 }
 	   
     }

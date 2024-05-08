@@ -4,12 +4,13 @@
 # Set some default verbose
 /control/verbose 1
 /run/verbose 1
+
 #
 #
 # Initialize kernel
 #
 # Visualization setting
-#/process/optical/processActivation Cerenkov true
+/process/optical/processActivation Cerenkov false 
 /process/optical/processActivation Scintillation true
 
 /run/initialize
