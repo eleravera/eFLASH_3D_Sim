@@ -72,37 +72,40 @@ void FlashSteppingAction::UserSteppingAction(const G4Step *aStep)
     G4String prevolumeName =
         preStep->GetPhysicalVolume()->GetLogicalVolume()->GetName();
 
- G4int parentid = aStep->GetTrack()->GetParentID();
- //G4Track* theTrack = aStep->GetTrack();
- G4double kineticEnergy = aStep->GetTrack()->GetKineticEnergy();
- G4double pos_x = aStep->GetTrack()->GetPosition().x();
- G4double pos_y = aStep->GetTrack()->GetPosition().y();
- G4double pos_z = aStep->GetTrack()->GetPosition().z();
- G4double cos_x = aStep->GetTrack()->GetMomentum().x();
- G4double cos_y = aStep->GetTrack()->GetMomentum().y();
- G4double cos_z = aStep->GetTrack()->GetMomentum().z();
- 
- G4double momentum = std::sqrt(cos_x*cos_x+cos_y*cos_y+cos_z*cos_z);
-    G4Track* track = aStep->GetTrack();
+    G4int parentid = aStep->GetTrack()->GetParentID();
+    //G4Track* theTrack = aStep->GetTrack();
+    G4double kineticEnergy = aStep->GetTrack()->GetKineticEnergy();
+    G4double pos_x = aStep->GetTrack()->GetPosition().x();
+    G4double pos_y = aStep->GetTrack()->GetPosition().y();
+    G4double pos_z = aStep->GetTrack()->GetPosition().z();
+    G4double cos_x = aStep->GetTrack()->GetMomentum().x();
+    G4double cos_y = aStep->GetTrack()->GetMomentum().y();
+    G4double cos_z = aStep->GetTrack()->GetMomentum().z();
     
-  
-  if(track->GetDefinition() == G4OpticalPhoton::OpticalPhotonDefinition()) { // if optical photon
-    if (prevolumeName == "phantomLog" && volumeName ==  "logicTreatmentRoom"){
-    // append to detection_vector the current info
-    detection_vector1.push_back(  detection(pos_x/mm, pos_y/mm, pos_z/mm));
-} }
+    G4double momentum = std::sqrt(cos_x*cos_x+cos_y*cos_y+cos_z*cos_z);
+        G4Track* track = aStep->GetTrack();
+    
+
+    if(track->GetDefinition() == G4OpticalPhoton::OpticalPhotonDefinition()) { 
+      if (prevolumeName == "phantomLog" && volumeName ==  "logicTreatmentRoom")
+      {
+      // append to detection_vector the current info
+      detection exiting_photon =  detection(pos_x/mm, pos_y/mm, pos_z/mm);
+     
+      detection_vector1.push_back(exiting_photon);
+      //exiting_photon.print();
+      //std::cout<< detection_vector1.size() << std::endl;
+      } }
 
 
- if (aStep->GetTrack()->GetDefinition()==G4Electron::ElectronDefinition() && prevolumeName == "logicTreatmentRoom" && volumeName == "phantomLog")
+      if (aStep->GetTrack()->GetDefinition()==G4Electron::ElectronDefinition() && prevolumeName == "logicTreatmentRoom" && volumeName == "phantomLog")
 
-     	{
-
-	  std::ofstream WriteDataIn("PhantomEntrance.txt", std::ios::app);
-	  WriteDataIn	 
-
-	    << parentid << "\t"<< eventid << "\t" << kineticEnergy << "\t" <<pos_x<<"\t"<<pos_y<<"\t"<<pos_z<<"\t"<<momentum<<"\t"<<cos_x<<"\t"<<cos_y<<"\t"<<cos_z<<"\t"<<G4endl;
-       
-	 }
+      {
+      std::ofstream WriteDataIn("PhantomEntrance.txt", std::ios::app);
+      WriteDataIn	 
+      << parentid << "\t"<< eventid << "\t" << kineticEnergy << "\t" <<pos_x<<"\t"<<pos_y<<"\t"<<pos_z<<"\t"<<momentum<<"\t"<<cos_x<<"\t"<<cos_y<<"\t"<<cos_z<<"\t"<<G4endl;
+        
+      }
 	   
     }
 }

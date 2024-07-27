@@ -61,8 +61,8 @@ Applicator::~Applicator() {}
 void Applicator::ConstructCollimator(G4VPhysicalVolume *) {
   // Sets default geometry and materials
   SetDefaultDimensions();
-   SetOuterRadius(25*mm);
-   SetApplicatorLength(300*mm);
+   SetOuterRadius(20*mm);
+   SetApplicatorLength(62.5*mm);
   // Construct the whole Applicator Beam Line
   ConstructApplicator();
 }
@@ -101,7 +101,7 @@ void Applicator::SetDefaultDimensions() {
   magenta->SetVisibility(true);
 
   
-  fInitial_pos = -100*cm; //set the same position in FlashPrimaryGeneratorAction.cc
+  fInitial_pos = -51.60*cm; //set the same position in FlashPrimaryGeneratorAction.cc
   // Geometry  APPLICATOR DEFAULTS
 
  
@@ -649,9 +649,9 @@ G4double phi2 = 90. * deg;
   rm2.rotateY(phi2);
 
   
-  const G4double innRadius = 6*cm;
-  const G4double out_Radius = innRadius+60*mm ;
-  const G4double hight = 3.4*cm-11/4*mm;
+  const G4double innRadius = 3*cm;
+  const G4double out_Radius = innRadius+42.5*mm ;
+  const G4double hight = 2.75 * cm;
   const G4double startAngle = 0. * deg;
   const G4double spanningAngle = 360. * deg;
   const G4double XPosition = fInitial_pos+hight;

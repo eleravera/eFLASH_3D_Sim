@@ -77,34 +77,37 @@ int main(int argc, char **argv) {
   G4UImanager *UImanager = G4UImanager::GetUIpointer();
   G4ScoringManager::GetScoringManager();
   
- 
-G4UIExecutive *ui = 0;
-  if (argc == 1) {
-    ui = new G4UIExecutive(argc, argv);
-    UImanager->ApplyCommand("/control/execute init_vis.mac");
-    ui->SessionStart();
-    delete ui;
-  }
-  else
-     {
-    G4String command = "/control/execute ";
+
+  // clears output vectors before run
+  detection_vector1.clear();    
+  detection_vector2.clear();
+
+  G4UIExecutive *ui = 0;
+    if (argc == 1) {
+      ui = new G4UIExecutive(argc, argv);
+      UImanager->ApplyCommand("/control/execute init_vis.mac");
+      ui->SessionStart();
+      delete ui;
+    }
+    else
+      {
+      G4String command = "/control/execute ";
     G4String fileName = argv[1];
     UImanager->ApplyCommand(command + fileName);
 
-       }
-  
+    }
 
-  // clears output vectors before run
-  detection_vector1.clear();         
-  detection_vector2.clear();
 
-  runManager->BeamOn(1);
+  //runManager->BeamOn(100);
   // Write results to output
     
-    std::ofstream file_out2("./detect1.txt");
+    std::ofstream file_out2("./detect1.raw");
     for (uint32_t i=0; i<detection_vector1.size(); i++) {
       file_out2.write(reinterpret_cast<char*>(&detection_vector1[i]), sizeof(detection));
+    
+      //std::cout<< reinterpret_cast<char*>(&detection_vector1[i]) << std::endl; 
     }
+
     file_out2.close();
   
     std::ofstream file_out3("./detect2.raw");
