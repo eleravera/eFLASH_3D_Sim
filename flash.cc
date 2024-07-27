@@ -51,10 +51,10 @@ int main(int argc, char **argv) {
   //  G4Random::setTheEngine(new CLHEP::MTwistEngine);
 
    auto *runManager=G4RunManagerFactory::CreateRunManager();
-  G4int nThreads = 4;
+  G4int nThreads = 8;
   runManager->SetNumberOfThreads(nThreads);
  
-  G4Random::setTheSeed(45698);
+  G4Random::setTheSeed(45705);
 
   runManager->SetUserInitialization(new FlashDetectorConstruction);
 
