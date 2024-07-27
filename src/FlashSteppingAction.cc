@@ -85,6 +85,7 @@ void FlashSteppingAction::UserSteppingAction(const G4Step *aStep)
  G4double momentum = std::sqrt(cos_x*cos_x+cos_y*cos_y+cos_z*cos_z);
     G4Track* track = aStep->GetTrack();
     
+  
   if(track->GetDefinition() == G4OpticalPhoton::OpticalPhotonDefinition()) { // if optical photon
     if (prevolumeName == "phantomLog" && volumeName ==  "logicTreatmentRoom"){
     // append to detection_vector the current info

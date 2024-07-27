@@ -101,7 +101,7 @@ G4UIExecutive *ui = 0;
   runManager->BeamOn(1);
   // Write results to output
     
-    std::ofstream file_out2("./detect1.raw");
+    std::ofstream file_out2("./detect1.txt");
     for (uint32_t i=0; i<detection_vector1.size(); i++) {
       file_out2.write(reinterpret_cast<char*>(&detection_vector1[i]), sizeof(detection));
     }
