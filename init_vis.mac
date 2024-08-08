@@ -14,7 +14,7 @@
 /process/optical/processActivation Scintillation true
 
 /run/initialize
-/run/beamOn 10000
+/run/beamOn 100
 /control/execute vis.mac
 
 

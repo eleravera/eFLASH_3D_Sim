@@ -53,7 +53,53 @@ FlashSteppingAction::~FlashSteppingAction() {}
 
 void FlashSteppingAction::UserSteppingAction(const G4Step *aStep)
 {
-  G4int eventid =
+  const G4Track* track = aStep->GetTrack();
+
+  // Check if the track is a secondary particle
+  if (track->GetParentID() > 0) {
+      
+      // Get the particle definition
+      const G4ParticleDefinition* particleDef = track->GetDefinition();
+
+      //std::cout <<  particleDef->GetParticleName() << std::endl;
+      //std::cout << track->GetParentID() << std::endl;
+
+      // Check if the particle is a photon
+      if (particleDef == G4OpticalPhoton::OpticalPhotonDefinition() && track->GetParentID() > 0) 
+      {
+        std::cout << "ALLORA OK" << std::endl;
+      }
+
+
+
+      // Check if the particle is a photon
+      if (particleDef->GetPDGCharge() == 0 && particleDef == G4OpticalPhoton::OpticalPhotonDefinition()) {
+
+          //check if the selection is correct
+          //std::cout <<  particleDef->GetParticleName() << std::endl;
+          //std::cout << track->GetParentID() << std::endl;
+          
+
+          // This is a secondary photon
+          const G4StepPoint* preStepPoint = aStep->GetPreStepPoint();
+          const G4ThreeVector& position = preStepPoint->GetPosition();  
+          const G4ThreeVector& momentum = aStep->GetTrack()->GetMomentum();
+
+          detection photon_position_generation =  detection(position.x()/mm, position.y()/mm, position.z()/mm);
+          detection photon_momentum_generation =  detection(momentum.x()/mm, momentum.y()/mm, momentum.z()/mm);
+
+          photon_position_generation.print();
+          photon_momentum_generation.print();
+          detection_vector1.push_back(photon_position_generation);
+          detection_vector2.push_back(photon_momentum_generation);
+
+      }
+
+  }
+}
+
+
+/*G4int eventid =
       G4RunManager::GetRunManager()->GetCurrentEvent()->GetEventID();
   G4StepPoint *postStep = aStep->GetPostStepPoint();
   G4StepPoint *preStep = aStep->GetPreStepPoint();
@@ -114,5 +160,4 @@ void FlashSteppingAction::UserSteppingAction(const G4Step *aStep)
         
       }
 	   
-    }
-}
+    }*/
