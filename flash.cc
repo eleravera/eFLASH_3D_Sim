@@ -101,7 +101,7 @@ int main(int argc, char **argv) {
   //runManager->BeamOn(100);
   // Write results to output
     
-    std::ofstream file_out2("./detect1.raw");
+    std::ofstream file_out2("./photon_dist/photon_position.raw");
     for (uint32_t i=0; i<detection_vector1.size(); i++) {
       file_out2.write(reinterpret_cast<char*>(&detection_vector1[i]), sizeof(detection));
     
@@ -109,14 +109,16 @@ int main(int argc, char **argv) {
     }
 
     file_out2.close();
-  
-    std::ofstream file_out3("./detect2.raw");
+
+
+    std::ofstream file_out3("./photon_dist/photon_angle.raw");
     for (uint32_t i=0; i<detection_vector2.size(); i++) {
       file_out3.write(reinterpret_cast<char*>(&detection_vector2[i]), sizeof(detection));
+    
+      //std::cout<< reinterpret_cast<char*>(&detection_vector1[i]) << std::endl; 
     }
+
     file_out3.close();
-
-
 
   delete visManager;
   delete runManager;

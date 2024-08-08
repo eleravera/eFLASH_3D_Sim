@@ -82,6 +82,8 @@ void FlashSteppingAction::UserSteppingAction(const G4Step *aStep)
     G4double cos_y = aStep->GetTrack()->GetMomentum().y();
     G4double cos_z = aStep->GetTrack()->GetMomentum().z();
     
+
+
     G4double momentum = std::sqrt(cos_x*cos_x+cos_y*cos_y+cos_z*cos_z);
         G4Track* track = aStep->GetTrack();
     
@@ -91,10 +93,15 @@ void FlashSteppingAction::UserSteppingAction(const G4Step *aStep)
       {
       // append to detection_vector the current info
       detection exiting_photon =  detection(pos_x/mm, pos_y/mm, pos_z/mm);
-     
       detection_vector1.push_back(exiting_photon);
       //exiting_photon.print();
       //std::cout<< detection_vector1.size() << std::endl;
+      detection exiting_photon_momentum =  detection(cos_x, cos_y, cos_z);
+      detection_vector2.push_back(exiting_photon_momentum);
+
+        //std::cout<< "My momentum: " <<  aStep->GetTrack()->GetMomentum() << std::endl;
+        //std::cout<< "My momentum along x, y z:  " <<  aStep->GetTrack()->GetMomentum().x() << aStep->GetTrack()->GetMomentum().y()<<aStep->GetTrack()->GetMomentum().z() << std::endl;
+
       } }
 
 

@@ -75,7 +75,7 @@ FlashDetectorConstruction::FlashDetectorConstruction()
     DefineMaterials();
     fDetectorMessenger = new FlashDetectorMessenger(this);
 
-    SetPhantomSize(50. *cm, 50. *cm, 50. *cm);
+    SetPhantomSize(10. *cm, 10. *cm, 10. *cm);
     SetAirGap(0*cm); // Set the air gap between the water phantom and the end of the applicator
     SetDetectorThickness(10*um);
     SetDetector_subThickness(370*um);
