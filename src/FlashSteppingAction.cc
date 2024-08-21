@@ -55,8 +55,15 @@ void FlashSteppingAction::UserSteppingAction(const G4Step *aStep)
 {
   const G4Track* track = aStep->GetTrack();
 
+    const G4ParticleDefinition* particleDef = track->GetDefinition();
+
+    
+    std::cout << "particle = " << particleDef->GetParticleName() << " with GetParentID = " << track->GetParentID() << " and  track->GetTrackID() = " << track->GetTrackID() << std::endl;
+
+
+
   // Check if the track is a secondary particle
-  if (track->GetParentID() > 0) {
+  /*if (track->GetParentID() > 0) {
       
       // Get the particle definition
       const G4ParticleDefinition* particleDef = track->GetDefinition();
@@ -65,15 +72,15 @@ void FlashSteppingAction::UserSteppingAction(const G4Step *aStep)
       //std::cout << track->GetParentID() << std::endl;
 
       // Check if the particle is a photon
-      if (particleDef == G4OpticalPhoton::OpticalPhotonDefinition() && track->GetParentID() > 0) 
+      if (particleDef == G4OpticalPhoton::OpticalPhotonDefinition() ) //&& track->GetParentID() > 0) 
       {
-        std::cout << "ALLORA OK" << std::endl;
+        std::cout << "photons with GetParentID = " << track->GetParentID() << " and  track->GetTrackID() = " << track->GetTrackID() << std::endl;
       }
-
+*/
 
 
       // Check if the particle is a photon
-      if (particleDef->GetPDGCharge() == 0 && particleDef == G4OpticalPhoton::OpticalPhotonDefinition()) {
+      /*if (particleDef == G4OpticalPhoton::OpticalPhotonDefinition()) {
 
           //check if the selection is correct
           //std::cout <<  particleDef->GetParticleName() << std::endl;
@@ -93,11 +100,24 @@ void FlashSteppingAction::UserSteppingAction(const G4Step *aStep)
           detection_vector1.push_back(photon_position_generation);
           detection_vector2.push_back(photon_momentum_generation);
 
-      }
+      }*/
 
-  }
+  //}
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+//QUELLO CHE VIENE DOPO é DI ALTRI BRANCHes
 
 /*G4int eventid =
       G4RunManager::GetRunManager()->GetCurrentEvent()->GetEventID();
