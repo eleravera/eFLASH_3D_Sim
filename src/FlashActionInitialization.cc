@@ -31,6 +31,7 @@
 #include "FlashEventAction.hh"
 #include "FlashPrimaryGeneratorAction.hh"
 #include "FlashSteppingAction.hh"
+#include "FlashStackingAction.hh"
 #include "FlashRunAction.hh"
 
 FlashActionInitialization::FlashActionInitialization()
@@ -55,8 +56,9 @@ void FlashActionInitialization::Build() const {
   FlashEventAction *eventAction = new FlashEventAction();
   
   SetUserAction(eventAction);
-   
+  
   
   SetUserAction(new FlashSteppingAction(eventAction));
+  SetUserAction(new FlashStackingAction());
   
 }

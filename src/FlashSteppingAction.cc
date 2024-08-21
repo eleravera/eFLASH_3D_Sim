@@ -57,8 +57,7 @@ void FlashSteppingAction::UserSteppingAction(const G4Step *aStep)
 
     const G4ParticleDefinition* particleDef = track->GetDefinition();
 
-    
-    std::cout << "particle = " << particleDef->GetParticleName() << " with GetParentID = " << track->GetParentID() << " and  track->GetTrackID() = " << track->GetTrackID() << std::endl;
+    //std::cout << "particle = " << particleDef->GetParticleName() << " with GetParentID = " << track->GetParentID() << " and  track->GetTrackID() = " << track->GetTrackID() << std::endl;
 
 
 
