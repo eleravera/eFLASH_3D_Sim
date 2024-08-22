@@ -31,6 +31,7 @@
 #define FlashActionInitialization_h 1
 
 #include "G4VUserActionInitialization.hh"
+#include "G4SteppingVerbose.hh"
 
 class FlashActionInitialization : public G4VUserActionInitialization {
 public:
@@ -39,6 +40,9 @@ public:
 
   virtual void BuildForMaster() const;
   virtual void Build() const;
+
+
+  virtual G4VSteppingVerbose* InitializeSteppingVerbose() const;
 };
 
 #endif

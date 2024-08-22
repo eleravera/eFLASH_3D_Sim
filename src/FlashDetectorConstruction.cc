@@ -117,7 +117,7 @@ FlashDetectorConstruction::ConstructPhantom(G4double CollPos) {
 
 
         G4MaterialPropertiesTable* MPT = new G4MaterialPropertiesTable();
-        MPT->AddConstProperty("SCINTILLATIONYIELD", 10000./MeV);
+        MPT->AddConstProperty("SCINTILLATIONYIELD", 1000./MeV);
         //MPT->AddProperty("RINDEX", energy, rindex);
         MPT->AddProperty("RINDEX", "PMMA");
         MPT->AddProperty("ABSLENGTH", energy, absorption);

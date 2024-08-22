@@ -33,6 +33,8 @@
 #include "FlashSteppingAction.hh"
 #include "FlashStackingAction.hh"
 #include "FlashRunAction.hh"
+#include "FlashSteppingVerbose.hh"
+
 
 FlashActionInitialization::FlashActionInitialization()
     : G4VUserActionInitialization() {}
@@ -61,4 +63,9 @@ void FlashActionInitialization::Build() const {
   SetUserAction(new FlashSteppingAction(eventAction));
   SetUserAction(new FlashStackingAction());
   
+}
+
+
+G4VSteppingVerbose* FlashActionInitialization::InitializeSteppingVerbose() const{
+  return new FlashSteppingVerbose();
 }

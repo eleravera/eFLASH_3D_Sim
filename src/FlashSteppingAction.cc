@@ -79,11 +79,11 @@ void FlashSteppingAction::UserSteppingAction(const G4Step *aStep)
 
 
       // Check if the particle is a photon
-      /*if (particleDef == G4OpticalPhoton::OpticalPhotonDefinition()) {
+      if (particleDef == G4OpticalPhoton::OpticalPhotonDefinition()) {
 
           //check if the selection is correct
           //std::cout <<  particleDef->GetParticleName() << std::endl;
-          //std::cout << track->GetParentID() << std::endl;
+          std::cout << track->GetParentID() << std::endl;
           
 
           // This is a secondary photon
@@ -94,12 +94,12 @@ void FlashSteppingAction::UserSteppingAction(const G4Step *aStep)
           detection photon_position_generation =  detection(position.x()/mm, position.y()/mm, position.z()/mm);
           detection photon_momentum_generation =  detection(momentum.x()/mm, momentum.y()/mm, momentum.z()/mm);
 
-          photon_position_generation.print();
-          photon_momentum_generation.print();
+          //photon_position_generation.print();
+          //photon_momentum_generation.print();
           detection_vector1.push_back(photon_position_generation);
           detection_vector2.push_back(photon_momentum_generation);
 
-      }*/
+      }
 
   //}
 }

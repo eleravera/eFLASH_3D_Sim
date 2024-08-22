@@ -2,8 +2,11 @@
 # in interactive session
 #
 # Set some default verbose
-/control/verbose 0
-/run/verbose 0 
+/control/verbose 1
+/control/saveHistory
+/run/verbose 0
+/tracking/verbose 0
+
 
 #
 #
@@ -13,9 +16,12 @@
 /process/optical/processActivation Cerenkov false # non aggiunti in source (librerie etc)
 /process/optical/processActivation Scintillation true
 
+/control/execute 9MeVEF.mac
+
+
 /run/initialize
-/run/beamOn 100
-/control/execute vis.mac
+/run/beamOn 10
+#/control/execute vis.mac
 
 
 

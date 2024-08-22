@@ -14,7 +14,7 @@ G4ClassificationOfNewTrack FlashStackingAction::ClassifyNewTrack(const G4Track *
     //const G4Track* track = aStep->GetTrack();
     const G4ParticleDefinition* particleDef = aTrack->GetDefinition();
 
-    std::cout << "particle = " << particleDef->GetParticleName() << " with GetParentID = " << aTrack->GetParentID() << " and  track->GetTrackID() = " << aTrack->GetTrackID() << std::endl;    
+    //std::cout << "particle = " << particleDef->GetParticleName() << " with GetParentID = " << aTrack->GetParentID() << " and  track->GetTrackID() = " << aTrack->GetTrackID() << std::endl;    
 
   return fUrgent;
   }
