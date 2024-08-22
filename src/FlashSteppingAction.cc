@@ -79,7 +79,7 @@ void FlashSteppingAction::UserSteppingAction(const G4Step *aStep)
 
 
       // Check if the particle is a photon
-      if (particleDef == G4OpticalPhoton::OpticalPhotonDefinition()) {
+      /*if (particleDef == G4OpticalPhoton::OpticalPhotonDefinition()) {
 
           //check if the selection is correct
           //std::cout <<  particleDef->GetParticleName() << std::endl;
@@ -99,7 +99,7 @@ void FlashSteppingAction::UserSteppingAction(const G4Step *aStep)
           detection_vector1.push_back(photon_position_generation);
           detection_vector2.push_back(photon_momentum_generation);
 
-      }
+      }*/
 
   //}
 }

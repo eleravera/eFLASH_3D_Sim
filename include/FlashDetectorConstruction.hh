@@ -56,6 +56,8 @@ public:
   G4VPhysicalVolume *physicalTreatmentRoom;
   G4LogicalVolume *logicTreatmentRoom;
   G4VPhysicalVolume *ConstructPhantom(G4double CollPos);
+  G4VPhysicalVolume *ConstructPinhole();
+
   G4VPhysicalVolume *ConstructDetector();
 
   FlashDetectorConstruction();
@@ -68,6 +70,9 @@ public:
   G4bool  SetDetectorMaterial(G4String material);
   void SetAirGap(G4double position);
   void SetPhantomSize(G4double sizeX, G4double sizeY, G4double sizeZ);
+  void SetPinholeDistance(G4double distanceX);
+  void SetDetectorDistance(G4double distanceX);
+
 
   void SetDetectorThickness(G4double thickness);
   void SetDetector_subThickness(G4double thickness_sub);
@@ -79,6 +84,7 @@ public:
   G4VisAttributes *red;
   G4VisAttributes *blue;
   G4VisAttributes *green;
+  G4VisAttributes *gray;
 
   
 private:
@@ -87,11 +93,15 @@ private:
   
   G4Material *airNist;
   G4Material *fPhantomMaterial;
+  G4Material *PinholeMaterial;
   Applicator *Collimator;
 
   G4double fAirGap;
   G4double fPhantomSizeX, fPhantomSizeY, fPhantomSizeZ, fPhantom_coordinateX,fPosition_coefficient;
-  G4ThreeVector fPhantomPosition;
+  G4ThreeVector fPhantomPosition, PinholePosition;
+  G4double PinholeDistance;
+  G4double DetectorDistance;
+
   G4double fDet_thickness,fDet_width,fDet_sub_thickness,fDetectorPosition,fAirGap_phantom_det;
   G4Element *Si;
   G4Element *C;
@@ -99,7 +109,7 @@ private:
   G4Material *fDetectorMaterial;
 
   G4Box *fPhantom;
-
+  //G4SubtractionSolid *PinholeCilinder;
 
   G4Box *fDet_box;
   G4LogicalVolume *fDetLogicalVolume;
@@ -117,6 +127,11 @@ private:
   G4VPhysicalVolume *fPhant_phys;
   G4VPhysicalVolume *fPhantom_physical;
     
+  G4LogicalVolume *PinholeLogicalVolume;
+  G4VPhysicalVolume *Pihole_phys;
+  G4VPhysicalVolume *Pihole_physical;
+
+
   G4UserLimits *fStepLimit;
   G4bool fCheckOverlaps;
  

@@ -5,7 +5,7 @@
 /control/verbose 1
 /control/saveHistory
 /run/verbose 0
-/tracking/verbose 0
+/tracking/verbose 2
 
 
 #
@@ -20,8 +20,8 @@
 
 
 /run/initialize
-/run/beamOn 10
-#/control/execute vis.mac
+/run/beamOn 1
+/control/execute vis.mac
 
 
 
