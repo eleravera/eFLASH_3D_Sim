@@ -72,13 +72,8 @@ public:
   void SetPhantomSize(G4double sizeX, G4double sizeY, G4double sizeZ);
   void SetPinholeDistance(G4double distanceX);
   void SetDetectorDistance(G4double distanceX);
-
-
   void SetDetectorThickness(G4double thickness);
-  void SetDetector_subThickness(G4double thickness_sub);
   void SetDetectorWidth(G4double width);
-  void SetDetectorPosition(G4double position);
-  void SetAirGap_water_detector(G4double spost);
 
   G4VisAttributes *skyBlue;
   G4VisAttributes *red;
@@ -98,7 +93,7 @@ private:
 
   G4double fAirGap;
   G4double fPhantomSizeX, fPhantomSizeY, fPhantomSizeZ, fPhantom_coordinateX,fPosition_coefficient;
-  G4ThreeVector fPhantomPosition, PinholePosition;
+  G4ThreeVector fPhantomPosition;
   G4double PinholeDistance;
   G4double DetectorDistance;
 
@@ -106,18 +101,18 @@ private:
   G4Element *Si;
   G4Element *C;
   G4Material *SiC;
-  G4Material *fDetectorMaterial;
+  G4Material *DetectorMaterial;
 
   G4Box *fPhantom;
   //G4SubtractionSolid *PinholeCilinder;
 
-  G4Box *fDet_box;
+  G4Box *Det_box;
   G4LogicalVolume *fDetLogicalVolume;
   G4VPhysicalVolume *fDet_phys;
 
-  G4Box *fDet_sub;
-  G4LogicalVolume *fDet_sub_LogicalVolume;
-  G4VPhysicalVolume *fDet_sub_phys;
+  //G4Box *fDet_sub;
+  //G4LogicalVolume *fDet_sub_LogicalVolume;
+  //G4VPhysicalVolume *fDet_sub_phys;
 
   
   void DefineMaterials();

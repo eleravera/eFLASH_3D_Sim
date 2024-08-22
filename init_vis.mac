@@ -20,7 +20,7 @@
 
 
 /run/initialize
-/run/beamOn 1
+/run/beamOn 0
 /control/execute vis.mac
 
 
