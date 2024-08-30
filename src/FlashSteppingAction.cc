@@ -57,7 +57,14 @@ void FlashSteppingAction::UserSteppingAction(const G4Step *aStep)
   G4StepPoint *postStep = aStep->GetPostStepPoint();
   G4StepPoint *preStep = aStep->GetPreStepPoint();
 
- 
+  if (postStep->GetStepStatus() == fGeomBoundary)
+    {
+      G4String volumeName = postStep->GetPhysicalVolume()->GetLogicalVolume()->GetName();
+      G4String prevolumeName = preStep->GetPhysicalVolume()->GetLogicalVolume()->GetName();
+      G4Track* track = aStep->GetTrack();
+      const G4ParticleDefinition* particleDef = track->GetDefinition();
+      
+      
       if(particleDef == G4OpticalPhoton::OpticalPhotonDefinition()) { 
         
           //Kill photons that exit non parallel from the phantom 
