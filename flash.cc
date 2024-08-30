@@ -59,7 +59,7 @@ int main(int argc, char **argv) {
   //  G4Random::setTheEngine(new CLHEP::MTwistEngine);
 
   auto *runManager=G4RunManagerFactory::CreateRunManager();
-  G4int nThreads = 1;
+  G4int nThreads = 8;
   runManager->SetNumberOfThreads(nThreads);
  
   G4Random::setTheSeed(45698);
@@ -80,7 +80,6 @@ int main(int argc, char **argv) {
 
   // clears output vectors before run
   detection_vector1.clear();    
-  detection_vector2.clear();
 
   G4UIExecutive *ui = 0;
     if (argc == 1) {
@@ -98,27 +97,21 @@ int main(int argc, char **argv) {
     }
 
 
-  //runManager->BeamOn(100);
+  runManager->BeamOn(0);
   // Write results to output
     
-    std::ofstream file_out2("./photon_dist/photon_position_generation.raw");
+    std::ofstream file_out2("./photon_dist/telecentric/photon_maps.raw");
     for (uint32_t i=0; i<detection_vector1.size(); i++) {
       file_out2.write(reinterpret_cast<char*>(&detection_vector1[i]), sizeof(detection));
     
-      //std::cout<< reinterpret_cast<char*>(&detection_vector1[i]) << std::endl; 
+      std::cout<< reinterpret_cast<char*>(&detection_vector1[i]) << std::endl; 
     }
 
     file_out2.close();
 
 
-    std::ofstream file_out3("./photon_dist/photon_angle_generation.raw");
-    for (uint32_t i=0; i<detection_vector2.size(); i++) {
-      file_out3.write(reinterpret_cast<char*>(&detection_vector2[i]), sizeof(detection));
-    
-      //std::cout<< reinterpret_cast<char*>(&detection_vector1[i]) << std::endl; 
-    }
+  std::cout << "Number of threds: " << runManager->GetNumberOfThreads() << std::endl;
 
-    file_out3.close();
 
   delete visManager;
   delete runManager;
