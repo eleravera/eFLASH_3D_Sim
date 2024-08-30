@@ -11,10 +11,22 @@ FlashStackingAction::~FlashStackingAction() {}
 G4ClassificationOfNewTrack FlashStackingAction::ClassifyNewTrack(const G4Track *aTrack)
   {
 
-    //const G4Track* track = aStep->GetTrack();
-    const G4ParticleDefinition* particleDef = aTrack->GetDefinition();
+    /*const G4ParticleDefinition* particleDef = aTrack->GetDefinition();
 
-    //std::cout << "particle = " << particleDef->GetParticleName() << " with GetParentID = " << aTrack->GetParentID() << " and  track->GetTrackID() = " << aTrack->GetTrackID() << std::endl;    
+    G4ThreeVector photonDirection = aTrack->GetMomentumDirection();  
+
+    // Define a small tolerance value
+    const G4double tolerance = 1e-3;
+
+    // Check if the photon is parallel to the x-axis
+    if (!(std::abs(photonDirection.x()) > 1.0 - tolerance &&
+        std::abs(photonDirection.y()) < tolerance &&
+        std::abs(photonDirection.z()) < tolerance))
+        {
+          std::cout << "A photon passed the selection" << std::endl;
+          // Kill the photon
+          return fKill;
+        }*/
 
   return fUrgent;
   }
