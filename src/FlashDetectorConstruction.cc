@@ -40,7 +40,9 @@
 #include "G4AutoDelete.hh"
 #include "G4Box.hh"
 #include "G4GlobalMagFieldMessenger.hh"
+#include "G4LogicalBorderSurface.hh"
 #include "G4LogicalVolume.hh"
+#include "G4OpticalSurface.hh"
 #include "G4PVParameterised.hh"
 #include "G4PVPlacement.hh"
 #include "G4SubtractionSolid.hh"
@@ -114,7 +116,7 @@ G4VPhysicalVolume *FlashDetectorConstruction::ConstructPhantom(G4double CollPos)
     std::vector<G4double> scint_spectrum = {0.5, 0.5};
 
     G4MaterialPropertiesTable* MPT = new G4MaterialPropertiesTable();
-    MPT->AddConstProperty("SCINTILLATIONYIELD", 1000./MeV);
+    MPT->AddConstProperty("SCINTILLATIONYIELD", 10000./MeV);
     MPT->AddProperty("RINDEX", energy, rindex);
     MPT->AddProperty("ABSLENGTH", energy, absorption);
     MPT-> AddProperty("SCINTILLATIONCOMPONENT1", energy, scint_spectrum);
@@ -159,6 +161,16 @@ G4VPhysicalVolume *FlashDetectorConstruction::ConstructPhantom(G4double CollPos)
     fStepLimit = new G4UserLimits(maxStep);
     fPhantomLogicalVolume->SetUserLimits(fStepLimit);
 
+
+    // Creazione e configurazione della superficie ottica
+    G4OpticalSurface* opticalSurface = new G4OpticalSurface("OpticalSurface");
+    opticalSurface->SetType(dielectric_dielectric);  // Tipo di superficie
+    opticalSurface->SetFinish(ground);  // Finitura opaca
+    opticalSurface->SetModel(unified);  // Modello di riflessione e trasmissione
+    opticalSurface->SetPolish(0.0);  // Coefficiente di riflessione a zero
+
+    // Associa la superficie ottica ai confini
+    new G4LogicalBorderSurface("BorderSurface", fPhant_phys, physicalTreatmentRoom, opticalSurface);
     return fPhant_phys;
 }
 
@@ -211,18 +223,31 @@ G4VPhysicalVolume *FlashDetectorConstruction::ConstructDetector(){
     DetectorMaterial=SiC;
     
     Det_box = new G4Box("Detector", fDet_thickness/2, fDet_width/2,fDet_width/2);
-    fDetectorPosition = fPhantom_coordinateX + fPhantomSizeX/2 + fDet_thickness/2 + DetectorDistance; //sicura di fDet_thickness/2?!
+    fDetectorPositionX = fPhantom_coordinateX + fPhantomSizeX/2 + fDet_thickness/2 + DetectorDistance; //sicura di fDet_thickness/2?!
+    fDetectorPositionY = fPhantom_coordinateX + fPhantomSizeX/2 + fDet_thickness/2 + DetectorDistance; //sicura di fDet_thickness/2?!
+    fDetectorPositionZ = fPhantom_coordinateX + fPhantomSizeX/2 + fDet_thickness/2 + DetectorDistance; //sicura di fDet_thickness/2?!
+
+
+    G4RotationMatrix* rotationMatrix2 = new G4RotationMatrix();
+    rotationMatrix2->rotateZ(90.*deg); // Ruota di 90 gradi attorno all'asse Y
+    G4RotationMatrix* rotationMatrix3 = new G4RotationMatrix();
+    rotationMatrix3->rotateY(90.*deg); // Ruota di 90 gradi attorno all'asse Y
+
 
     // Definition of the logical volume of the Detector
     fDetLogicalVolume = new G4LogicalVolume(Det_box, DetectorMaterial, "DetectorLog", 0, 0, 0);
-    fDet_phys = new G4PVPlacement(0,G4ThreeVector(fDetectorPosition, 0. * mm, 0. * mm), "DetPhys",fDetLogicalVolume,physicalTreatmentRoom,false, 0, fCheckOverlaps);
+    fDet_phys1 = new G4PVPlacement(0,G4ThreeVector(fDetectorPositionX, 0. * mm, 0. * mm), "DetPhys",fDetLogicalVolume,physicalTreatmentRoom,false, 0, fCheckOverlaps);
+    fDet_phys2 = new G4PVPlacement(rotationMatrix2,G4ThreeVector(0. * mm, fDetectorPositionY, 0. * mm), "DetPhys",fDetLogicalVolume,physicalTreatmentRoom,false, 0, fCheckOverlaps);
+    fDet_phys3 = new G4PVPlacement(rotationMatrix3,G4ThreeVector(0. * mm, 0. * mm, fDetectorPositionZ), "DetPhys",fDetLogicalVolume,physicalTreatmentRoom,false, 0, fCheckOverlaps);
+
+
 
     // Visualisation attributes of the detector
     gray = new G4VisAttributes(G4Colour(211 / 255., 211 / 255., 211 / 255.));
     gray->SetVisibility(true);
-    PinholeLogicalVolume->SetVisAttributes(gray);
+    fDetLogicalVolume->SetVisAttributes(gray);
 
-    return fDet_phys;
+    return fDet_phys1, fDet_phys2, fDet_phys3;
 
 }
 
@@ -266,7 +291,7 @@ G4VPhysicalVolume *FlashDetectorConstruction::Construct() {
     // -----------------------------
     // Pinhole camera
     //------------------------------
-    Pihole_physical = ConstructPinhole();
+    //Pihole_physical = ConstructPinhole();
 
     // -----------------------------
     // Detector pannel
