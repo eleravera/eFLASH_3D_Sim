@@ -97,7 +97,7 @@ private:
   G4double PinholeDistance;
   G4double DetectorDistance;
 
-  G4double fDet_thickness,fDet_width,fDet_sub_thickness,fDetectorPosition,fAirGap_phantom_det;
+  G4double fDet_thickness,fDet_width,fDet_sub_thickness,fDetectorPositionX, fDetectorPositionY, fDetectorPositionZ,fAirGap_phantom_det;
   G4Element *Si;
   G4Element *C;
   G4Material *SiC;
@@ -108,7 +108,7 @@ private:
 
   G4Box *Det_box;
   G4LogicalVolume *fDetLogicalVolume;
-  G4VPhysicalVolume *fDet_phys;
+  G4VPhysicalVolume *fDet_phys1, *fDet_phys2, *fDet_phys3;
 
   //G4Box *fDet_sub;
   //G4LogicalVolume *fDet_sub_LogicalVolume;
