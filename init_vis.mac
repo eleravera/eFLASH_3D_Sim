@@ -16,11 +16,12 @@
 /process/optical/processActivation Cerenkov false # non aggiunti in source (librerie etc)
 /process/optical/processActivation Scintillation true
 
+/run/initialize
 /control/execute 9MeVEF.mac
 
 
-/run/initialize
-/run/beamOn 0
+
+/run/beamOn 1000
 /control/execute vis.mac
 
 

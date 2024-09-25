@@ -33,6 +33,9 @@
 #include "G4Types.hh"
 
 #include "G4RunManagerFactory.hh"
+#include "G4RunManager.hh"
+#include "G4MTRunManager.hh"
+#include <G4Timer.hh>
 
 #include "G4UIExecutive.hh"
 #include "G4UImanager.hh"
@@ -58,8 +61,9 @@ int main(int argc, char **argv) {
 
   //  G4Random::setTheEngine(new CLHEP::MTwistEngine);
 
-  auto *runManager=G4RunManagerFactory::CreateRunManager();
-  G4int nThreads = 8;
+  //auto *runManager=G4RunManagerFactory::CreateRunManager();
+  auto *runManager = new G4MTRunManager();
+  G4int nThreads = 6;
   runManager->SetNumberOfThreads(nThreads);
  
   G4Random::setTheSeed(45698);
@@ -69,6 +73,8 @@ int main(int argc, char **argv) {
   runManager->SetUserInitialization(new FlashPhysicsList);
 
   runManager->SetUserInitialization(new FlashActionInitialization);
+
+
 
   G4VisManager *visManager = new G4VisExecutive;
 
@@ -81,11 +87,14 @@ int main(int argc, char **argv) {
   // clears output vectors before run
   detection_vector1.clear();    
 
+
+  G4Timer timer;
+  timer.Start();
   G4UIExecutive *ui = 0;
     if (argc == 1) {
       ui = new G4UIExecutive(argc, argv);
       UImanager->ApplyCommand("/control/execute init_vis.mac");
-      ui->SessionStart();
+      //ui->SessionStart(); //per lanciare simulazione senza UI basta disalibilitare questa parte. 
       delete ui;
     }
     else
@@ -96,21 +105,22 @@ int main(int argc, char **argv) {
 
     }
 
-
-  runManager->BeamOn(0);
+  //runManager->BeamOn(100);
+  timer.Stop();
+  
   // Write results to output
-    
-    std::ofstream file_out2("./photon_dist/telecentric/photon_maps.raw");
-    for (uint32_t i=0; i<detection_vector1.size(); i++) {
+  std::ofstream file_out2("./photon_dist/telecentric/photon_maps.raw");
+  for (uint32_t i=0; i<detection_vector1.size(); i++) {
       file_out2.write(reinterpret_cast<char*>(&detection_vector1[i]), sizeof(detection));
-    
-      std::cout<< reinterpret_cast<char*>(&detection_vector1[i]) << std::endl; 
     }
-
-    file_out2.close();
+  
+  std::cout<< "detection_vector1.size(): " << detection_vector1.size() << std::endl;
+  file_out2.close();
 
 
   std::cout << "Number of threds: " << runManager->GetNumberOfThreads() << std::endl;
+  std::cout << "Elapsed time: " << timer.GetRealElapsed() << " seconds" << std::endl;
+
 
 
   delete visManager;

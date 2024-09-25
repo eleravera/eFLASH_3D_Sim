@@ -70,21 +70,21 @@ void FlashSteppingAction::UserSteppingAction(const G4Step *aStep)
           //Kill photons that exit non parallel from the phantom 
           if (prevolumeName == "phantomLog" && volumeName ==  "logicTreatmentRoom") {
             G4ThreeVector photonDirection = track->GetMomentumDirection();  
-            // Define a small tolerance value
-            const G4double tolerance = 2e-3;
-          
-            // Check if the photon is parallel to the x-axis and kill the photon
-            if (!(
-                (std::abs(photonDirection.x()) > 1.0 - tolerance && std::abs(photonDirection.y()) < tolerance && std::abs(photonDirection.z()) < tolerance) ||
-                (std::abs(photonDirection.y()) > 1.0 - tolerance && std::abs(photonDirection.x()) < tolerance && std::abs(photonDirection.z()) < tolerance) ||
-                (std::abs(photonDirection.z()) > 1.0 - tolerance && std::abs(photonDirection.x()) < tolerance && std::abs(photonDirection.y()) < tolerance)
-                )) 
-                {
-                  track->SetTrackStatus(fStopAndKill);
-                }
-            else {
-                std::cout << "A photon passed the selection" << std::endl;
-                }
+            // Define a small tolerance value as cosThetaMax
+            const G4double cosThetaMax = std::cos(0.1 * CLHEP::pi / 180.0);  // 1 degree in radians
+
+
+            // Calcola il coseno dell'angolo rispetto agli assi
+            G4double cosThetaX = photonDirection.x();  // Prodotto scalare con (1,0,0)
+            G4double cosThetaY = photonDirection.y();  // Prodotto scalare con (0,1,0)
+            G4double cosThetaZ = photonDirection.z();  // Prodotto scalare con (0,0,1)
+
+            // Se il fotone è entro 1 grado rispetto a uno degli assi principali killalo
+            if (!(cosThetaX > cosThetaMax || cosThetaY > cosThetaMax || cosThetaZ > cosThetaMax)) {
+                track->SetTrackStatus(fStopAndKill); 
+            } else {
+                // std::cout << "A photon passed the selection" << std::endl;
+            }
 
             }
       
@@ -98,7 +98,7 @@ void FlashSteppingAction::UserSteppingAction(const G4Step *aStep)
             // append to detection_vector the current info
             detection photon_maps =  detection(pos_x/mm, pos_y/mm, pos_z/mm);
             detection_vector1.push_back(photon_maps);
-            std::cout << "A photon has been saved on file" << std::endl;  
+            //std::cout << "A photon has been saved on file" << std::endl;  
             //photon_maps.print();
             } 
         

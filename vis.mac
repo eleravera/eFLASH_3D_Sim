@@ -38,8 +38,6 @@
 /vis/verbose warnings
 /vis/scene/add/trajectories
 
-##BEAM
-/control/execute 9MeVEF.mac
 
 
 

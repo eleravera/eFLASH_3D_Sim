@@ -80,7 +80,12 @@ void FlashPrimaryGeneratorAction::SetDefaultPrimaryParticle() {
 
 void FlashPrimaryGeneratorAction::GeneratePrimaries(G4Event *anEvent) {
 
+  
+
   //Energy is defined in 9MeVEF.mac and 7MeVEF.mac for the 9 MeV and 7 MeV spectrum respectively
+
+//G4double energy = 9.0 * MeV;
+    //particleGun->GetCurrentSource()->GetEneDist()->SetMonoEnergy(energy);
 
   G4double x = X0;//the beam has a gaussian shape
   G4double y = Y0;
@@ -94,6 +99,7 @@ void FlashPrimaryGeneratorAction::GeneratePrimaries(G4Event *anEvent) {
     z += G4RandGauss::shoot(Z0, sigmaZ);
   }
 
+  
   particleGun->GetCurrentSource()->GetPosDist()->SetCentreCoords(G4ThreeVector(x, y, z));
 
   particleGun->GetCurrentSource()->GetAngDist()->SetAngDistType("beam2d"); //define angular divergence
