@@ -43,6 +43,8 @@ public:
   virtual ~FlashSteppingAction();
 
   virtual void UserSteppingAction(const G4Step *);
+  
+  static G4int killedPhotonCount;
 
 private:
   // FlashEventAction *fEventAction;

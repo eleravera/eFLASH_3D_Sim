@@ -46,6 +46,9 @@
 #include "G4UnitsTable.hh"
 #include "G4SystemOfUnits.hh"
 
+G4int FlashSteppingAction::killedPhotonCount = 0;
+
+
 FlashSteppingAction::FlashSteppingAction(FlashEventAction *)
     : G4UserSteppingAction() {}
 
@@ -53,6 +56,7 @@ FlashSteppingAction::~FlashSteppingAction() {}
 
 void FlashSteppingAction::UserSteppingAction(const G4Step *aStep)
 {
+
   G4int eventid = G4RunManager::GetRunManager()->GetCurrentEvent()->GetEventID();
   G4StepPoint *postStep = aStep->GetPostStepPoint();
   G4StepPoint *preStep = aStep->GetPreStepPoint();
@@ -73,7 +77,6 @@ void FlashSteppingAction::UserSteppingAction(const G4Step *aStep)
             // Define a small tolerance value as cosThetaMax
             const G4double cosThetaMax = std::cos(0.1 * CLHEP::pi / 180.0);  // 1 degree in radians
 
-
             // Calcola il coseno dell'angolo rispetto agli assi
             G4double cosThetaX = photonDirection.x();  // Prodotto scalare con (1,0,0)
             G4double cosThetaY = photonDirection.y();  // Prodotto scalare con (0,1,0)
@@ -82,6 +85,8 @@ void FlashSteppingAction::UserSteppingAction(const G4Step *aStep)
             // Se il fotone è entro 1 grado rispetto a uno degli assi principali killalo
             if (!(cosThetaX > cosThetaMax || cosThetaY > cosThetaMax || cosThetaZ > cosThetaMax)) {
                 track->SetTrackStatus(fStopAndKill); 
+                killedPhotonCount++;
+
             } else {
                 // std::cout << "A photon passed the selection" << std::endl;
             }

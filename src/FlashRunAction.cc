@@ -29,6 +29,7 @@
 
 #include "FlashRunAction.hh"
 
+#include "FlashSteppingAction.hh"
 #include "FlashPrimaryGeneratorAction.hh"
 #include "G4Accumulable.hh"
 #include "G4AccumulableManager.hh"
@@ -56,10 +57,13 @@ void FlashRunAction::EndOfRunAction(const G4Run *run) {
     G4cout << G4endl
            << "--------------------End of Global Run-----------------------"
            << G4endl << "  The run was " << nofEvents << " events ";
+           
   } else {
     G4cout << G4endl
            << "--------------------End of Local Run------------------------"
            << G4endl << "  The run was " << nofEvents << " events ";
+
   }
+  std::cout<< "Photons killed: " << FlashSteppingAction::killedPhotonCount << std::endl;
   
 }

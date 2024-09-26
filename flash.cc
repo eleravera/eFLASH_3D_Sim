@@ -94,7 +94,7 @@ int main(int argc, char **argv) {
     if (argc == 1) {
       ui = new G4UIExecutive(argc, argv);
       UImanager->ApplyCommand("/control/execute init_vis.mac");
-      //ui->SessionStart(); //per lanciare simulazione senza UI basta disalibilitare questa parte. 
+      ui->SessionStart(); //per lanciare simulazione senza UI basta disalibilitare questa parte. 
       delete ui;
     }
     else
@@ -109,7 +109,7 @@ int main(int argc, char **argv) {
   timer.Stop();
   
   // Write results to output
-  std::ofstream file_out2("./photon_dist/telecentric/photon_maps.raw");
+  std::ofstream file_out2("./photon_dist/telecentric/photon_maps_01.raw");
   for (uint32_t i=0; i<detection_vector1.size(); i++) {
       file_out2.write(reinterpret_cast<char*>(&detection_vector1[i]), sizeof(detection));
     }

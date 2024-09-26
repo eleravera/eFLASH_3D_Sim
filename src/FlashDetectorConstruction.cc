@@ -81,10 +81,10 @@ FlashDetectorConstruction::FlashDetectorConstruction()
     SetAirGap(0*cm); // Set the air gap between the water phantom and the end of the applicator
     SetPhantomSize(10. *cm, 10. *cm, 10. *cm);
     SetPinholeDistance(25. *cm);
-    SetDetectorDistance(50.*cm); // Set the air gap between the water phantom and the end of the detector
+    SetDetectorDistance(10.*cm); // Set the air gap between the water phantom and the end of the detector
 
     SetDetectorThickness(1*mm);
-    SetDetectorWidth(50*cm);
+    SetDetectorWidth(15*cm);
         
 }
 
@@ -223,31 +223,32 @@ G4VPhysicalVolume *FlashDetectorConstruction::ConstructDetector(){
     DetectorMaterial=SiC;
     
     Det_box = new G4Box("Detector", fDet_thickness/2, fDet_width/2,fDet_width/2);
-    fDetectorPositionX = fPhantom_coordinateX + fPhantomSizeX/2 + fDet_thickness/2 + DetectorDistance; //sicura di fDet_thickness/2?!
-    fDetectorPositionY = fPhantom_coordinateX + fPhantomSizeX/2 + fDet_thickness/2 + DetectorDistance; //sicura di fDet_thickness/2?!
-    fDetectorPositionZ = fPhantom_coordinateX + fPhantomSizeX/2 + fDet_thickness/2 + DetectorDistance; //sicura di fDet_thickness/2?!
+    fDetectorPosition_t = fPhantomSizeX + DetectorDistance + fDet_thickness/2;//+ DetectorDistance; //sicura di fDet_thickness/2?!
+    fDetectorPosition_l = fPhantomSizeX*0.5 + DetectorDistance + fDet_thickness/2;//fPhantom_coordinateX + fPhantomSizeX/2 + fDet_thickness/2 + DetectorDistance; //sicura di fDet_thickness/2?!
 
+    G4int offset = fPhantomSizeX * 0.5 ; 
 
-    G4RotationMatrix* rotationMatrix2 = new G4RotationMatrix();
-    rotationMatrix2->rotateZ(90.*deg); // Ruota di 90 gradi attorno all'asse Y
-    G4RotationMatrix* rotationMatrix3 = new G4RotationMatrix();
-    rotationMatrix3->rotateY(90.*deg); // Ruota di 90 gradi attorno all'asse Y
-
+    G4RotationMatrix* rotationMatrix_z = new G4RotationMatrix();
+    rotationMatrix_z->rotateZ(90.*deg); // Ruota di 90 gradi attorno all'asse Z
+    G4RotationMatrix* rotationMatrix_y = new G4RotationMatrix();
+    rotationMatrix_y->rotateY(90.*deg); // Ruota di 90 gradi attorno all'asse Y
+    
 
     // Definition of the logical volume of the Detector
     fDetLogicalVolume = new G4LogicalVolume(Det_box, DetectorMaterial, "DetectorLog", 0, 0, 0);
-    fDet_phys1 = new G4PVPlacement(0,G4ThreeVector(fDetectorPositionX, 0. * mm, 0. * mm), "DetPhys",fDetLogicalVolume,physicalTreatmentRoom,false, 0, fCheckOverlaps);
-    fDet_phys2 = new G4PVPlacement(rotationMatrix2,G4ThreeVector(0. * mm, fDetectorPositionY, 0. * mm), "DetPhys",fDetLogicalVolume,physicalTreatmentRoom,false, 0, fCheckOverlaps);
-    fDet_phys3 = new G4PVPlacement(rotationMatrix3,G4ThreeVector(0. * mm, 0. * mm, fDetectorPositionZ), "DetPhys",fDetLogicalVolume,physicalTreatmentRoom,false, 0, fCheckOverlaps);
-
-
+    fDet_phys1 = new G4PVPlacement(0,G4ThreeVector(fDetectorPosition_t, 0., 0.), "DetPhys",fDetLogicalVolume,physicalTreatmentRoom,false, 0, fCheckOverlaps);
+    fDet_phys2 = new G4PVPlacement(rotationMatrix_z,G4ThreeVector(offset, fDetectorPosition_l, 0.), "DetPhys",fDetLogicalVolume,physicalTreatmentRoom,false, 0, fCheckOverlaps);
+    fDet_phys3 = new G4PVPlacement(rotationMatrix_z,G4ThreeVector(offset, -fDetectorPosition_l, 0.), "DetPhys",fDetLogicalVolume,physicalTreatmentRoom,false, 0, fCheckOverlaps);
+    fDet_phys4 = new G4PVPlacement(rotationMatrix_y, G4ThreeVector(offset, 0., fDetectorPosition_l), "DetPhys", fDetLogicalVolume, physicalTreatmentRoom, false, 0, fCheckOverlaps);
+    fDet_phys5 = new G4PVPlacement(rotationMatrix_y, G4ThreeVector(offset, 0., -fDetectorPosition_l), "DetPhys", fDetLogicalVolume, physicalTreatmentRoom, false, 0, fCheckOverlaps);
+    
 
     // Visualisation attributes of the detector
     gray = new G4VisAttributes(G4Colour(211 / 255., 211 / 255., 211 / 255.));
     gray->SetVisibility(true);
     fDetLogicalVolume->SetVisAttributes(gray);
 
-    return fDet_phys1, fDet_phys2, fDet_phys3;
+    return fDet_phys1, fDet_phys2, fDet_phys3, fDet_phys4, fDet_phys5;
 
 }
 
