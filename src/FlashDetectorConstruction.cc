@@ -110,9 +110,9 @@ G4VPhysicalVolume *FlashDetectorConstruction::ConstructPhantom(G4double CollPos)
 
     fPhantomMaterial = nist->FindOrBuildMaterial("G4_PLASTIC_SC_VINYLTOLUENE");//(EJ200
     
-    std::vector<G4double> energy     = {00.5 * eV, 0.35 *eV};
+    std::vector<G4double> energy     = {2.48 * eV, 3.1 * eV};
     std::vector<G4double> rindex     = {1.58, 1.58};
-    std::vector<G4double> absorption = {250.*cm, 250.*cm};
+    std::vector<G4double> absorption = {380.*cm, 380.*cm};
     std::vector<G4double> scint_spectrum = {0.5, 0.5};
 
     G4MaterialPropertiesTable* MPT = new G4MaterialPropertiesTable();
@@ -264,7 +264,9 @@ G4VPhysicalVolume *FlashDetectorConstruction::Construct() {
     G4bool isotopes = false;
     // Filled with air
     airNist = G4NistManager::Instance()->FindOrBuildMaterial("G4_AIR", isotopes);
-    std::vector<G4double> energy     = {00.5 * eV, 0.35 *eV};
+    std::vector<G4double> energy     = {2.48 * eV, 3.1 * eV};
+
+    //std::vector<G4double> energy     = {00.5 * eV, 0.35 *eV};
     std::vector<G4double> rindex     = {1., 1.};
     G4MaterialPropertiesTable* MPT = new G4MaterialPropertiesTable();
     MPT->AddProperty("RINDEX", energy, rindex);
