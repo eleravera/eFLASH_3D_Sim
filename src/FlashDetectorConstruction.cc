@@ -223,8 +223,8 @@ G4VPhysicalVolume *FlashDetectorConstruction::ConstructDetector(){
     DetectorMaterial=SiC;
     
     Det_box = new G4Box("Detector", fDet_thickness/2, fDet_width/2,fDet_width/2);
-    fDetectorPosition_t = fPhantomSizeX + DetectorDistance + fDet_thickness/2;//+ DetectorDistance; //sicura di fDet_thickness/2?!
-    fDetectorPosition_l = fPhantomSizeX*0.5 + DetectorDistance + fDet_thickness/2;//fPhantom_coordinateX + fPhantomSizeX/2 + fDet_thickness/2 + DetectorDistance; //sicura di fDet_thickness/2?!
+    fDetectorPosition_t = fPhantomSizeX + DetectorDistance + fDet_thickness/2;
+    fDetectorPosition_l = fPhantomSizeX*0.5 + DetectorDistance + fDet_thickness/2;
 
     G4int offset = fPhantomSizeX * 0.5 ; 
 

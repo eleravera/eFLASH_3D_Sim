@@ -46,7 +46,7 @@
 #include "G4UnitsTable.hh"
 #include "G4SystemOfUnits.hh"
 
-G4int FlashSteppingAction::killedPhotonCount = 0;
+uint64_t FlashSteppingAction::killedPhotonCount = 0;
 
 
 FlashSteppingAction::FlashSteppingAction(FlashEventAction *)
@@ -75,7 +75,7 @@ void FlashSteppingAction::UserSteppingAction(const G4Step *aStep)
           if (prevolumeName == "phantomLog" && volumeName ==  "logicTreatmentRoom") {
             G4ThreeVector photonDirection = track->GetMomentumDirection();  
             // Define a small tolerance value as cosThetaMax
-            const G4double cosThetaMax = std::cos(0.1 * CLHEP::pi / 180.0);  // 1 degree in radians
+            const G4double cosThetaMax = std::cos(0.1 * CLHEP::pi / 180.0);  // conv degree in radians
 
             // Calcola il coseno dell'angolo rispetto agli assi
             G4double cosThetaX = photonDirection.x();  // Prodotto scalare con (1,0,0)

@@ -109,7 +109,7 @@ int main(int argc, char **argv) {
   timer.Stop();
   
   // Write results to output
-  std::ofstream file_out2("./photon_dist/telecentric/photon_maps_01.raw");
+  std::ofstream file_out2("./photon_dist/telecentric/photon_maps_02.raw");
   for (uint32_t i=0; i<detection_vector1.size(); i++) {
       file_out2.write(reinterpret_cast<char*>(&detection_vector1[i]), sizeof(detection));
     }

@@ -21,7 +21,7 @@
 
 
 
-/run/beamOn 100
+#/run/beamOn 100000
 /control/execute vis.mac
 
 

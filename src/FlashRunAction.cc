@@ -39,16 +39,20 @@
 #include "G4SystemOfUnits.hh"
 #include "G4UnitsTable.hh"
 
-FlashRunAction::FlashRunAction() : G4UserRunAction() {}
+FlashRunAction::FlashRunAction() : G4UserRunAction() {
+
+}
 
 FlashRunAction::~FlashRunAction() {}
 
 void FlashRunAction::BeginOfRunAction(const G4Run *run) {
   G4cout << "### Run " << run->GetRunID() << " start." << G4endl;
   G4RunManager::GetRunManager()->SetRandomNumberStore(false);
+
 }
 
 void FlashRunAction::EndOfRunAction(const G4Run *run) {
+
   G4int nofEvents = run->GetNumberOfEvent();
   if (nofEvents == 0)
     return;
