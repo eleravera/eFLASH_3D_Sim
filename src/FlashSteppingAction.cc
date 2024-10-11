@@ -61,6 +61,9 @@ void FlashSteppingAction::UserSteppingAction(const G4Step *aStep)
   G4StepPoint *postStep = aStep->GetPostStepPoint();
   G4StepPoint *preStep = aStep->GetPreStepPoint();
 
+
+  std::cout<<"Almeno qui c'è arrivato"<<std::endl;
+
   if (postStep->GetStepStatus() == fGeomBoundary)
     {
       G4String volumeName = postStep->GetPhysicalVolume()->GetLogicalVolume()->GetName();
