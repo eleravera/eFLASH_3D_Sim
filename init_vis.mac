@@ -17,11 +17,11 @@
 /process/optical/processActivation Scintillation true
 
 /run/initialize
-/control/execute 9MeVEF_corrected.mac
+/control/execute 9MeVEF.mac #Quello corrected è uguale 
 
 
 
-#/run/beamOn 10000
+/run/beamOn 10000
 #/control/execute vis.mac
 
 
