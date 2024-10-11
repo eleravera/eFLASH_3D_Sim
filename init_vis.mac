@@ -17,7 +17,7 @@
 /process/optical/processActivation Scintillation true
 
 /run/initialize
-/control/execute 9MeVEF.mac
+/control/execute 9MeVEF_corrected.mac
 
 
 
