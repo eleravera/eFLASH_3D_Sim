@@ -63,7 +63,7 @@ int main(int argc, char **argv) {
 
   //auto *runManager=G4RunManagerFactory::CreateRunManager();
   auto *runManager = new G4MTRunManager();
-  G4int nThreads = 6;
+  G4int nThreads = 100;
   runManager->SetNumberOfThreads(nThreads);
  
   G4Random::setTheSeed(45698);
