@@ -94,7 +94,7 @@ int main(int argc, char **argv) {
     if (argc == 1) {
       ui = new G4UIExecutive(argc, argv);
       UImanager->ApplyCommand("/control/execute init_vis.mac");
-      ui->SessionStart(); //per lanciare simulazione senza UI basta disalibilitare questa parte. 
+      //ui->SessionStart(); //per lanciare simulazione senza UI basta disalibilitare questa parte. 
       delete ui;
     }
     else
