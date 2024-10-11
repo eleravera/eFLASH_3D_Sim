@@ -46,7 +46,7 @@
 #include "G4UnitsTable.hh"
 #include "G4SystemOfUnits.hh"
 
-uint64_t FlashSteppingAction::killedPhotonCount = 0;
+double FlashSteppingAction::killedPhotonCount = 0;
 
 
 FlashSteppingAction::FlashSteppingAction(FlashEventAction *)
