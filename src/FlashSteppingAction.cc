@@ -103,7 +103,7 @@ void FlashSteppingAction::UserSteppingAction(const G4Step *aStep)
             // append to detection_vector the current info
             detection photon_maps =  detection(pos_x/mm, pos_y/mm, pos_z/mm);
             detection_vector1.push_back(photon_maps);
-            //std::cout << "A photon has been saved on file" << std::endl;  
+            std::cout << "A photon has been saved on file" << std::endl;  
             //photon_maps.print();
             } 
         
