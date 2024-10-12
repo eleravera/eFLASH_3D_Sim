@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #Definisci il percorso della sottocartella
-base_dir="./photon_distr/telecentric"
+base_dir="./photon_dist/telecentric"
 mkdir -p "$base_dir"  # Crea la cartella base se non esiste
 
 # Crea una cartella con data e ora all'interno della sottocartella
