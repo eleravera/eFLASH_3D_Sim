@@ -19,8 +19,6 @@
 /run/initialize
 /control/execute 9MeVEF.mac #Quello corrected è uguale 
 
-/myApp/outputFile ./my_new_output_file.raw
-/myApp/setSeed 12345
 
 /run/beamOn 100
 #/control/execute vis.mac

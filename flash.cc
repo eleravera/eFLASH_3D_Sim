@@ -58,9 +58,16 @@ tbb::concurrent_vector<detection> detection_vector2;
 
 int main(int argc, char **argv) {
 
-  OutputFileMessenger* outputMessenger = new OutputFileMessenger();
-  //G4Random::setTheEngine(new CLHEP::MTwistEngine);
-  //auto *runManager=G4RunManagerFactory::CreateRunManager();
+  if (argc < 4) {
+        G4cerr << "Usage: " << argv[0] << " <macro_file> <seed> <output_file>" << G4endl;
+        return 1;
+    }
+
+  G4String macroFile = argv[1];
+  int seed = std::stoi(argv[2]);
+  G4String outputFileName = argv[3];
+
+  G4Random::setTheSeed(seed);
   auto *runManager = new G4MTRunManager();
   G4int nThreads = 5;
   runManager->SetNumberOfThreads(nThreads);
@@ -72,34 +79,14 @@ int main(int argc, char **argv) {
   G4VisManager *visManager = new G4VisExecutive;
   visManager->Initialize();
 
-  G4UImanager *UImanager = G4UImanager::GetUIpointer();
-  G4ScoringManager::GetScoringManager();
-  
   // clears output vectors before run
   detection_vector1.clear();  
-
+  G4UImanager *UImanager = G4UImanager::GetUIpointer();
   G4Timer timer;
-  timer.Start();
-  G4UIExecutive *ui = 0;
-    if (argc == 1) {
-      ui = new G4UIExecutive(argc, argv);
-      UImanager->ApplyCommand("/control/execute init_vis.mac");
-       //std::cout<<"outputFileName: " << outputFileName <<std::endl;
-      //ui->SessionStart(); //per lanciare simulazione senza UI basta disalibilitare questa parte. 
-      delete ui;
-    }
-    else
-      {
-      G4String command = "/control/execute ";
-    G4String fileName = argv[1];
-    UImanager->ApplyCommand(command + fileName);
-
-    }
-
-  //runManager->BeamOn(100);
+  timer.Start();  
+  UImanager->ApplyCommand("/control/execute " + macroFile);
   timer.Stop();
 
-  G4String outputFileName = outputMessenger->GetOutputFileName();
   std::ofstream file_out2(outputFileName.c_str());
   if (!file_out2.is_open()) {
     G4cerr << "Error: unable to open file " << outputFileName << G4endl;
@@ -112,12 +99,15 @@ int main(int argc, char **argv) {
   }
   
   //print some interesting information
-  std::cout<< "detection_vector1.size(): " << detection_vector1.size() << std::endl;
+  std::cout<< "Photons passing the selection: " << detection_vector1.size() << std::endl;
+  file_out2.close();
+
+  std::cout << "        ------      " << std::endl;
   std::cout << "Number of threds: " << runManager->GetNumberOfThreads() << std::endl;
   std::cout << "Elapsed time: " << timer.GetRealElapsed() << " seconds" << std::endl;
   std::cout<<"outputFileName: " << outputFileName <<std::endl;
+  std::cout<<"Seed: " << seed << std::endl;
 
-  file_out2.close();
   delete visManager;
   delete runManager;
   return 0;

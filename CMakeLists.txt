@@ -71,4 +71,11 @@ endforeach()
 #
 install(TARGETS flash DESTINATION bin)
 
+# Aggiungi un target personalizzato per copiare run_simulations.sh
+add_custom_target(copy_run_simulations ALL
+    COMMAND ${CMAKE_COMMAND} -E copy
+    ${CMAKE_SOURCE_DIR}/run_simulations.sh
+    ${CMAKE_BINARY_DIR}/run_simulations.sh
+    COMMENT "Copying run_simulations.sh to build directory"
+)
 
