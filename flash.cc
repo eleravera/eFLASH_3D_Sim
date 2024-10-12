@@ -49,6 +49,7 @@
 
 #include "Randomize.hh"
 #include <common.hh>
+#include "OutputFileMessenger.hh"
 
 // concurrent vector to write output in multithread mode without conflicts 
 // currently multithread not active
@@ -57,36 +58,25 @@ tbb::concurrent_vector<detection> detection_vector2;
 
 int main(int argc, char **argv) {
 
-  
-
-  //  G4Random::setTheEngine(new CLHEP::MTwistEngine);
-
+  OutputFileMessenger* outputMessenger = new OutputFileMessenger();
+  //G4Random::setTheEngine(new CLHEP::MTwistEngine);
   //auto *runManager=G4RunManagerFactory::CreateRunManager();
   auto *runManager = new G4MTRunManager();
-  G4int nThreads = 100;
+  G4int nThreads = 5;
   runManager->SetNumberOfThreads(nThreads);
  
-  G4Random::setTheSeed(45698);
-
   runManager->SetUserInitialization(new FlashDetectorConstruction);
-
   runManager->SetUserInitialization(new FlashPhysicsList);
-
   runManager->SetUserInitialization(new FlashActionInitialization);
 
-
-
   G4VisManager *visManager = new G4VisExecutive;
-
   visManager->Initialize();
 
   G4UImanager *UImanager = G4UImanager::GetUIpointer();
   G4ScoringManager::GetScoringManager();
   
-
   // clears output vectors before run
-  detection_vector1.clear();    
-
+  detection_vector1.clear();  
 
   G4Timer timer;
   timer.Start();
@@ -94,6 +84,7 @@ int main(int argc, char **argv) {
     if (argc == 1) {
       ui = new G4UIExecutive(argc, argv);
       UImanager->ApplyCommand("/control/execute init_vis.mac");
+       //std::cout<<"outputFileName: " << outputFileName <<std::endl;
       //ui->SessionStart(); //per lanciare simulazione senza UI basta disalibilitare questa parte. 
       delete ui;
     }
@@ -107,22 +98,26 @@ int main(int argc, char **argv) {
 
   //runManager->BeamOn(100);
   timer.Stop();
-  
+
+  G4String outputFileName = outputMessenger->GetOutputFileName();
+  std::ofstream file_out2(outputFileName.c_str());
+  if (!file_out2.is_open()) {
+    G4cerr << "Error: unable to open file " << outputFileName << G4endl;
+  }
+  else{
   // Write results to output
-  std::ofstream file_out2("./photon_dist/telecentric/photon_maps_02.raw");
   for (uint32_t i=0; i<detection_vector1.size(); i++) {
       file_out2.write(reinterpret_cast<char*>(&detection_vector1[i]), sizeof(detection));
     }
+  }
   
+  //print some interesting information
   std::cout<< "detection_vector1.size(): " << detection_vector1.size() << std::endl;
-  file_out2.close();
-
-
   std::cout << "Number of threds: " << runManager->GetNumberOfThreads() << std::endl;
   std::cout << "Elapsed time: " << timer.GetRealElapsed() << " seconds" << std::endl;
+  std::cout<<"outputFileName: " << outputFileName <<std::endl;
 
-
-
+  file_out2.close();
   delete visManager;
   delete runManager;
   return 0;
