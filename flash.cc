@@ -33,9 +33,6 @@
 #include "G4Types.hh"
 
 #include "G4RunManagerFactory.hh"
-#include "G4RunManager.hh"
-#include "G4MTRunManager.hh"
-#include <G4Timer.hh>
 
 #include "G4UIExecutive.hh"
 #include "G4UImanager.hh"
@@ -49,7 +46,6 @@
 
 #include "Randomize.hh"
 #include <common.hh>
-#include "OutputFileMessenger.hh"
 
 // concurrent vector to write output in multithread mode without conflicts 
 // currently multithread not active
@@ -58,55 +54,71 @@ tbb::concurrent_vector<detection> detection_vector2;
 
 int main(int argc, char **argv) {
 
-  if (argc < 4) {
-        G4cerr << "Usage: " << argv[0] << " <macro_file> <seed> <output_file>" << G4endl;
-        return 1;
-    }
+  
 
-  G4String macroFile = argv[1];
-  int seed = std::stoi(argv[2]);
-  G4String outputFileName = argv[3];
+  //  G4Random::setTheEngine(new CLHEP::MTwistEngine);
 
-  G4Random::setTheSeed(seed);
-  auto *runManager = new G4MTRunManager();
-  G4int nThreads = 120;
+  auto *runManager=G4RunManagerFactory::CreateRunManager();
+  G4int nThreads = 1;
   runManager->SetNumberOfThreads(nThreads);
  
+  G4Random::setTheSeed(45698);
+
   runManager->SetUserInitialization(new FlashDetectorConstruction);
+
   runManager->SetUserInitialization(new FlashPhysicsList);
+
   runManager->SetUserInitialization(new FlashActionInitialization);
 
   G4VisManager *visManager = new G4VisExecutive;
+
   visManager->Initialize();
 
-  // clears output vectors before run
-  detection_vector1.clear();  
   G4UImanager *UImanager = G4UImanager::GetUIpointer();
-  G4Timer timer;
-  timer.Start();  
-  UImanager->ApplyCommand("/control/execute " + macroFile);
-  timer.Stop();
-
-  std::ofstream file_out2(outputFileName.c_str());
-  if (!file_out2.is_open()) {
-    G4cerr << "Error: unable to open file " << outputFileName << G4endl;
-  }
-  else{
-  // Write results to output
-  for (uint32_t i=0; i<detection_vector1.size(); i++) {
-      file_out2.write(reinterpret_cast<char*>(&detection_vector1[i]), sizeof(detection));
-    }
-  }
+  G4ScoringManager::GetScoringManager();
   
-  //print some interesting information
-  std::cout<< "Photons passing the selection: " << detection_vector1.size() << std::endl;
-  file_out2.close();
 
-  std::cout << "        ------      " << std::endl;
-  std::cout << "Number of threds: " << runManager->GetNumberOfThreads() << std::endl;
-  std::cout << "Elapsed time: " << timer.GetRealElapsed() << " seconds" << std::endl;
-  std::cout<<"outputFileName: " << outputFileName <<std::endl;
-  std::cout<<"Seed: " << seed << std::endl;
+  // clears output vectors before run
+  detection_vector1.clear();    
+  detection_vector2.clear();
+
+  G4UIExecutive *ui = 0;
+    if (argc == 1) {
+      ui = new G4UIExecutive(argc, argv);
+      UImanager->ApplyCommand("/control/execute init_vis.mac");
+      ui->SessionStart();
+      delete ui;
+    }
+    else
+      {
+      G4String command = "/control/execute ";
+    G4String fileName = argv[1];
+    UImanager->ApplyCommand(command + fileName);
+
+    }
+
+
+  //runManager->BeamOn(100);
+  // Write results to output
+    
+    std::ofstream file_out2("./photon_dist/photon_position_generation.raw");
+    for (uint32_t i=0; i<detection_vector1.size(); i++) {
+      file_out2.write(reinterpret_cast<char*>(&detection_vector1[i]), sizeof(detection));
+    
+      //std::cout<< reinterpret_cast<char*>(&detection_vector1[i]) << std::endl; 
+    }
+
+    file_out2.close();
+
+
+    std::ofstream file_out3("./photon_dist/photon_angle_generation.raw");
+    for (uint32_t i=0; i<detection_vector2.size(); i++) {
+      file_out3.write(reinterpret_cast<char*>(&detection_vector2[i]), sizeof(detection));
+    
+      //std::cout<< reinterpret_cast<char*>(&detection_vector1[i]) << std::endl; 
+    }
+
+    file_out3.close();
 
   delete visManager;
   delete runManager;

@@ -40,7 +40,9 @@
 #include "G4AutoDelete.hh"
 #include "G4Box.hh"
 #include "G4GlobalMagFieldMessenger.hh"
+#include "G4LogicalBorderSurface.hh"
 #include "G4LogicalVolume.hh"
+#include "G4OpticalSurface.hh"
 #include "G4PVParameterised.hh"
 #include "G4PVPlacement.hh"
 #include "G4SubtractionSolid.hh"
@@ -78,11 +80,11 @@ FlashDetectorConstruction::FlashDetectorConstruction()
 
     SetAirGap(0*cm); // Set the air gap between the water phantom and the end of the applicator
     SetPhantomSize(10. *cm, 10. *cm, 10. *cm);
-    SetPinholeDistance(25. *cm);
-    SetDetectorDistance(50.*cm); // Set the air gap between the water phantom and the end of the detector
+    SetPinholeDistance(5. *cm);
+    SetDetectorDistance(10.*cm); // Set the air gap between the water phantom and the end of the detector
 
     SetDetectorThickness(1*mm);
-    SetDetectorWidth(50*cm);
+    SetDetectorWidth(15*cm);
         
 }
 
@@ -108,13 +110,13 @@ G4VPhysicalVolume *FlashDetectorConstruction::ConstructPhantom(G4double CollPos)
 
     fPhantomMaterial = nist->FindOrBuildMaterial("G4_PLASTIC_SC_VINYLTOLUENE");//(EJ200
     
-    std::vector<G4double> energy     = {00.5 * eV, 0.35 *eV};
+    std::vector<G4double> energy     = {2.48 * eV, 3.1 * eV}; //sto generando solo tra i 400 e i 500 nm. lambda [nm] = 1240/E[eV]
     std::vector<G4double> rindex     = {1.58, 1.58};
-    std::vector<G4double> absorption = {250.*cm, 250.*cm};
+    std::vector<G4double> absorption = {380.*cm, 380.*cm};
     std::vector<G4double> scint_spectrum = {0.5, 0.5};
 
     G4MaterialPropertiesTable* MPT = new G4MaterialPropertiesTable();
-    MPT->AddConstProperty("SCINTILLATIONYIELD", 1000./MeV);
+    MPT->AddConstProperty("SCINTILLATIONYIELD", 10000./MeV);
     MPT->AddProperty("RINDEX", energy, rindex);
     MPT->AddProperty("ABSLENGTH", energy, absorption);
     MPT-> AddProperty("SCINTILLATIONCOMPONENT1", energy, scint_spectrum);
@@ -159,6 +161,16 @@ G4VPhysicalVolume *FlashDetectorConstruction::ConstructPhantom(G4double CollPos)
     fStepLimit = new G4UserLimits(maxStep);
     fPhantomLogicalVolume->SetUserLimits(fStepLimit);
 
+
+    // Creazione e configurazione della superficie ottica
+    G4OpticalSurface* opticalSurface = new G4OpticalSurface("OpticalSurface");
+    opticalSurface->SetType(dielectric_dielectric);  // Tipo di superficie
+    opticalSurface->SetFinish(ground);  // Finitura opaca
+    opticalSurface->SetModel(unified);  // Modello di riflessione e trasmissione
+    opticalSurface->SetPolish(0.0);  // Coefficiente di riflessione a zero
+
+    // Associa la superficie ottica ai confini
+    new G4LogicalBorderSurface("BorderSurface", fPhant_phys, physicalTreatmentRoom, opticalSurface);
     return fPhant_phys;
 }
 
@@ -184,7 +196,7 @@ G4VPhysicalVolume *FlashDetectorConstruction::ConstructPinhole() {
     // Definition of the logical volume of the Pinhole
     PinholeLogicalVolume = new G4LogicalVolume(PinholeCilinder, PinholeMaterial, "pinholeLog", 0, 0, 0);
 
-    G4ThreeVector PinholePosition = G4ThreeVector(fPhantom_coordinateX + fPhantomSizeX/2 + fDet_thickness/2 + PinholeDistance, 0. * mm, 0. * mm); //sicura di fDet_thickness/2?!
+    G4ThreeVector PinholePosition = G4ThreeVector(fPhantom_coordinateX + fPhantomSizeX/2+ PinholeDistance, 0. * mm, 0. * mm); //sicura di fDet_thickness/2?!
 
     // Definition of the physical volume of the Pinhole
     Pihole_phys = new G4PVPlacement(rotationMatrix, PinholePosition, "pinholePhys", PinholeLogicalVolume, physicalTreatmentRoom, false, 0);
@@ -211,18 +223,32 @@ G4VPhysicalVolume *FlashDetectorConstruction::ConstructDetector(){
     DetectorMaterial=SiC;
     
     Det_box = new G4Box("Detector", fDet_thickness/2, fDet_width/2,fDet_width/2);
-    fDetectorPosition = fPhantom_coordinateX + fPhantomSizeX/2 + fDet_thickness/2 + DetectorDistance; //sicura di fDet_thickness/2?!
+    fDetectorPosition_t = fPhantomSizeX + DetectorDistance + fDet_thickness/2;
+    fDetectorPosition_l = fPhantomSizeX*0.5 + DetectorDistance + fDet_thickness/2;
+
+    G4int offset = fPhantomSizeX * 0.5 ; 
+
+    G4RotationMatrix* rotationMatrix_z = new G4RotationMatrix();
+    rotationMatrix_z->rotateZ(90.*deg); // Ruota di 90 gradi attorno all'asse Z
+    G4RotationMatrix* rotationMatrix_y = new G4RotationMatrix();
+    rotationMatrix_y->rotateY(90.*deg); // Ruota di 90 gradi attorno all'asse Y
+    
 
     // Definition of the logical volume of the Detector
     fDetLogicalVolume = new G4LogicalVolume(Det_box, DetectorMaterial, "DetectorLog", 0, 0, 0);
-    fDet_phys = new G4PVPlacement(0,G4ThreeVector(fDetectorPosition, 0. * mm, 0. * mm), "DetPhys",fDetLogicalVolume,physicalTreatmentRoom,false, 0, fCheckOverlaps);
+    fDet_phys1 = new G4PVPlacement(0,G4ThreeVector(fDetectorPosition_t, 0., 0.), "DetPhys",fDetLogicalVolume,physicalTreatmentRoom,false, 0, fCheckOverlaps);
+    fDet_phys2 = new G4PVPlacement(rotationMatrix_z,G4ThreeVector(offset, fDetectorPosition_l, 0.), "DetPhys",fDetLogicalVolume,physicalTreatmentRoom,false, 0, fCheckOverlaps);
+    fDet_phys3 = new G4PVPlacement(rotationMatrix_z,G4ThreeVector(offset, -fDetectorPosition_l, 0.), "DetPhys",fDetLogicalVolume,physicalTreatmentRoom,false, 0, fCheckOverlaps);
+    fDet_phys4 = new G4PVPlacement(rotationMatrix_y, G4ThreeVector(offset, 0., fDetectorPosition_l), "DetPhys", fDetLogicalVolume, physicalTreatmentRoom, false, 0, fCheckOverlaps);
+    fDet_phys5 = new G4PVPlacement(rotationMatrix_y, G4ThreeVector(offset, 0., -fDetectorPosition_l), "DetPhys", fDetLogicalVolume, physicalTreatmentRoom, false, 0, fCheckOverlaps);
+    
 
     // Visualisation attributes of the detector
     gray = new G4VisAttributes(G4Colour(211 / 255., 211 / 255., 211 / 255.));
     gray->SetVisibility(true);
-    PinholeLogicalVolume->SetVisAttributes(gray);
+    fDetLogicalVolume->SetVisAttributes(gray);
 
-    return fDet_phys;
+    return fDet_phys1, fDet_phys2, fDet_phys3, fDet_phys4, fDet_phys5;
 
 }
 
@@ -238,7 +264,9 @@ G4VPhysicalVolume *FlashDetectorConstruction::Construct() {
     G4bool isotopes = false;
     // Filled with air
     airNist = G4NistManager::Instance()->FindOrBuildMaterial("G4_AIR", isotopes);
-    std::vector<G4double> energy     = {00.5 * eV, 0.35 *eV};
+    std::vector<G4double> energy     = {2.48 * eV, 3.1 * eV};
+
+    //std::vector<G4double> energy     = {00.5 * eV, 0.35 *eV};
     std::vector<G4double> rindex     = {1., 1.};
     G4MaterialPropertiesTable* MPT = new G4MaterialPropertiesTable();
     MPT->AddProperty("RINDEX", energy, rindex);

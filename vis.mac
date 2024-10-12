@@ -7,7 +7,7 @@
 # trajectories are established:
 /vis/viewer/set/autoRefresh false
 /vis/verbose errors
-/tracking/verbose 2
+#/tracking/verbose 2
 
 #
 # Draw geometry:
@@ -38,10 +38,8 @@
 /vis/verbose warnings
 /vis/scene/add/trajectories
 
-##BEAM
-/control/execute 9MeVEF.mac
 
-
+/vis/scene/add/axes
 
 
 
