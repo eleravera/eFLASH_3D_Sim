@@ -5,7 +5,7 @@
 /control/verbose 1
 /control/saveHistory
 /run/verbose 0
-/tracking/verbose 2
+/tracking/verbose 0
 
 
 #
@@ -16,12 +16,12 @@
 /process/optical/processActivation Cerenkov false # non aggiunti in source (librerie etc)
 /process/optical/processActivation Scintillation true
 
-/control/execute 9MeVEF.mac
-
-
 /run/initialize
-/run/beamOn 0
-/control/execute vis.mac
+/control/execute 9MeVEF.mac #Quello corrected è uguale 
+
+
+/run/beamOn 100000
+#/control/execute vis.mac
 
 
 
