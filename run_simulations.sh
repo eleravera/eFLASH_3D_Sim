@@ -17,7 +17,7 @@ do
   seed=$((4000 + i))
 
   # Definisce il nome del file di output
-  output_file="$output_dir/my_outputfile_${i}.raw" >> "output_dir/log_simulation.log" 2>&1
+  output_file="$output_dir/my_outputfile_${i}.raw" >> "$output_dir/log_simulation.log" 2>&1
   
   # Comando per lanciare la simulazione
   ./flash init_vis.mac $seed $output_file
