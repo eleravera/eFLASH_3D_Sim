@@ -264,9 +264,7 @@ G4VPhysicalVolume *FlashDetectorConstruction::Construct() {
     G4bool isotopes = false;
     // Filled with air
     airNist = G4NistManager::Instance()->FindOrBuildMaterial("G4_AIR", isotopes);
-    std::vector<G4double> energy     = {2.48 * eV, 3.1 * eV};
-
-    //std::vector<G4double> energy     = {00.5 * eV, 0.35 *eV};
+    std::vector<G4double> energy     = {2.48 * eV, 3.1 * eV}; // corrispondente al range 400-500 nm. Lambda [nm] = 1239.8 / E [ev]
     std::vector<G4double> rindex     = {1., 1.};
     G4MaterialPropertiesTable* MPT = new G4MaterialPropertiesTable();
     MPT->AddProperty("RINDEX", energy, rindex);

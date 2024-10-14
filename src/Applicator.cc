@@ -44,6 +44,8 @@
 #include "G4Tubs.hh"
 #include "G4VisAttributes.hh"
 #include "globals.hh"
+#include "G4MaterialPropertiesTable.hh"
+
 
 Applicator::Applicator(G4VPhysicalVolume *physicalTreatmentRoom)
     : fMotherPhys(physicalTreatmentRoom),
@@ -146,6 +148,14 @@ void Applicator::SetDefaultDimensions() {
       G4NistManager::Instance()->FindOrBuildMaterial("G4_Galactic", isotopes);
   PMMA =
       G4NistManager::Instance()->FindOrBuildMaterial("G4_PLEXIGLASS", isotopes);
+  
+  G4MaterialPropertiesTable* MPT = new G4MaterialPropertiesTable();
+  std::vector<G4double> energy     = {2.48 * eV, 3.1 * eV}; // corrispondente al range 400-500 nm. Lambda [nm] = 1239.8 / E [ev]
+  std::vector<G4double> rindex     = {1.492, 1.492}; //stesso range dei fotoni nello scintillatore
+  MPT->AddProperty("RINDEX", energy, rindex);
+  PMMA->SetMaterialPropertiesTable(MPT);
+
+
 
   G4Material *titanioNist =
       G4NistManager::Instance()->FindOrBuildMaterial("G4_Ti", isotopes);
@@ -705,6 +715,12 @@ void Applicator::FlashBeamLineApplicator() {
   G4LogicalVolume *logFirstApplicatorFlash = new G4LogicalVolume(
       fSolidFirstApplicatorFlash, fFirstApplicatorMaterialFlash,
       "FirstApplicatorFlash", 0, 0, 0);
+  
+  //set step limit in phantom
+  G4double maxStep = 0.1 * mm;
+  G4UserLimits* fStepLimit = new G4UserLimits(maxStep);
+  logFirstApplicatorFlash->SetUserLimits(fStepLimit);
+
 
   fPhysiFirstApplicatorFlash = new G4PVPlacement(
       G4Transform3D(rm6,
