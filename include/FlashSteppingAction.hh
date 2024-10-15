@@ -46,6 +46,7 @@ public:
   
   static double killedPhotonCount;
   static double killedPhotonCount_applicator; 
+  static double killedPhotonCount_phantom; 
 
 private:
   // FlashEventAction *fEventAction;

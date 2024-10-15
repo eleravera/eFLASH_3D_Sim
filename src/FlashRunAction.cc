@@ -69,6 +69,7 @@ void FlashRunAction::EndOfRunAction(const G4Run *run) {
 
   }
   std::cout<< "Photons killed: " << FlashSteppingAction::killedPhotonCount << std::endl;
-  std::cout<< "Photons killed in applicator->the phantom: " << FlashSteppingAction::killedPhotonCount_applicator << std::endl;
+  std::cout<< "Photons killed in phantom->the applicator: " << FlashSteppingAction::killedPhotonCount_applicator << std::endl;
+  std::cout<< "Photons killed in applicator->the phantom: " << FlashSteppingAction::killedPhotonCount_phantom << std::endl;
   
 }

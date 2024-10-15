@@ -48,6 +48,7 @@
 
 double FlashSteppingAction::killedPhotonCount = 0;
 double FlashSteppingAction::killedPhotonCount_applicator = 0;
+double FlashSteppingAction::killedPhotonCount_phantom = 0;
 
 
 FlashSteppingAction::FlashSteppingAction(FlashEventAction *)
@@ -97,11 +98,17 @@ void FlashSteppingAction::UserSteppingAction(const G4Step *aStep)
 
           if (prevolumeName == "FirstApplicatorFlash" && volumeName ==  "phantomLog") {
                 track->SetTrackStatus(fStopAndKill); 
-                killedPhotonCount++;
+                killedPhotonCount_phantom++;
                 //std::cout<<"Photons phantom Log-> FirstApplicatorFlash has been killed " << std::endl; 
 
           }
 
+          if (prevolumeName == "phantomLog" && volumeName ==  "FirstApplicatorFlash") {
+                track->SetTrackStatus(fStopAndKill); 
+                killedPhotonCount_applicator++;
+                //std::cout<<"Photons phantom Log-> FirstApplicatorFlash has been killed " << std::endl; 
+
+          }
 
 
 
