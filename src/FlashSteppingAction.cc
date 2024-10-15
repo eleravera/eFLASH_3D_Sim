@@ -47,6 +47,7 @@
 #include "G4SystemOfUnits.hh"
 
 double FlashSteppingAction::killedPhotonCount = 0;
+double FlashSteppingAction::killedPhotonCount_applicator = 0;
 
 
 FlashSteppingAction::FlashSteppingAction(FlashEventAction *)
@@ -93,7 +94,16 @@ void FlashSteppingAction::UserSteppingAction(const G4Step *aStep)
             }
 
             }
-      
+
+          if (prevolumeName == "phantomLog" && volumeName ==  "FirstApplicatorFlash") {
+                track->SetTrackStatus(fStopAndKill); 
+                //killedPhotonCount++;
+                //std::cout<<"Photons phantom Log-> FirstApplicatorFlash has been killed " << std::endl; 
+
+          }
+
+
+
 
           //Save photons 
           if (prevolumeName == "logicTreatmentRoom" && volumeName ==  "DetectorLog") {

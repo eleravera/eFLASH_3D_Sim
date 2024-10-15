@@ -45,6 +45,7 @@ public:
   virtual void UserSteppingAction(const G4Step *);
   
   static double killedPhotonCount;
+  static double killedPhotonCount_applicator; 
 
 private:
   // FlashEventAction *fEventAction;

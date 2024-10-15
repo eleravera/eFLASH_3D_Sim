@@ -167,7 +167,7 @@ G4VPhysicalVolume *FlashDetectorConstruction::ConstructPhantom(G4double CollPos,
     opticalSurface_phantom_troom->SetType(dielectric_dielectric);  // Tipo di superficie
     opticalSurface_phantom_troom->SetFinish(ground);  // Finitura opaca
     opticalSurface_phantom_troom->SetModel(unified);  // Modello di riflessione e trasmissione
-    opticalSurface_phantom_troom->SetPolish(0.5);  // Coefficiente di riflessione a zero
+    opticalSurface_phantom_troom->SetPolish(0.0);  // Coefficiente di riflessione a zero
 
     // Associa la superficie ottica ai confini
     new G4LogicalBorderSurface("BorderSurface", fPhant_phys, physicalTreatmentRoom, opticalSurface_phantom_troom);
@@ -179,7 +179,7 @@ G4VPhysicalVolume *FlashDetectorConstruction::ConstructPhantom(G4double CollPos,
     opticalSurface_phantom_applicator->SetType(dielectric_dielectric);  // Tipo di superficie
     opticalSurface_phantom_applicator->SetFinish(ground);  // Finitura opaca
     opticalSurface_phantom_applicator->SetModel(unified);  // Modello di riflessione e trasmissione
-    opticalSurface_phantom_applicator->SetPolish(0.5);  // Coefficiente di riflessione a zero
+    opticalSurface_phantom_applicator->SetPolish(0.0);  // Coefficiente di riflessione a zero
 
     // Associa la superficie ottica ai confini
     //G4VPhysicalVolume* applicator = Applicator->GetApplicator();
