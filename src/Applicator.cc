@@ -717,9 +717,9 @@ void Applicator::FlashBeamLineApplicator() {
       "FirstApplicatorFlash", 0, 0, 0);
   
   //set step limit in phantom
-  G4double maxStep = 0.1 * mm;
-  G4UserLimits* fStepLimit = new G4UserLimits(maxStep);
-  logFirstApplicatorFlash->SetUserLimits(fStepLimit);
+  //G4double maxStep = 0.1 * mm;
+  //G4UserLimits* fStepLimit = new G4UserLimits(maxStep);
+  //logFirstApplicatorFlash->SetUserLimits(fStepLimit);
 
 
   fPhysiFirstApplicatorFlash = new G4PVPlacement(
