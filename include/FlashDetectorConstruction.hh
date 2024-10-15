@@ -36,6 +36,7 @@
 #include "tls.hh"
 #include "G4ThreeVector.hh"
 #include "G4UserLimits.hh"
+#include "Applicator.hh"
 
 class G4VPhysicalVolume;
 class G4LogicalVolume;
@@ -55,7 +56,7 @@ class FlashDetectorConstruction : public G4VUserDetectorConstruction {
 public:
   G4VPhysicalVolume *physicalTreatmentRoom;
   G4LogicalVolume *logicTreatmentRoom;
-  G4VPhysicalVolume *ConstructPhantom(G4double CollPos);
+  G4VPhysicalVolume *ConstructPhantom(G4double CollPos, G4VPhysicalVolume *fPhysiFirstApplicatorFlash);
   G4VPhysicalVolume *ConstructPinhole();
 
   G4VPhysicalVolume *ConstructDetector();

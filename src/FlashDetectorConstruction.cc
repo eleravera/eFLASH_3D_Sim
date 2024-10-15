@@ -105,7 +105,7 @@ void FlashDetectorConstruction::DefineMaterials() {
   }
 
 
-G4VPhysicalVolume *FlashDetectorConstruction::ConstructPhantom(G4double CollPos) {
+G4VPhysicalVolume *FlashDetectorConstruction::ConstructPhantom(G4double CollPos,  G4VPhysicalVolume *fPhysiFirstApplicatorFlash) {
     //This function creates a cubic phantom with the point Collpos on the surface of the cube.
 
     fPhantomMaterial = nist->FindOrBuildMaterial("G4_PLASTIC_SC_VINYLTOLUENE");//(EJ200
@@ -163,14 +163,28 @@ G4VPhysicalVolume *FlashDetectorConstruction::ConstructPhantom(G4double CollPos)
 
 
     // Creazione e configurazione della superficie ottica
-    G4OpticalSurface* opticalSurface = new G4OpticalSurface("OpticalSurface");
-    opticalSurface->SetType(dielectric_dielectric);  // Tipo di superficie
-    opticalSurface->SetFinish(ground);  // Finitura opaca
-    opticalSurface->SetModel(unified);  // Modello di riflessione e trasmissione
-    opticalSurface->SetPolish(0.0);  // Coefficiente di riflessione a zero
+    G4OpticalSurface* opticalSurface_phantom_troom = new G4OpticalSurface("OpticalSurface");
+    opticalSurface_phantom_troom->SetType(dielectric_dielectric);  // Tipo di superficie
+    opticalSurface_phantom_troom->SetFinish(ground);  // Finitura opaca
+    opticalSurface_phantom_troom->SetModel(unified);  // Modello di riflessione e trasmissione
+    opticalSurface_phantom_troom->SetPolish(0.5);  // Coefficiente di riflessione a zero
 
     // Associa la superficie ottica ai confini
-    new G4LogicalBorderSurface("BorderSurface", fPhant_phys, physicalTreatmentRoom, opticalSurface);
+    new G4LogicalBorderSurface("BorderSurface", fPhant_phys, physicalTreatmentRoom, opticalSurface_phantom_troom);
+
+
+
+    //Bisogna definire anche la superfice ottica al fPhant_phys e applicator
+    G4OpticalSurface* opticalSurface_phantom_applicator = new G4OpticalSurface("OpticalSurface");
+    opticalSurface_phantom_applicator->SetType(dielectric_dielectric);  // Tipo di superficie
+    opticalSurface_phantom_applicator->SetFinish(ground);  // Finitura opaca
+    opticalSurface_phantom_applicator->SetModel(unified);  // Modello di riflessione e trasmissione
+    opticalSurface_phantom_applicator->SetPolish(0.5);  // Coefficiente di riflessione a zero
+
+    // Associa la superficie ottica ai confini
+    //G4VPhysicalVolume* applicator = Applicator->GetApplicator();
+    new G4LogicalBorderSurface("BorderSurface", fPhant_phys, fPhysiFirstApplicatorFlash, opticalSurface_phantom_applicator);
+
     return fPhant_phys;
 }
 
@@ -286,8 +300,9 @@ G4VPhysicalVolume *FlashDetectorConstruction::Construct() {
     // Applicator + phantom + Default dimensions
     //------------------------------
     Collimator = new Applicator(physicalTreatmentRoom);
+    G4VPhysicalVolume* fPhysiFirstApplicatorFlash = Collimator->GetApplicator();
     fPhantom_physical = ConstructPhantom(Collimator->fFinalApplicatorXPositionFlash +
-    Collimator->fHightFinalApplicatorFlash+fAirGap);
+    Collimator->fHightFinalApplicatorFlash+fAirGap, fPhysiFirstApplicatorFlash);
 
     // -----------------------------
     // Pinhole camera

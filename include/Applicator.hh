@@ -128,5 +128,12 @@ void ConstructCollimator(G4VPhysicalVolume *);
   G4Tubs *solidVSFlash;
   G4VPhysicalVolume *physiVSFlash;
   G4Material *VSFlashMaterialFlash;
+
+public:
+    // Getter pubblico
+    G4VPhysicalVolume* GetApplicator() const {
+        return fPhysiFirstApplicatorFlash;
+    }
+
 };
 #endif
