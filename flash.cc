@@ -69,7 +69,7 @@ int main(int argc, char **argv) {
 
   G4Random::setTheSeed(seed);
   auto *runManager = new G4MTRunManager();
-  G4int nThreads = 120;
+  G4int nThreads = 127;
   runManager->SetNumberOfThreads(nThreads);
  
   runManager->SetUserInitialization(new FlashDetectorConstruction);
