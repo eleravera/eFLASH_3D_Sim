@@ -78,7 +78,7 @@ void FlashSteppingAction::UserSteppingAction(const G4Step *aStep)
           if (prevolumeName == "phantomLog" && volumeName ==  "logicTreatmentRoom") {
             G4ThreeVector photonDirection = track->GetMomentumDirection();  
             // Define a small tolerance value as cosThetaMax
-            const G4double cosThetaMax = std::cos(0.1 * CLHEP::pi / 180.0);  // conv degree in radians
+            const G4double cosThetaMax = std::cos(0.02 * CLHEP::pi / 180.0);  // conv degree in radians
 
             // Calcola il coseno dell'angolo rispetto agli assi
             G4double cosThetaX = photonDirection.x();  // Prodotto scalare con (1,0,0)
