@@ -25,12 +25,16 @@
 //
 //
 //  flash.cc
-// Authors: J.Pensavalle, G.Milluzzo, F. Romano
-// jake.pensavalle@pi.infn.it, giuliana.milluzzo@ct.infn.it, francesco.romano@ct.infn.it
+// Author: E. Ravera
+// eleonora.ravera@phd.unipi.it
+
 
 #include "G4Types.hh"
 
 #include "G4RunManagerFactory.hh"
+#include "G4RunManager.hh"
+#include "G4MTRunManager.hh"
+#include <G4Timer.hh>
 
 #include "G4UIExecutive.hh"
 #include "G4UImanager.hh"
@@ -41,48 +45,67 @@
 #include "FlashDetectorConstruction.hh"
 #include "FlashPhysicsList.hh"
 #include "G4ScoringManager.hh"
+#include <fstream>
 
 #include "Randomize.hh"
 
+
 int main(int argc, char **argv) {
 
-  
+  if (argc < 4) {
+        G4cerr << "Usage: " << argv[0] << " <macro_file> <seed> <output_file>" << G4endl;
+        return 1;
+    }
 
-  //  G4Random::setTheEngine(new CLHEP::MTwistEngine);
+  G4String macroFile = argv[1];
+  int seed = std::stoi(argv[2]);
+  G4String outputFileName = argv[3];
 
-   auto *runManager=G4RunManagerFactory::CreateRunManager();
-  G4int nThreads = 8;
+  G4Random::setTheSeed(seed);
+  auto *runManager = new G4MTRunManager();
+  G4int nThreads = 230;
   runManager->SetNumberOfThreads(nThreads);
  
-  G4Random::setTheSeed(45705);
-
   runManager->SetUserInitialization(new FlashDetectorConstruction);
-
   runManager->SetUserInitialization(new FlashPhysicsList);
-
   runManager->SetUserInitialization(new FlashActionInitialization);
 
   G4VisManager *visManager = new G4VisExecutive;
-
   visManager->Initialize();
 
-  G4UImanager *UImanager = G4UImanager::GetUIpointer();
-  G4ScoringManager::GetScoringManager();
-  
-G4UIExecutive *ui = 0;
-  if (argc == 1) {
-    ui = new G4UIExecutive(argc, argv);
-    UImanager->ApplyCommand("/control/execute init_vis.mac");
-    ui->SessionStart();
-    delete ui;
-  }
-  else
-     {
-    G4String command = "/control/execute ";
-    G4String fileName = argv[1];
-    UImanager->ApplyCommand(command + fileName);
 
-       }
+  // Inizializza il gestore di scoring
+  G4ScoringManager::GetScoringManager();
+
+  // clears output vectors before run
+  G4UImanager *UImanager = G4UImanager::GetUIpointer();
+  G4Timer timer;
+  timer.Start();  
+  UImanager->ApplyCommand("/control/execute " + macroFile);
+  timer.Stop();
+
+
+  // Scrivi i risultati della mesh nel file di output
+  std::ofstream outputFile(outputFileName);
+  if (!outputFile.is_open()) {
+      G4cerr << "Error opening output file: " << outputFileName << G4endl;
+      return 1;
+  }
+
+    // Assumi che tu abbia un sistema di scoring configurato, quindi scrivi i dati della mesh
+    // Esegui il comando per elencare o scrivere i risultati della mesh
+    UImanager->ApplyCommand("/score/list"); // Elenca i risultati della mesh nel terminale
+    UImanager->ApplyCommand("/score/dumpQuantityToFile boxMesh_1 dose " + outputFileName); // Scrivi nel file
+
+    // Chiudi il file
+    outputFile.close(); // Assicurati di chiudere il file
+
+
+  std::cout << "        ------      " << std::endl;
+  std::cout << "Number of threds: " << runManager->GetNumberOfThreads() << std::endl;
+  std::cout << "Elapsed time: " << timer.GetRealElapsed() << " seconds" << std::endl;
+  std::cout<<"outputFileName: " << outputFileName <<std::endl;
+  std::cout<<"Seed: " << seed << std::endl;
 
   delete visManager;
   delete runManager;

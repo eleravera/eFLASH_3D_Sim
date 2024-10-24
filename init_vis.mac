@@ -10,5 +10,6 @@
 #
 # Visualization setting
 /run/initialize
+/control/execute 9MeVEF.mac
 /control/execute vis.mac
 
