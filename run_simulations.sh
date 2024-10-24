@@ -17,11 +17,11 @@ do
   seed=$((4000 + i))
 
   # Definisce il nome del file di output
-  output_file="$output_dir/my_outputfile_${i}.raw" 
+  output_file="$output_dir/my_outputfile_${i}.out" 
   
   # Comando per lanciare la simulazione
   #./flash init_vis.mac $seed $output_file >> "$output_dir/log_simulation.log" 2>&1
-  ./flash init_vis.mac $seed $output_file | tee -a "$output_dir/log_simulation.log"
+  ./flash run.mac $seed $output_file | tee -a "$output_dir/log_simulation.log"
 
   # Facoltativo: stampa per vedere l'iterazione in corso
   echo "Eseguito run $i con seed $seed e file di output $output_file"
