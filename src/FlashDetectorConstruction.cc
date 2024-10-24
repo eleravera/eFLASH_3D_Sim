@@ -252,9 +252,9 @@ G4VPhysicalVolume *FlashDetectorConstruction::ConstructDetector(){
     fDetLogicalVolume = new G4LogicalVolume(Det_box, DetectorMaterial, "DetectorLog", 0, 0, 0);
     fDet_phys1 = new G4PVPlacement(0,G4ThreeVector(fDetectorPosition_t, 0., 0.), "DetPhys",fDetLogicalVolume,physicalTreatmentRoom,false, 0, fCheckOverlaps);
     fDet_phys2 = new G4PVPlacement(rotationMatrix_z,G4ThreeVector(offset, fDetectorPosition_l, 0.), "DetPhys",fDetLogicalVolume,physicalTreatmentRoom,false, 0, fCheckOverlaps);
-    fDet_phys3 = new G4PVPlacement(rotationMatrix_z,G4ThreeVector(offset, -fDetectorPosition_l, 0.), "DetPhys",fDetLogicalVolume,physicalTreatmentRoom,false, 0, fCheckOverlaps);
-    fDet_phys4 = new G4PVPlacement(rotationMatrix_y, G4ThreeVector(offset, 0., fDetectorPosition_l), "DetPhys", fDetLogicalVolume, physicalTreatmentRoom, false, 0, fCheckOverlaps);
-    fDet_phys5 = new G4PVPlacement(rotationMatrix_y, G4ThreeVector(offset, 0., -fDetectorPosition_l), "DetPhys", fDetLogicalVolume, physicalTreatmentRoom, false, 0, fCheckOverlaps);
+    //fDet_phys3 = new G4PVPlacement(rotationMatrix_z,G4ThreeVector(offset, -fDetectorPosition_l, 0.), "DetPhys",fDetLogicalVolume,physicalTreatmentRoom,false, 0, fCheckOverlaps);
+    //fDet_phys4 = new G4PVPlacement(rotationMatrix_y, G4ThreeVector(offset, 0., fDetectorPosition_l), "DetPhys", fDetLogicalVolume, physicalTreatmentRoom, false, 0, fCheckOverlaps);
+    fDet_phys3 = new G4PVPlacement(rotationMatrix_y, G4ThreeVector(offset, 0., -fDetectorPosition_l), "DetPhys", fDetLogicalVolume, physicalTreatmentRoom, false, 0, fCheckOverlaps);
     
 
     // Visualisation attributes of the detector
@@ -262,7 +262,7 @@ G4VPhysicalVolume *FlashDetectorConstruction::ConstructDetector(){
     gray->SetVisibility(true);
     fDetLogicalVolume->SetVisAttributes(gray);
 
-    return fDet_phys1, fDet_phys2, fDet_phys3, fDet_phys4, fDet_phys5;
+    return fDet_phys1, fDet_phys2, fDet_phys3;//, fDet_phys4, fDet_phys5;
 
 }
 

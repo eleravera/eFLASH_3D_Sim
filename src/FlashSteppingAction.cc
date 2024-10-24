@@ -59,6 +59,7 @@ FlashSteppingAction::~FlashSteppingAction() {}
 void FlashSteppingAction::UserSteppingAction(const G4Step *aStep)
 {
 
+  /*
   G4int eventid = G4RunManager::GetRunManager()->GetCurrentEvent()->GetEventID();
   G4StepPoint *postStep = aStep->GetPostStepPoint();
   G4StepPoint *preStep = aStep->GetPreStepPoint();
@@ -128,5 +129,5 @@ void FlashSteppingAction::UserSteppingAction(const G4Step *aStep)
        }
     }
 
-
+*/
 }

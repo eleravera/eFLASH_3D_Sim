@@ -109,7 +109,7 @@ private:
 
   G4Box *Det_box;
   G4LogicalVolume *fDetLogicalVolume;
-  G4VPhysicalVolume *fDet_phys1, *fDet_phys2, *fDet_phys3, *fDet_phys4, *fDet_phys5;
+  G4VPhysicalVolume *fDet_phys1, *fDet_phys2, *fDet_phys3;//, *fDet_phys4, *fDet_phys5;
 
   //G4Box *fDet_sub;
   //G4LogicalVolume *fDet_sub_LogicalVolume;

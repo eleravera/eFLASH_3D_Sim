@@ -25,10 +25,8 @@
 //
 //
 //  flash.cc
-// Authors: J.Pensavalle, G.Milluzzo, F. Romano
-// jake.pensavalle@pi.infn.it, giuliana.milluzzo@ct.infn.it, francesco.romano@ct.infn.it
-
-
+// Author: E. Ravera
+//eleonora.ravera@phd.unipi.it
 
 #include "G4Types.hh"
 
@@ -112,5 +110,3 @@ int main(int argc, char **argv) {
   delete runManager;
   return 0;
 }
-
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo.....
