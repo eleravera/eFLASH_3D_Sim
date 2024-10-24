@@ -70,8 +70,8 @@ int main(int argc, char **argv) {
   runManager->SetUserInitialization(new FlashPhysicsList);
   runManager->SetUserInitialization(new FlashActionInitialization);
 
-  G4VisManager *visManager = new G4VisExecutive;
-  visManager->Initialize();
+  //G4VisManager *visManager = new G4VisExecutive;
+  //visManager->Initialize();
 
 
   // Inizializza il gestore di scoring
@@ -107,7 +107,7 @@ int main(int argc, char **argv) {
   std::cout<<"outputFileName: " << outputFileName <<std::endl;
   std::cout<<"Seed: " << seed << std::endl;
 
-  delete visManager;
+  //delete visManager;
   delete runManager;
   return 0;
 }

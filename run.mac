@@ -32,9 +32,7 @@
 
 
 #/score/drawProjection boxMesh_1 dose
-
 #/score/drawMesh boxMesh_1 dose
-
 #/score/close
 
 #/score/list  
