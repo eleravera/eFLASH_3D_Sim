@@ -63,7 +63,7 @@ int main(int argc, char **argv) {
 
   G4Random::setTheSeed(seed);
   auto *runManager = new G4MTRunManager();
-  G4int nThreads = 230;
+  G4int nThreads = 2;
   runManager->SetNumberOfThreads(nThreads);
  
   runManager->SetUserInitialization(new FlashDetectorConstruction);
@@ -71,11 +71,11 @@ int main(int argc, char **argv) {
   runManager->SetUserInitialization(new FlashActionInitialization);
 
   //G4VisManager *visManager = new G4VisExecutive;
-  //visManager->Initialize();
+ //visManager->Initialize();
 
 
   // Inizializza il gestore di scoring
-  G4ScoringManager::GetScoringManager();
+    G4ScoringManager::GetScoringManager();
 
   // clears output vectors before run
   G4UImanager *UImanager = G4UImanager::GetUIpointer();
@@ -99,6 +99,9 @@ int main(int argc, char **argv) {
 
     // Chiudi il file
     outputFile.close(); // Assicurati di chiudere il file
+
+
+
 
 
   std::cout << "        ------      " << std::endl;
