@@ -18,13 +18,13 @@
 /vis/viewer/set/lightsVector -1 0 0
 #
 # Specify style (surface, wireframe, auxiliary edges,...)
-/vis/viewer/set/style wireframe
-/vis/viewer/set/auxiliaryEdge true
-/vis/viewer/set/lineSegmentsPerCircle 100
+#/vis/viewer/set/style wireframe
+#/vis/viewer/set/auxiliaryEdge true
+#/vis/viewer/set/lineSegmentsPerCircle 100
 
 # Axes, scale, etc.
-#/vis/scene/add/scale   # Simple scale line
-#/vis/scene/add/axes    # Simple axes: x=red, y=green, z=blue.
+/vis/scene/add/scale   # Simple scale line
+/vis/scene/add/axes    # Simple axes: x=red, y=green, z=blue.
 /vis/scene/add/trajectories
 /vis/scene/endOfEventAction accumulate 1
 
@@ -38,8 +38,6 @@
 /vis/verbose warnings
 /vis/scene/add/trajectories
 
-
-/vis/scene/add/axes
 
 
 
