@@ -183,7 +183,7 @@ G4VPhysicalVolume *FlashDetectorConstruction::ConstructPinhole() {
     PinholeMaterial = nist->FindOrBuildMaterial("G4_AIR"); 
     G4double collimatorThickness = 0.3*cm;
     G4double squareSize = 10*cm + PinholeDistance;
-    G4double innerRadius = 5.*mm; 
+    G4double innerRadius = 0.5*mm; 
 
 
     G4Trd* squareSolid = new G4Trd("BlackSheet", (squareSize+collimatorThickness)/2, (squareSize-collimatorThickness)/2, (squareSize+collimatorThickness)/2,  (squareSize-collimatorThickness)/2, collimatorThickness/2);

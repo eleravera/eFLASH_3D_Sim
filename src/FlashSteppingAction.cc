@@ -46,6 +46,8 @@
 #include "G4UnitsTable.hh"
 #include "G4SystemOfUnits.hh"
 
+int i = 0 ;
+
 FlashSteppingAction::FlashSteppingAction(FlashEventAction *)
     : G4UserSteppingAction() {}
 
@@ -73,6 +75,8 @@ void FlashSteppingAction::UserSteppingAction(const G4Step *aStep)
             //detection photon_maps =  detection(pos_x/mm, pos_y/mm, pos_z/mm);
             //detection_vector1.push_back(photon_maps);
             std::cout << "A photon has been saved on file: positions are : " << pos_x << " , " << pos_y << " , " << pos_z  << std::endl;  
+            i++;
+            std::cout<<"i: " << i<< std::endl; 
             //photon_maps.print();
             } 
 
