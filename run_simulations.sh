@@ -14,7 +14,7 @@ for i in {0..499}
 do
 
   # Imposta il seed uguale all'indice 'i', o un altro calcolo se preferisci
-  seed=$((7000 + i))
+  seed=$((8000 + i))
 
   # Definisce il nome del file di output
   output_file="$output_dir/my_outputfile_${i}.raw" 
