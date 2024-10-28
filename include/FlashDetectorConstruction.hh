@@ -123,7 +123,7 @@ private:
   G4VPhysicalVolume *fPhantom_physical;
     
   G4LogicalVolume *PinholeLogicalVolume;
-  G4VPhysicalVolume *Pihole_phys;
+  G4VPhysicalVolume *Pihole_phys1, *Pihole_phys2, *Pihole_phys3, *Pihole_phys4, *Pihole_phys5;
   G4VPhysicalVolume *Pihole_physical;
 
 
