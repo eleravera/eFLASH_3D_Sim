@@ -91,24 +91,35 @@ FlashDetectorConstruction::FlashDetectorConstruction()
 
 
 FlashDetectorConstruction::~FlashDetectorConstruction() {
-
     delete fDetectorMessenger;
 }
 
 
 void FlashDetectorConstruction::DefineMaterials() {
+    //Detector Material:
     nist = G4NistManager::Instance();
-    //write here a function to define custom materials
     G4bool isotopes = false;
     Si = nist->FindOrBuildElement("Si", isotopes);
     C = nist->FindOrBuildElement("C", isotopes);
+    G4double fDensity_SiC=3.22*g/cm3;
+    SiC=new G4Material("SiC", fDensity_SiC,2);
+    SiC->AddElement(Si,1);
+    SiC->AddElement(C,1);
+    DetectorMaterial=SiC;
 
-  }
+
+    //Pinhole Material: 
+    PinholeMaterial = nist->FindOrBuildMaterial("G4_WATER"); 
+    std::vector<G4double> energy     = {2.48 * eV, 3.1 * eV}; //sto generando solo tra i 400 e i 500 nm. lambda [nm] = 1240/E[eV]
+    std::vector<G4double> rindex     = {0, 0};
+    G4MaterialPropertiesTable* MPT = new G4MaterialPropertiesTable();
+    MPT->AddProperty("RINDEX", energy, rindex);
+    PinholeMaterial->SetMaterialPropertiesTable(MPT);
+    G4cout << "Pinhole G4MaterialPropertiesTable:" << G4endl;
+    MPT->DumpTable();
 
 
-G4VPhysicalVolume *FlashDetectorConstruction::ConstructPhantom(G4double CollPos) {
-    //This function creates a cubic phantom with the point Collpos on the surface of the cube.
-
+    //Phantom Material 
     fPhantomMaterial = nist->FindOrBuildMaterial("G4_PLASTIC_SC_VINYLTOLUENE");//(EJ200
     std::vector<G4double> energy     = {2.48 * eV, 3.1 * eV}; //sto generando solo tra i 400 e i 500 nm. lambda [nm] = 1240/E[eV]
     std::vector<G4double> rindex     = {1.58, 1.58};
@@ -116,7 +127,7 @@ G4VPhysicalVolume *FlashDetectorConstruction::ConstructPhantom(G4double CollPos)
     std::vector<G4double> scint_spectrum = {0.5, 0.5};
 
     G4MaterialPropertiesTable* MPT = new G4MaterialPropertiesTable();
-    MPT->AddConstProperty("SCINTILLATIONYIELD", 10000./MeV);
+    MPT->AddConstProperty("SCINTILLATIONYIELD", 10./MeV);
     MPT->AddProperty("RINDEX", energy, rindex);
     MPT->AddProperty("ABSLENGTH", energy, absorption);
     MPT-> AddProperty("SCINTILLATIONCOMPONENT1", energy, scint_spectrum);
@@ -128,34 +139,35 @@ G4VPhysicalVolume *FlashDetectorConstruction::ConstructPhantom(G4double CollPos)
     G4cout << "Phantom G4MaterialPropertiesTable:" << G4endl;
     MPT->DumpTable();
 
-    fPosition_coefficient = CollPos;
-    
-    fPhantom_coordinateX = (fPosition_coefficient * mm + fPhantomSizeX / 2);
+  }
 
+
+G4VPhysicalVolume *FlashDetectorConstruction::ConstructPhantom(G4double CollPos) {
+    /* This function creates a cubic phantom - with material properties defined in function DefineMaterials(). 
+        The folling parameters are: 
+        fPosition_coefficient = 
+        fPhantom_coordinateX = 
+        fPhantomPosition = 
+
+        Let's keep in mind that there is a shif in the Phantom position (due to Air Gap)
+
+        The surface of the Phantom are defined as ... 
+
+    */
+
+    fPosition_coefficient = CollPos;
+    fPhantom_coordinateX = (fPosition_coefficient * mm + fPhantomSizeX / 2);
     fPhantomPosition =  G4ThreeVector(fPhantom_coordinateX, 0. * mm, 0. * mm); //phantom is constructed with the entrance surface attached to the applicator 
     
-
-    // Definition of the solid volume of the Phantom
     fPhantom = new G4Box("Phantom", fPhantomSizeX / 2, fPhantomSizeY / 2, fPhantomSizeZ / 2);
-
-    // Definition of the logical volume of the Phantom
     fPhantomLogicalVolume = new G4LogicalVolume(fPhantom, fPhantomMaterial, "phantomLog", 0, 0, 0);
-
-    // Definition of the physical volume of the Phantom
     fPhant_phys = new G4PVPlacement(0, fPhantomPosition, "phantomPhys", fPhantomLogicalVolume, physicalTreatmentRoom, false, 0);
+    
     //define the region to set cuts in FlashPhysicsList.cc and step limit
     G4Region *PhantomRegion = new G4Region("Phantom_reg");
     fPhantomLogicalVolume->SetRegion(PhantomRegion);
     PhantomRegion->AddRootLogicalVolume(fPhantomLogicalVolume);
 
-    // Visualisation attributes of the phantom
-    red = new G4VisAttributes(G4Colour(0 / 255., 255 / 255., 0 / 255.));
-    red->SetVisibility(true);
-
-    blue = new G4VisAttributes(G4Colour(0 / 255., 0. / 255., 255. / 255.));
-    blue->SetVisibility(true);
-
-    fPhantomLogicalVolume->SetVisAttributes(red);
     //set step limit in phantom
     G4double maxStep = 0.1 * mm;
     fStepLimit = new G4UserLimits(maxStep);
@@ -168,58 +180,62 @@ G4VPhysicalVolume *FlashDetectorConstruction::ConstructPhantom(G4double CollPos)
     opticalSurface->SetFinish(ground);  // Finitura opaca
     opticalSurface->SetModel(unified);  // Modello di riflessione e trasmissione
     opticalSurface->SetPolish(0.0);  // Coefficiente di riflessione a zero
+    new G4LogicalBorderSurface("BorderSurface", fPhant_phys, physicalTreatmentRoom, opticalSurface);// Associa la superficie ottica ai confini
 
-    // Associa la superficie ottica ai confini
-    new G4LogicalBorderSurface("BorderSurface", fPhant_phys, physicalTreatmentRoom, opticalSurface);
+
+    // Visualisation attributes of the phantom
+    red = new G4VisAttributes(G4Colour(0 / 255., 255 / 255., 0 / 255.));
+    red->SetVisibility(true);
+    blue = new G4VisAttributes(G4Colour(0 / 255., 0. / 255., 255. / 255.));
+    blue->SetVisibility(true);
+    fPhantomLogicalVolume->SetVisAttributes(red);
+
     return fPhant_phys;
+
 }
 
 
 G4VPhysicalVolume *FlashDetectorConstruction::ConstructPinhole() {
-    //This function creates a pinhole collimator made by 5 collimators as the one defined in function X
-
-    //Pinhole properties: 
-    PinholeMaterial = nist->FindOrBuildMaterial("G4_WATER"); 
-    std::vector<G4double> energy     = {2.48 * eV, 3.1 * eV}; //sto generando solo tra i 400 e i 500 nm. lambda [nm] = 1240/E[eV]
-    std::vector<G4double> rindex     = {0, 0};
-    G4MaterialPropertiesTable* MPT = new G4MaterialPropertiesTable();
-    MPT->AddProperty("RINDEX", energy, rindex);
-    PinholeMaterial->SetMaterialPropertiesTable(MPT);
-    G4cout << "Pinhole G4MaterialPropertiesTable:" << G4endl;
-    MPT->DumpTable();
-
+    /* This function creates a pinhole collimator with sheet, each with an hole at the center  - with material properties defined in function DefineMaterials(). A pinhole sheet is made by a G4Trd, so that the sheets can be places to form "a  cube" without overlapping. It is created by the subtraction of G4Trd and G4Tubs.
+        The folling parameters are: 
+        collimatorThickness = 
+        squareSize = 
+        innerRadius = 
+    */
 
     G4double collimatorThickness = 0.3*cm;
     G4double squareSize = 10*cm + PinholeDistance;
     G4double innerRadius = 0.5*mm; 
 
-
     G4Trd* squareSolid = new G4Trd("BlackSheet", (squareSize+collimatorThickness)/2, (squareSize-collimatorThickness)/2, (squareSize+collimatorThickness)/2,  (squareSize-collimatorThickness)/2, collimatorThickness/2);
-
-
     G4Tubs* innerCylinder = new G4Tubs("InnerCylinder", 0, innerRadius, collimatorThickness/2, 0.*deg, 360.*deg);
     G4SubtractionSolid* PinholeCilinder = new G4SubtractionSolid("Pinhole", squareSolid, innerCylinder);   
     PinholeLogicalVolume = new G4LogicalVolume(PinholeCilinder, PinholeMaterial, "pinholeLog", 0, 0, 0);
 
-    G4RotationMatrix* rotationMatrix_y = new G4RotationMatrix();
-    rotationMatrix_y->rotateY(90.*deg); // Ruota di 90 gradi attorno all'asse Y
-
     G4double PinholePosition_l =  fPhantomSizeX * 0.5 + PinholeDistance * 0.5;
     G4double PinholePosition_t =  fPhantomSizeX + PinholeDistance * 0.5; 
+
+    //Pinhole 1 
+    G4RotationMatrix* rotationMatrix_y = new G4RotationMatrix();
+    rotationMatrix_y->rotateY(90.*deg); // Ruota di 90 gradi attorno all'asse Y
     Pihole_phys1 = new G4PVPlacement(rotationMatrix_y, G4ThreeVector(PinholePosition_t, 0., 0.), "pinholePhys", PinholeLogicalVolume, physicalTreatmentRoom, false, 0,fCheckOverlaps);
-    
+
+    //Pinhole 2 
     G4RotationMatrix* rotationMatrix_x1 = new G4RotationMatrix();
     rotationMatrix_x1->rotateX(-90.*deg); // Ruota di 90 gradi attorno all'asse Z
     Pihole_phys2 = new G4PVPlacement(rotationMatrix_x1, G4ThreeVector(fPhantomSizeX * 0.5, PinholePosition_l, 0.), "pinholePhys", PinholeLogicalVolume, physicalTreatmentRoom, false, 0, fCheckOverlaps);
-    
+
+     //Pinhole 3    
     G4RotationMatrix* rotationMatrix_x2 = new G4RotationMatrix();
     rotationMatrix_x2->rotateX(+90.*deg); // Ruota di 90 gradi attorno all'asse Z
     Pihole_phys3 = new G4PVPlacement(rotationMatrix_x2, G4ThreeVector(fPhantomSizeX * 0.5, -PinholePosition_l, 0.), "pinholePhys", PinholeLogicalVolume, physicalTreatmentRoom, false, 0, fCheckOverlaps);
     
+    //Pinhole 5 
     Pihole_phys5 = new G4PVPlacement(0, G4ThreeVector(fPhantomSizeX * 0.5, 0., -PinholePosition_l), "pinholePhys", PinholeLogicalVolume, physicalTreatmentRoom, false, 0, fCheckOverlaps);
-
     G4RotationMatrix* reverse = new G4RotationMatrix();
     reverse->rotateX(180.*deg);
+    
+    //Pinhole 4 
     Pihole_phys4 = new G4PVPlacement(reverse, G4ThreeVector(fPhantomSizeX * 0.5, 0., PinholePosition_l), "pinholePhys", PinholeLogicalVolume, physicalTreatmentRoom, false, 0, fCheckOverlaps);
 
 
@@ -235,12 +251,7 @@ G4VPhysicalVolume *FlashDetectorConstruction::ConstructPinhole() {
 
 
 G4VPhysicalVolume *FlashDetectorConstruction::ConstructDetector(){
-    //Detector
-    G4double fDensity_SiC=3.22*g/cm3;
-    SiC=new G4Material("SiC", fDensity_SiC,2);
-    SiC->AddElement(Si,1);
-    SiC->AddElement(C,1);
-    DetectorMaterial=SiC;
+
     
     Det_box = new G4Box("Detector", fDet_thickness/2, fDet_width/2,fDet_width/2);
     fDetectorPosition_t = fPhantomSizeX + DetectorDistance + fAirGap;
