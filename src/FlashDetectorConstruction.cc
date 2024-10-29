@@ -110,14 +110,13 @@ G4VPhysicalVolume *FlashDetectorConstruction::ConstructPhantom(G4double CollPos)
     //This function creates a cubic phantom with the point Collpos on the surface of the cube.
 
     fPhantomMaterial = nist->FindOrBuildMaterial("G4_PLASTIC_SC_VINYLTOLUENE");//(EJ200
-    
     std::vector<G4double> energy     = {2.48 * eV, 3.1 * eV}; //sto generando solo tra i 400 e i 500 nm. lambda [nm] = 1240/E[eV]
     std::vector<G4double> rindex     = {1.58, 1.58};
     std::vector<G4double> absorption = {380.*cm, 380.*cm};
     std::vector<G4double> scint_spectrum = {0.5, 0.5};
 
     G4MaterialPropertiesTable* MPT = new G4MaterialPropertiesTable();
-    MPT->AddConstProperty("SCINTILLATIONYIELD", 10./MeV);
+    MPT->AddConstProperty("SCINTILLATIONYIELD", 10000./MeV);
     MPT->AddProperty("RINDEX", energy, rindex);
     MPT->AddProperty("ABSLENGTH", energy, absorption);
     MPT-> AddProperty("SCINTILLATIONCOMPONENT1", energy, scint_spectrum);
@@ -180,7 +179,16 @@ G4VPhysicalVolume *FlashDetectorConstruction::ConstructPinhole() {
     //This function creates a pinhole collimator made by 5 collimators as the one defined in function X
 
     //Pinhole properties: 
-    PinholeMaterial = nist->FindOrBuildMaterial("G4_AIR"); 
+    PinholeMaterial = nist->FindOrBuildMaterial("G4_WATER"); 
+    std::vector<G4double> energy     = {2.48 * eV, 3.1 * eV}; //sto generando solo tra i 400 e i 500 nm. lambda [nm] = 1240/E[eV]
+    std::vector<G4double> rindex     = {0, 0};
+    G4MaterialPropertiesTable* MPT = new G4MaterialPropertiesTable();
+    MPT->AddProperty("RINDEX", energy, rindex);
+    PinholeMaterial->SetMaterialPropertiesTable(MPT);
+    G4cout << "Pinhole G4MaterialPropertiesTable:" << G4endl;
+    MPT->DumpTable();
+
+
     G4double collimatorThickness = 0.3*cm;
     G4double squareSize = 10*cm + PinholeDistance;
     G4double innerRadius = 0.5*mm; 
@@ -228,8 +236,6 @@ G4VPhysicalVolume *FlashDetectorConstruction::ConstructPinhole() {
 
 G4VPhysicalVolume *FlashDetectorConstruction::ConstructDetector(){
     //Detector
-
-    //poi andrà cambiato    DetectorMaterial = nist->FindOrBuildMaterial("G4_AIR");
     G4double fDensity_SiC=3.22*g/cm3;
     SiC=new G4Material("SiC", fDensity_SiC,2);
     SiC->AddElement(Si,1);
@@ -277,8 +283,6 @@ G4VPhysicalVolume *FlashDetectorConstruction::Construct() {
     // Filled with air
     airNist = G4NistManager::Instance()->FindOrBuildMaterial("G4_AIR", isotopes);
     std::vector<G4double> energy     = {2.48 * eV, 3.1 * eV};
-
-    //std::vector<G4double> energy     = {00.5 * eV, 0.35 *eV};
     std::vector<G4double> rindex     = {1., 1.};
     G4MaterialPropertiesTable* MPT = new G4MaterialPropertiesTable();
     MPT->AddProperty("RINDEX", energy, rindex);
