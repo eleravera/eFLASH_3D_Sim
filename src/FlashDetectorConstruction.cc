@@ -61,7 +61,6 @@
 
 #include "Applicator.hh"
 
-
 #include "G4MaterialPropertiesTable.hh"
 
 #include "G4PSEnergyDeposit.hh"
@@ -182,7 +181,6 @@ G4VPhysicalVolume *FlashDetectorConstruction::ConstructPhantom(G4double CollPos)
     opticalSurface->SetPolish(0.0);  // Coefficiente di riflessione a zero
     new G4LogicalBorderSurface("BorderSurface", fPhant_phys, physicalTreatmentRoom, opticalSurface);// Associa la superficie ottica ai confini
 
-
     // Visualisation attributes of the phantom
     red = new G4VisAttributes(G4Colour(0 / 255., 255 / 255., 0 / 255.));
     red->SetVisibility(true);
@@ -238,7 +236,6 @@ G4VPhysicalVolume *FlashDetectorConstruction::ConstructPinhole() {
     //Pinhole 4 
     Pihole_phys4 = new G4PVPlacement(reverse, G4ThreeVector(fPhantomSizeX * 0.5, 0., PinholePosition_l), "pinholePhys", PinholeLogicalVolume, physicalTreatmentRoom, false, 0, fCheckOverlaps);
 
-
     // Visualisation attributes of the pinhole
     gray = new G4VisAttributes(G4Colour(211 / 255., 211 / 255., 211 / 255.));
     gray->SetVisibility(true);
@@ -249,9 +246,7 @@ G4VPhysicalVolume *FlashDetectorConstruction::ConstructPinhole() {
 }
 
 
-
 G4VPhysicalVolume *FlashDetectorConstruction::ConstructDetector(){
-
     
     Det_box = new G4Box("Detector", fDet_thickness/2, fDet_width/2,fDet_width/2);
     fDetectorPosition_t = fPhantomSizeX + DetectorDistance + fAirGap;
