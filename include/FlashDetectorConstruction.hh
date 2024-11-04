@@ -116,6 +116,7 @@ private:
 
   
   void DefineMaterials();
+  void DefineSurfaces(); 
 
 
   G4LogicalVolume *fPhantomLogicalVolume;
