@@ -42,9 +42,23 @@
 #include <sstream>
 #include <string>
 #include "G4OpticalPhoton.hh"
+#include "G4OpBoundaryProcess.hh"
 #include <common.hh>
 #include "G4UnitsTable.hh"
 #include "G4SystemOfUnits.hh"
+#include "G4RunManager.hh"
+#include "FlashRunAction.hh"
+#include "G4AnalysisManager.hh"
+
+G4int FlashSteppingAction::TransmissionCount; 
+G4int FlashSteppingAction::FresnelRefractionCount; 
+G4int FlashSteppingAction::FresnelReflectionCount;
+G4int FlashSteppingAction::TotalInternalReflectionCount;
+G4int FlashSteppingAction::LambertianReflectionCount; 
+G4int FlashSteppingAction::LobeReflectionCount;
+G4int FlashSteppingAction::SpikeReflectionCount; 
+G4int FlashSteppingAction::BackScatteringCount; 
+G4int FlashSteppingAction::AbsorptionCount; 
 
 int i = 0 ;
 
@@ -55,18 +69,22 @@ FlashSteppingAction::~FlashSteppingAction() {}
 
 void FlashSteppingAction::UserSteppingAction(const G4Step *aStep)
 {
+
     const G4Track* track = aStep->GetTrack();
     const G4ParticleDefinition* particleDef = track->GetDefinition();
 
     G4StepPoint *postStep = aStep->GetPostStepPoint();
     G4StepPoint *preStep = aStep->GetPreStepPoint();
 
-    if (particleDef == G4OpticalPhoton::OpticalPhotonDefinition() && postStep->GetStepStatus() == fGeomBoundary) {
+    static G4ParticleDefinition* opticalphoton = G4OpticalPhoton::OpticalPhotonDefinition();
+
+
+    if (particleDef == opticalphoton && postStep->GetStepStatus() == fGeomBoundary) {
 
         G4String volumeName = postStep->GetPhysicalVolume()->GetLogicalVolume()->GetName();
         G4String prevolumeName = preStep->GetPhysicalVolume()->GetLogicalVolume()->GetName();
 
-        if (prevolumeName == "logicTreatmentRoom" && volumeName ==  "DetectorLog") {
+        /*if (prevolumeName == "logicTreatmentRoom" && volumeName ==  "DetectorLog") {
             G4double pos_x = aStep->GetTrack()->GetPosition().x();
             G4double pos_y = aStep->GetTrack()->GetPosition().y();
             G4double pos_z = aStep->GetTrack()->GetPosition().z();
@@ -78,11 +96,66 @@ void FlashSteppingAction::UserSteppingAction(const G4Step *aStep)
             i++;
             std::cout<<"i: " << i<< std::endl; 
             //photon_maps.print();
-            } 
-
-   
+            } */  
 
       }
+      
+      G4ProcessManager* OpManager = opticalphoton->GetProcessManager();
+      G4ProcessVector* postStepDoItVector = OpManager->GetPostStepProcessVector(typeDoIt);
+      G4int n_proc = postStepDoItVector->entries();
+
+      G4OpBoundaryProcessStatus theStatus = Undefined;
+      G4AnalysisManager* analysisMan = G4AnalysisManager::Instance();
+      
+      for(G4int i = 0; i < n_proc; ++i)
+        {
+          G4VProcess* currentProcess = (*postStepDoItVector)[i];
+
+          G4OpBoundaryProcess* opProc = dynamic_cast<G4OpBoundaryProcess*>(currentProcess);
+          if(opProc)
+          {
+            //G4double angle = std::acos(preStep->GetMomentumDirection().x());
+            theStatus      = opProc->GetStatus();
+            G4ThreeVector p0 = preStep->GetMomentumDirection();
+            G4double angle = std::acos(p0.x());
+            
+            switch(theStatus)
+            { 
+              case Transmission:
+                TransmissionCount++; 
+                break;
+              case FresnelRefraction:
+                FresnelRefractionCount++; 
+                break;
+              case FresnelReflection:
+                FresnelReflectionCount++;
+
+                analysisMan->FillH1(0, angle/deg);
+
+
+                break; 
+              case TotalInternalReflection:
+                TotalInternalReflectionCount++;
+                break;
+              case LambertianReflection:
+                LambertianReflectionCount++;
+                break;
+              case LobeReflection:
+                LobeReflectionCount++;
+                break;
+              case SpikeReflection:
+                SpikeReflectionCount++;
+                break;
+              case BackScattering:
+                BackScatteringCount++;
+                break;
+              case Absorption:
+                AbsorptionCount++;
+                break;
+
+            }
+          }
+        }
 
 }
 

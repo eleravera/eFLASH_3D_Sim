@@ -28,7 +28,7 @@
 /// \brief Implementation of the FlashRunAction class
 
 #include "FlashRunAction.hh"
-
+#include "FlashSteppingAction.hh"
 #include "FlashPrimaryGeneratorAction.hh"
 #include "G4Accumulable.hh"
 #include "G4AccumulableManager.hh"
@@ -37,6 +37,9 @@
 #include "G4RunManager.hh"
 #include "G4SystemOfUnits.hh"
 #include "G4UnitsTable.hh"
+#include "G4AnalysisManager.hh"
+
+
 
 FlashRunAction::FlashRunAction() : G4UserRunAction() {}
 
@@ -45,7 +48,12 @@ FlashRunAction::~FlashRunAction() {}
 void FlashRunAction::BeginOfRunAction(const G4Run *run) {
   G4cout << "### Run " << run->GetRunID() << " start." << G4endl;
   G4RunManager::GetRunManager()->SetRandomNumberStore(false);
-}
+
+  G4AnalysisManager* analysisManager = G4AnalysisManager::Instance();
+  analysisManager->OpenFile("output_test_histogram.csv");
+  analysisManager->CreateH1("H1", "Example Histogram", 100, 0., 100.); // ID: 0
+
+  }
 
 void FlashRunAction::EndOfRunAction(const G4Run *run) {
   G4int nofEvents = run->GetNumberOfEvent();
@@ -55,11 +63,25 @@ void FlashRunAction::EndOfRunAction(const G4Run *run) {
   if (IsMaster()) {
     G4cout << G4endl
            << "--------------------End of Global Run-----------------------"
-           << G4endl << "  The run was " << nofEvents << " events ";
+           << G4endl << "  The run was " << nofEvents << " events " << G4endl;
   } else {
     G4cout << G4endl
            << "--------------------End of Local Run------------------------"
-           << G4endl << "  The run was " << nofEvents << " events ";
+           << G4endl << "  The run was " << nofEvents << " events " << G4endl;
   }
-  
+
+  G4cout << "  Transmissions: " << FlashSteppingAction::TransmissionCount << G4endl;
+  G4cout << "  Fresnel refraction: " << FlashSteppingAction::FresnelRefractionCount << G4endl;
+  G4cout << "  Fresnel reflection: " << FlashSteppingAction::FresnelReflectionCount << G4endl;
+  G4cout << "  Total internal reflection: " << FlashSteppingAction::TotalInternalReflectionCount << G4endl;
+  G4cout << "  Lambertian reflection: " << FlashSteppingAction::LambertianReflectionCount << G4endl;
+  G4cout << "  Lobe reflection: " << FlashSteppingAction::LobeReflectionCount << G4endl;
+  G4cout << "  Spike reflection: " << FlashSteppingAction::SpikeReflectionCount << G4endl;
+  G4cout << "  Backscattering: " << FlashSteppingAction::BackScatteringCount << G4endl;
+  G4cout << "  Absorption: " << FlashSteppingAction::AbsorptionCount << G4endl;
+
+  G4AnalysisManager* analysisManager = G4AnalysisManager::Instance();
+  analysisManager->Write();
+  analysisManager->CloseFile();
+
 }

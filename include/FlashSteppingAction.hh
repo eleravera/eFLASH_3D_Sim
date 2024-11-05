@@ -38,14 +38,24 @@ class FlashEventAction;
 class G4LogicalVolume;
 
 class FlashSteppingAction : public G4UserSteppingAction {
+
 public:
   FlashSteppingAction(FlashEventAction *);
   virtual ~FlashSteppingAction();
 
   virtual void UserSteppingAction(const G4Step *);
 
-private:
-  // FlashEventAction *fEventAction;
+  static G4int TransmissionCount; 
+  static G4int FresnelRefractionCount; 
+  static G4int FresnelReflectionCount;
+  static G4int TotalInternalReflectionCount;
+  static G4int LambertianReflectionCount; 
+  static G4int LobeReflectionCount;
+  static G4int SpikeReflectionCount; 
+  static G4int BackScatteringCount; 
+  static G4int AbsorptionCount; 
+  
 };
+
 
 #endif

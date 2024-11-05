@@ -95,16 +95,14 @@ FlashDetectorConstruction::~FlashDetectorConstruction() {
 
 
 void FlashDetectorConstruction::DefineMaterials() {
-    // Filled with air
-    airNist = G4NistManager::Instance()->FindOrBuildMaterial("G4_AIR", false);
     std::vector<G4double> energy     = {2.48 * eV, 3.1 * eV}; //sto generando solo tra i 400 e i 500 nm. lambda [nm] = 1240/E[eV]
-    std::vector<G4double> rindex_air     = {1., 1.};
+    
+    // Filled with air
+    std::vector<G4double> rindex_air     = {1.0, 1.0};
+    airNist = G4NistManager::Instance()->FindOrBuildMaterial("G4_AIR", false);
     G4MaterialPropertiesTable* MPT_Air = new G4MaterialPropertiesTable();
     MPT_Air->AddProperty("RINDEX", energy, rindex_air);
     airNist->SetMaterialPropertiesTable(MPT_Air);
-    G4cout << "Air G4MaterialPropertiesTable:" << G4endl;
-    MPT_Air->DumpTable();
-
 
     //Detector Material:
     nist = G4NistManager::Instance();
@@ -119,45 +117,73 @@ void FlashDetectorConstruction::DefineMaterials() {
 
 
     //Pinhole Material: 
-    PinholeMaterial = nist->FindOrBuildMaterial("G4_WATER"); 
-    std::vector<G4double> rindex_pinhole     = {0, 0};
+    PinholeMaterial = DetectorMaterial; //nist->FindOrBuildMaterial("G4_WATER"); 
+    std::vector<G4double> rindex_pinhole     = {0., 0.};
+    std::vector<G4double> reflectivity_pinhole     = {0., 0.};
+    std::vector<G4double> trasmittance_pinhole     = {0., 0.};
+
     G4MaterialPropertiesTable* MPT_Pinhole = new G4MaterialPropertiesTable();
     MPT_Pinhole->AddProperty("RINDEX", energy, rindex_pinhole);
     PinholeMaterial->SetMaterialPropertiesTable(MPT_Pinhole);
-    G4cout << "Pinhole G4MaterialPropertiesTable:" << G4endl;
-    MPT_Pinhole->DumpTable();
+
+    G4OpticalSurface* PinholeOpticalSurface = new G4OpticalSurface("PinholeOpticalSurface");
+    new G4LogicalBorderSurface("PinholeOpticalSurface", physicalTreatmentRoom, Pihole_phys1, PinholeOpticalSurface);
+    PinholeOpticalSurface->SetType(dielectric_dielectric);  
+    PinholeOpticalSurface->SetModel(unified); 
+    PinholeOpticalSurface->SetFinish(polished); 
+
+    G4MaterialPropertiesTable* WrappingProperty_Pinhole = new G4MaterialPropertiesTable();
+    WrappingProperty_Pinhole->AddProperty("REFLECTIVITY", energy, reflectivity_pinhole); 
+    WrappingProperty_Pinhole->AddProperty("TRANSMITTANCE", energy, trasmittance_pinhole); 
+
+    PinholeOpticalSurface->SetMaterialPropertiesTable(WrappingProperty_Pinhole);
+
 
 
     //Phantom Material 
     fPhantomMaterial = nist->FindOrBuildMaterial("G4_PLASTIC_SC_VINYLTOLUENE");//(EJ200
+    /*    
+    //An alternative would be: 
+    EJ200 = new G4Material("EJ200", 1.023*g/cm3, 2); //eljen technology 1.023
+    G4int natoms;
+    EJ200->AddElement(H, natoms = 524); // su G4 nist database
+    EJ200->AddElement(C, natoms = 475);
+    */
     std::vector<G4double> rindex_phantom     = {1.58, 1.58};
     std::vector<G4double> absorption_phantom = {380.*cm, 380.*cm};
     std::vector<G4double> scint_spectrum = {0.5, 0.5};
     std::vector<G4double> reflectivity_phantom = {1., 1.};
 
-
     G4MaterialPropertiesTable* MPT_Phantom = new G4MaterialPropertiesTable();
-    MPT_Phantom->AddConstProperty("SCINTILLATIONYIELD", 1./MeV);
     MPT_Phantom->AddProperty("RINDEX", energy, rindex_phantom);
     MPT_Phantom->AddProperty("ABSLENGTH", energy, absorption_phantom);
+    MPT_Phantom->AddConstProperty("SCINTILLATIONYIELD", 1./MeV);
     MPT_Phantom-> AddProperty("SCINTILLATIONCOMPONENT1", energy, scint_spectrum);
     MPT_Phantom->AddConstProperty("RESOLUTIONSCALE", 1.0);
     MPT_Phantom->AddConstProperty("SCINTILLATIONTIMECONSTANT1", 2.1*ns);
-    MPT_Phantom->AddConstProperty("SCINTILLATIONYIELD1", 1.0);
-    MPT_Phantom->AddProperty("REFLECTIVITY", energy, reflectivity_phantom);
-
+    MPT_Phantom->AddConstProperty("SCINTILLATIONRISETIME1", 0.9*ns);   
+    //MPT_Phantom->AddProperty("REFLECTIVITY", energy, reflectivity_phantom);
     fPhantomMaterial->SetMaterialPropertiesTable(MPT_Phantom);
-    G4cout << "Phantom G4MaterialPropertiesTable:" << G4endl;
-    MPT_Phantom->DumpTable();
 
     //Surface: Phantom-world
-    G4OpticalSurface* PhantomOpticalSurface = new G4OpticalSurface("PhantomopticalSurface");
+    G4OpticalSurface* PhantomOpticalSurface = new G4OpticalSurface("PhantomOpticalSurface");
     new G4LogicalBorderSurface("PhantomBorderSurface", fPhant_phys, physicalTreatmentRoom, PhantomOpticalSurface);
+
     PhantomOpticalSurface->SetType(dielectric_dielectric);  
     PhantomOpticalSurface->SetModel(unified); 
     PhantomOpticalSurface->SetFinish(polished);  
+    G4MaterialPropertiesTable* WrappingProperty = new G4MaterialPropertiesTable();
+    WrappingProperty->AddProperty("REFLECTIVITY", energy, reflectivity_phantom); 
+    PhantomOpticalSurface->SetMaterialPropertiesTable(WrappingProperty);
 
 
+    G4cout << "----- Material properties table printed by DetectorConstruction: -----" << G4endl;
+    G4cout << "Phantom G4MaterialPropertiesTable:" << G4endl;
+    MPT_Phantom->DumpTable();
+        G4cout << "Pinhole G4MaterialPropertiesTable:" << G4endl;
+    MPT_Pinhole->DumpTable();
+        G4cout << "Air G4MaterialPropertiesTable:" << G4endl;
+    MPT_Air->DumpTable();
   }
 
 
@@ -174,7 +200,6 @@ G4VPhysicalVolume *FlashDetectorConstruction::ConstructPhantom(G4double CollPos)
         Let's keep in mind that there is a shif in the Phantom position (due to Air Gap)
 
         The surface of the Phantom are defined as ... 
-
     */
 
     fPosition_coefficient = CollPos;
