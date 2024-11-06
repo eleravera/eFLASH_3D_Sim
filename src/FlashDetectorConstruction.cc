@@ -85,6 +85,8 @@ FlashDetectorConstruction::FlashDetectorConstruction()
 
     SetDetectorThickness(1*mm);
     SetDetectorWidth(15*cm);
+
+    DefineSurfaces(); 
         
 }
 
@@ -119,25 +121,8 @@ void FlashDetectorConstruction::DefineMaterials() {
     //Pinhole Material: 
     PinholeMaterial = DetectorMaterial; //nist->FindOrBuildMaterial("G4_WATER"); 
     std::vector<G4double> rindex_pinhole     = {0., 0.};
-    std::vector<G4double> reflectivity_pinhole     = {0., 0.};
-    std::vector<G4double> trasmittance_pinhole     = {0., 0.};
-
     G4MaterialPropertiesTable* MPT_Pinhole = new G4MaterialPropertiesTable();
     MPT_Pinhole->AddProperty("RINDEX", energy, rindex_pinhole);
-    PinholeMaterial->SetMaterialPropertiesTable(MPT_Pinhole);
-
-    G4OpticalSurface* PinholeOpticalSurface = new G4OpticalSurface("PinholeOpticalSurface");
-    new G4LogicalBorderSurface("PinholeOpticalSurface", physicalTreatmentRoom, Pihole_phys1, PinholeOpticalSurface);
-    PinholeOpticalSurface->SetType(dielectric_dielectric);  
-    PinholeOpticalSurface->SetModel(unified); 
-    PinholeOpticalSurface->SetFinish(polished); 
-
-    G4MaterialPropertiesTable* WrappingProperty_Pinhole = new G4MaterialPropertiesTable();
-    WrappingProperty_Pinhole->AddProperty("REFLECTIVITY", energy, reflectivity_pinhole); 
-    WrappingProperty_Pinhole->AddProperty("TRANSMITTANCE", energy, trasmittance_pinhole); 
-
-    PinholeOpticalSurface->SetMaterialPropertiesTable(WrappingProperty_Pinhole);
-
 
 
     //Phantom Material 
@@ -152,29 +137,16 @@ void FlashDetectorConstruction::DefineMaterials() {
     std::vector<G4double> rindex_phantom     = {1.58, 1.58};
     std::vector<G4double> absorption_phantom = {380.*cm, 380.*cm};
     std::vector<G4double> scint_spectrum = {0.5, 0.5};
-    std::vector<G4double> reflectivity_phantom = {1., 1.};
 
     G4MaterialPropertiesTable* MPT_Phantom = new G4MaterialPropertiesTable();
     MPT_Phantom->AddProperty("RINDEX", energy, rindex_phantom);
     MPT_Phantom->AddProperty("ABSLENGTH", energy, absorption_phantom);
-    MPT_Phantom->AddConstProperty("SCINTILLATIONYIELD", 1./MeV);
+    MPT_Phantom->AddConstProperty("SCINTILLATIONYIELD", 100./MeV);
     MPT_Phantom-> AddProperty("SCINTILLATIONCOMPONENT1", energy, scint_spectrum);
     MPT_Phantom->AddConstProperty("RESOLUTIONSCALE", 1.0);
     MPT_Phantom->AddConstProperty("SCINTILLATIONTIMECONSTANT1", 2.1*ns);
     MPT_Phantom->AddConstProperty("SCINTILLATIONRISETIME1", 0.9*ns);   
-    //MPT_Phantom->AddProperty("REFLECTIVITY", energy, reflectivity_phantom);
     fPhantomMaterial->SetMaterialPropertiesTable(MPT_Phantom);
-
-    //Surface: Phantom-world
-    G4OpticalSurface* PhantomOpticalSurface = new G4OpticalSurface("PhantomOpticalSurface");
-    new G4LogicalBorderSurface("PhantomBorderSurface", fPhant_phys, physicalTreatmentRoom, PhantomOpticalSurface);
-
-    PhantomOpticalSurface->SetType(dielectric_dielectric);  
-    PhantomOpticalSurface->SetModel(unified); 
-    PhantomOpticalSurface->SetFinish(polished);  
-    G4MaterialPropertiesTable* WrappingProperty = new G4MaterialPropertiesTable();
-    WrappingProperty->AddProperty("REFLECTIVITY", energy, reflectivity_phantom); 
-    PhantomOpticalSurface->SetMaterialPropertiesTable(WrappingProperty);
 
 
     G4cout << "----- Material properties table printed by DetectorConstruction: -----" << G4endl;
@@ -186,6 +158,24 @@ void FlashDetectorConstruction::DefineMaterials() {
     MPT_Air->DumpTable();
   }
 
+
+
+void FlashDetectorConstruction::DefineSurfaces(){
+
+
+    /*G4OpticalSurface* PinholeOpticalSurface = new G4OpticalSurface("PinholeOpticalSurface");
+    new G4LogicalBorderSurface("PinholeOpticalSurface", physicalTreatmentRoom, Pihole_phys1, PinholeOpticalSurface);
+    PinholeOpticalSurface->SetType(dielectric_dielectric);  
+    PinholeOpticalSurface->SetModel(unified); 
+    PinholeOpticalSurface->SetFinish(polished); */
+
+    //G4MaterialPropertiesTable* WrappingProperty_Pinhole = new G4MaterialPropertiesTable();
+    //WrappingProperty_Pinhole->AddProperty("REFLECTIVITY", energy, reflectivity_pinhole); 
+    //WrappingProperty_Pinhole->AddProperty("TRANSMITTANCE", energy, trasmittance_pinhole); 
+
+    //PinholeOpticalSurface->SetMaterialPropertiesTable(WrappingProperty_Pinhole);
+
+}
 
 
 
@@ -219,6 +209,32 @@ G4VPhysicalVolume *FlashDetectorConstruction::ConstructPhantom(G4double CollPos)
     G4double maxStep = 0.1 * mm;
     fStepLimit = new G4UserLimits(maxStep);
     fPhantomLogicalVolume->SetUserLimits(fStepLimit);
+
+
+    //Surface: Phantom-world
+    std::vector<G4double> reflectivity_phantom = {1., 1.};
+    std::vector<G4double> energy     = {2.48 * eV, 3.1 * eV}; //sto generando solo tra i 400 e i 500 nm. lambda [nm] = 1240/E[eV]
+
+    G4OpticalSurface* PhantomOpticalSurface = new G4OpticalSurface("PhantomOpticalSurface");
+    PhantomOpticalSurface->SetType(dielectric_dielectric);  
+    PhantomOpticalSurface->SetModel(unified); 
+    PhantomOpticalSurface->SetFinish(polished);  
+    G4MaterialPropertiesTable* WrappingProperty = new G4MaterialPropertiesTable();
+    WrappingProperty->AddProperty("REFLECTIVITY", energy, reflectivity_phantom); 
+    PhantomOpticalSurface->SetMaterialPropertiesTable(WrappingProperty);
+    G4LogicalBorderSurface* Surface = new G4LogicalBorderSurface("PhantomOpticalSurface", fPhant_phys, physicalTreatmentRoom, PhantomOpticalSurface);
+
+    /*G4OpticalSurface* PhantomOpticalSurface_reverse = new G4OpticalSurface("PhantomOpticalSurface_reverse");
+    PhantomOpticalSurface->SetType(dielectric_dielectric);  
+    PhantomOpticalSurface->SetModel(unified); 
+    PhantomOpticalSurface->SetFinish(polished);  
+    G4MaterialPropertiesTable* WrappingProperty_reverse = new G4MaterialPropertiesTable();
+    std::vector<G4double> reflectivity_phantom_reverse = {0., 0.};
+    WrappingProperty_reverse->AddProperty("REFLECTIVITY", energy, reflectivity_phantom_reverse); 
+    PhantomOpticalSurface->SetMaterialPropertiesTable(WrappingProperty_reverse);
+    G4LogicalBorderSurface* Surface_reverse = new G4LogicalBorderSurface("PhantomOpticalSurface_reverse", physicalTreatmentRoom,fPhant_phys, PhantomOpticalSurface_reverse);*/
+
+
 
 
     // Visualisation attributes of the phantom
@@ -338,8 +354,7 @@ G4VPhysicalVolume *FlashDetectorConstruction::Construct() {
     // Applicator + phantom + Default dimensions
     //------------------------------
     Collimator = new Applicator(physicalTreatmentRoom);
-    fPhantom_physical = ConstructPhantom(Collimator->fFinalApplicatorXPositionFlash +
-    Collimator->fHightFinalApplicatorFlash+fAirGap);
+    fPhantom_physical = ConstructPhantom(Collimator->fFinalApplicatorXPositionFlash +Collimator->fHightFinalApplicatorFlash+fAirGap);
 
     // -----------------------------
     // Pinhole camera

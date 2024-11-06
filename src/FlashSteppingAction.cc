@@ -50,15 +50,15 @@
 #include "FlashRunAction.hh"
 #include "G4AnalysisManager.hh"
 
-G4int FlashSteppingAction::TransmissionCount; 
-G4int FlashSteppingAction::FresnelRefractionCount; 
-G4int FlashSteppingAction::FresnelReflectionCount;
-G4int FlashSteppingAction::TotalInternalReflectionCount;
-G4int FlashSteppingAction::LambertianReflectionCount; 
-G4int FlashSteppingAction::LobeReflectionCount;
-G4int FlashSteppingAction::SpikeReflectionCount; 
-G4int FlashSteppingAction::BackScatteringCount; 
-G4int FlashSteppingAction::AbsorptionCount; 
+G4int FlashSteppingAction::TransmissionCount = 0 ; 
+G4int FlashSteppingAction::FresnelRefractionCount = 0 ; 
+G4int FlashSteppingAction::FresnelReflectionCount = 0 ;
+G4int FlashSteppingAction::TotalInternalReflectionCount = 0 ;
+G4int FlashSteppingAction::LambertianReflectionCount = 0 ; 
+G4int FlashSteppingAction::LobeReflectionCount = 0 ;
+G4int FlashSteppingAction::SpikeReflectionCount = 0 ; 
+G4int FlashSteppingAction::BackScatteringCount = 0 ; 
+G4int FlashSteppingAction::AbsorptionCount = 0 ; 
 
 int i = 0 ;
 
@@ -69,20 +69,104 @@ FlashSteppingAction::~FlashSteppingAction() {}
 
 void FlashSteppingAction::UserSteppingAction(const G4Step *aStep)
 {
+    G4AnalysisManager* analysisMan = G4AnalysisManager::Instance();
 
-    const G4Track* track = aStep->GetTrack();
-    const G4ParticleDefinition* particleDef = track->GetDefinition();
 
+    G4Track* track = aStep->GetTrack();
     G4StepPoint *postStep = aStep->GetPostStepPoint();
     G4StepPoint *preStep = aStep->GetPreStepPoint();
-
     static G4ParticleDefinition* opticalphoton = G4OpticalPhoton::OpticalPhotonDefinition();
 
+    G4OpBoundaryProcessStatus theStatus = Undefined;
+    static G4ThreadLocal G4OpBoundaryProcess* boundary = NULL; 
+    //find the boundary process only once
+    if(!boundary){
+      G4ProcessManager* pm = aStep->GetTrack()->GetDefinition()->GetProcessManager();
+      G4int nprocesses = pm->GetProcessListLength();
+      G4ProcessVector* pv = pm->GetProcessList();
+      G4int i;
+      for( i=0;i<nprocesses;i++){
+        if((*pv)[i]->GetProcessName()=="OpBoundary"){
+          boundary = (G4OpBoundaryProcess*)(*pv)[i];
+          break;
+          }
+        }
+      }
 
-    if (particleDef == opticalphoton && postStep->GetStepStatus() == fGeomBoundary) {
+
+    /*if (track->GetDefinition() == opticalphoton && postStep->GetStepStatus() == fGeomBoundary) {
 
         G4String volumeName = postStep->GetPhysicalVolume()->GetLogicalVolume()->GetName();
         G4String prevolumeName = preStep->GetPhysicalVolume()->GetLogicalVolume()->GetName();
+      }*/
+
+
+
+    if(track->GetDefinition() == G4OpticalPhoton::OpticalPhotonDefinition()) { 
+    
+      if(!(aStep->GetPostStepPoint()->GetPhysicalVolume())){//out of world
+        return;}
+    
+      G4String thePrePV  = aStep->GetPreStepPoint()->GetPhysicalVolume()->GetName();
+      G4String thePostPV = aStep->GetPostStepPoint()->GetPhysicalVolume()->GetName();
+   
+    if(postStep->GetStepStatus() == fGeomBoundary){ // if at boundary
+        
+      theStatus = boundary->GetStatus();
+
+      std::cout << "\n pre-volume and post-volume: " << thePrePV << "   " << thePostPV << std::endl; 
+      
+      /* Count detected photons */
+      switch(theStatus){
+      case Absorption: // absorption at every boundary
+        AbsorptionCount++;
+        std::cout << "AbsorptionCount ++: " << AbsorptionCount << std::endl; 
+        break;
+
+      case FresnelRefraction:
+        FresnelRefractionCount++;
+        std::cout << "FresnelRefractionCount ++: " << FresnelRefractionCount << std::endl; 
+
+            break;
+      
+      case FresnelReflection:
+        FresnelReflectionCount++;
+        std::cout << "FresnelReflectionCount ++: " << FresnelReflectionCount << std::endl; 
+            break;
+      
+      case TotalInternalReflection:
+        TotalInternalReflectionCount++;
+        std::cout << "TotalInternalReflectionCount ++: " << TotalInternalReflectionCount << std::endl; 
+        track->SetTrackStatus(fStopAndKill);
+            break;
+      
+      case LambertianReflection:
+        LambertianReflectionCount++;
+            break;
+      
+      case LobeReflection:
+        LobeReflectionCount++;
+            break;
+      
+      case SpikeReflection:
+        SpikeReflectionCount++;
+            break;
+      
+      case BackScattering:
+        BackScatteringCount++;
+            break;
+      
+      default: 
+        break;
+  
+    } /* end of switch */
+   }  /* end of if at boundary */
+  }   /* end of if optical photon */
+
+    
+
+}
+
 
         /*if (prevolumeName == "logicTreatmentRoom" && volumeName ==  "DetectorLog") {
             G4double pos_x = aStep->GetTrack()->GetPosition().x();
@@ -97,66 +181,3 @@ void FlashSteppingAction::UserSteppingAction(const G4Step *aStep)
             std::cout<<"i: " << i<< std::endl; 
             //photon_maps.print();
             } */  
-
-      }
-      
-      G4ProcessManager* OpManager = opticalphoton->GetProcessManager();
-      G4ProcessVector* postStepDoItVector = OpManager->GetPostStepProcessVector(typeDoIt);
-      G4int n_proc = postStepDoItVector->entries();
-
-      G4OpBoundaryProcessStatus theStatus = Undefined;
-      G4AnalysisManager* analysisMan = G4AnalysisManager::Instance();
-      
-      for(G4int i = 0; i < n_proc; ++i)
-        {
-          G4VProcess* currentProcess = (*postStepDoItVector)[i];
-
-          G4OpBoundaryProcess* opProc = dynamic_cast<G4OpBoundaryProcess*>(currentProcess);
-          if(opProc)
-          {
-            //G4double angle = std::acos(preStep->GetMomentumDirection().x());
-            theStatus      = opProc->GetStatus();
-            G4ThreeVector p0 = preStep->GetMomentumDirection();
-            G4double angle = std::acos(p0.x());
-            
-            switch(theStatus)
-            { 
-              case Transmission:
-                TransmissionCount++; 
-                break;
-              case FresnelRefraction:
-                FresnelRefractionCount++; 
-                break;
-              case FresnelReflection:
-                FresnelReflectionCount++;
-
-                analysisMan->FillH1(0, angle/deg);
-
-
-                break; 
-              case TotalInternalReflection:
-                TotalInternalReflectionCount++;
-                break;
-              case LambertianReflection:
-                LambertianReflectionCount++;
-                break;
-              case LobeReflection:
-                LobeReflectionCount++;
-                break;
-              case SpikeReflection:
-                SpikeReflectionCount++;
-                break;
-              case BackScattering:
-                BackScatteringCount++;
-                break;
-              case Absorption:
-                AbsorptionCount++;
-                break;
-
-            }
-          }
-        }
-
-}
-
-
