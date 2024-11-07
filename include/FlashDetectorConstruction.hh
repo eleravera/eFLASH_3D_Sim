@@ -36,6 +36,8 @@
 #include "tls.hh"
 #include "G4ThreeVector.hh"
 #include "G4UserLimits.hh"
+#include "G4OpticalSurface.hh"
+#include "G4LogicalBorderSurface.hh"
 
 class G4VPhysicalVolume;
 class G4LogicalVolume;
@@ -53,18 +55,20 @@ class FlashDetectorMessenger;
 
 class FlashDetectorConstruction : public G4VUserDetectorConstruction {
 public:
-  G4VPhysicalVolume *physicalTreatmentRoom;
-  G4LogicalVolume *logicTreatmentRoom;
-  G4VPhysicalVolume *ConstructPhantom(G4double CollPos);
-  G4VPhysicalVolume *ConstructPinhole();
-
-  G4VPhysicalVolume *ConstructDetector();
-
+  //Constructor and destructor for FlashDetectorConstruction class
   FlashDetectorConstruction();
   virtual ~FlashDetectorConstruction();
 
+  //Logical and Physical volume of the treatment room
+  G4LogicalVolume *logicTreatmentRoom;
+  G4VPhysicalVolume *physicalTreatmentRoom;
+
+  //The functions to create Phantom, Pinhole and Photodetector - and so set the carachteristic of the detector
+  G4VPhysicalVolume *ConstructPhantom(G4double CollPos);
+  G4VPhysicalVolume *ConstructPinhole();
+  G4VPhysicalVolume *ConstructDetector();
   virtual G4VPhysicalVolume *Construct();
-  virtual void ConstructSDandField();
+  virtual void ConstructSDandField(); // ? 
 
   G4bool  SetPhantomMaterial(G4String material);
   G4bool  SetDetectorMaterial(G4String material);
@@ -74,7 +78,10 @@ public:
   void SetDetectorDistance(G4double distanceX);
   void SetDetectorThickness(G4double thickness);
   void SetDetectorWidth(G4double width);
+  void DefineMaterials();
+  void DefineSurfaces(); 
 
+  //Visualization attributes
   G4VisAttributes *skyBlue;
   G4VisAttributes *red;
   G4VisAttributes *blue;
@@ -85,44 +92,45 @@ public:
 private:
 
   FlashDetectorMessenger* fDetectorMessenger;
-  
+
   G4Material *airNist;
   G4Material *fPhantomMaterial;
   G4Material *PinholeMaterial;
   Applicator *Collimator;
 
+  G4OpticalSurface *PhantomOpticalSurface;
+  G4LogicalBorderSurface *PhantomSurface; 
+
+  //Attributes set by some public functions, such as SetAirGap, SetPhantomSize.. 
   G4double fAirGap;
-  G4double fPhantomSizeX, fPhantomSizeY, fPhantomSizeZ, fPhantom_coordinateX,fPosition_coefficient;
+  G4double fPhantomSizeX, fPhantomSizeY, fPhantomSizeZ; 
+  G4double fPhantom_coordinateX, fPosition_coefficient;
   G4ThreeVector fPhantomPosition;
   G4double PinholeDistance;
   G4double DetectorDistance;
 
-  G4double fDet_thickness,fDet_width,fDet_sub_thickness,fDetectorPosition_t,fDetectorPosition_l,fAirGap_phantom_det;
+  G4double fDet_thickness,fDet_width, fDet_sub_thickness; 
+  G4double fDetectorPosition_t, fDetectorPosition_l, fAirGap_phantom_det;
+  //Materials 
   G4Element *Si;
   G4Element *C;
   G4Material *SiC;
   G4Material *DetectorMaterial;
 
-  G4Box *fPhantom;
-  //G4SubtractionSolid *PinholeCilinder;
-
   G4Box *Det_box;
   G4LogicalVolume *fDetLogicalVolume;
   G4VPhysicalVolume *fDet_phys1, *fDet_phys2, *fDet_phys3, *fDet_phys4, *fDet_phys5;
+  G4VPhysicalVolume *Detector_physical; 
 
-  //G4Box *fDet_sub;
-  //G4LogicalVolume *fDet_sub_LogicalVolume;
-  //G4VPhysicalVolume *fDet_sub_phys;
-
-  
-  void DefineMaterials();
-  void DefineSurfaces(); 
-
-
+  //Phantom
+  G4Box *fPhantom;
   G4LogicalVolume *fPhantomLogicalVolume;
   G4VPhysicalVolume *fPhant_phys;
   G4VPhysicalVolume *fPhantom_physical;
-    
+
+
+  //Pinhole 
+  //G4SubtractionSolid *PinholeCilinder;
   G4LogicalVolume *PinholeLogicalVolume;
   G4VPhysicalVolume *Pihole_phys1, *Pihole_phys2, *Pihole_phys3, *Pihole_phys4, *Pihole_phys5;
   G4VPhysicalVolume *Pihole_physical;

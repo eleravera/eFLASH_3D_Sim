@@ -49,6 +49,7 @@
 #include "G4RunManager.hh"
 #include "FlashRunAction.hh"
 #include "G4AnalysisManager.hh"
+#include <unordered_set>
 
 G4int FlashSteppingAction::TransmissionCount = 0 ; 
 G4int FlashSteppingAction::FresnelRefractionCount = 0 ; 
@@ -60,7 +61,13 @@ G4int FlashSteppingAction::SpikeReflectionCount = 0 ;
 G4int FlashSteppingAction::BackScatteringCount = 0 ; 
 G4int FlashSteppingAction::AbsorptionCount = 0 ; 
 
-int i = 0 ;
+static std::unordered_set<G4int> trappedPhoton;
+
+enum VolumeFlag {
+    PHANTOM = 0,
+    TREATMENT_ROOM = 1,
+    OTHER = 2
+};
 
 FlashSteppingAction::FlashSteppingAction(FlashEventAction *)
     : G4UserSteppingAction() {}
@@ -70,7 +77,6 @@ FlashSteppingAction::~FlashSteppingAction() {}
 void FlashSteppingAction::UserSteppingAction(const G4Step *aStep)
 {
     G4AnalysisManager* analysisMan = G4AnalysisManager::Instance();
-
 
     G4Track* track = aStep->GetTrack();
     G4StepPoint *postStep = aStep->GetPostStepPoint();
@@ -102,22 +108,57 @@ void FlashSteppingAction::UserSteppingAction(const G4Step *aStep)
 
 
 
-    if(track->GetDefinition() == G4OpticalPhoton::OpticalPhotonDefinition()) { 
+    if(track->GetDefinition() == opticalphoton) { 
+      TotalInternalReflectionCount = 0;//reset this variable for every photon
     
-      if(!(aStep->GetPostStepPoint()->GetPhysicalVolume())){//out of world
-        return;}
+      //if(!(aStep->GetPostStepPoint()->GetPhysicalVolume())){//out of world
+      //  return;}
     
-      G4String thePrePV  = aStep->GetPreStepPoint()->GetPhysicalVolume()->GetName();
-      G4String thePostPV = aStep->GetPostStepPoint()->GetPhysicalVolume()->GetName();
-   
-    if(postStep->GetStepStatus() == fGeomBoundary){ // if at boundary
-        
-      theStatus = boundary->GetStatus();
+      if(postStep->GetStepStatus() == fGeomBoundary) { // if at boundary
+        theStatus = boundary->GetStatus();
 
-      std::cout << "\n pre-volume and post-volume: " << thePrePV << "   " << thePostPV << std::endl; 
+        if(theStatus == TotalInternalReflection) { // Add photon to trapped set if it undergoes total internal reflection
+            trappedPhoton.insert(track->GetTrackID());
+            TotalInternalReflectionCount ++; 
+            //std::cout << "track->GetTrackID() = " << track->GetTrackID() << std::endl; 
+            }
+        }
+        
+        if (track->GetTrackStatus() == fStopAndKill) { // Check if the photon is absorbed within the volume and had previously undergone TIR
+            G4String thePrePV = preStep->GetPhysicalVolume()->GetName();
+            VolumeFlag volumeFlag;
+            
+            if (trappedPhoton.find(track->GetTrackID()) != trappedPhoton.end()) {// If the track ID exists in the set, the photon was previously "trapped"
+                
+                if (thePrePV == "phantomPhys"){
+                  std::cout << "Photon absorbed in volume: " << thePrePV << " with a track id = " << track->GetTrackID() << std::endl;
+                  volumeFlag = PHANTOM; 
+                }
+
+                else if (thePrePV == "physicalTreatmentRoom") {
+                  std::cout << "Photon absorbed in volume: " << thePrePV << " with a track id = " << track->GetTrackID() << std::endl;
+                  volumeFlag = TREATMENT_ROOM;
+                }
+
+                else {
+                  std::cout << "Photon absorbed in ANOTHER volume: " << thePrePV << " with a track id = " << track->GetTrackID() << std::endl;
+                  volumeFlag = OTHER;
+                }
+                
+                // Remove from the set as it’s now absorbed
+                trappedPhoton.erase(track->GetTrackID());
+            }
+        }
+
+
+    //if(postStep->GetStepStatus() == fGeomBoundary){ // if at boundary
+        
+      //theStatus = boundary->GetStatus();
+
+      //std::cout << "\n pre-volume and post-volume: " << thePrePV << "   " << thePostPV << std::endl; 
       
       /* Count detected photons */
-      switch(theStatus){
+      /*switch(theStatus){
       case Absorption: // absorption at every boundary
         AbsorptionCount++;
         std::cout << "AbsorptionCount ++: " << AbsorptionCount << std::endl; 
@@ -137,7 +178,6 @@ void FlashSteppingAction::UserSteppingAction(const G4Step *aStep)
       case TotalInternalReflection:
         TotalInternalReflectionCount++;
         std::cout << "TotalInternalReflectionCount ++: " << TotalInternalReflectionCount << std::endl; 
-        track->SetTrackStatus(fStopAndKill);
             break;
       
       case LambertianReflection:
@@ -159,8 +199,8 @@ void FlashSteppingAction::UserSteppingAction(const G4Step *aStep)
       default: 
         break;
   
-    } /* end of switch */
-   }  /* end of if at boundary */
+    }*/ /* end of switch */
+   //}  /* end of if at boundary */
   }   /* end of if optical photon */
 
     

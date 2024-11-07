@@ -48,15 +48,10 @@
 #include <common.hh>
 
 // concurrent vector to write output in multithread mode without conflicts 
-// currently multithread not active
 tbb::concurrent_vector<detection> detection_vector1;
 tbb::concurrent_vector<detection> detection_vector2;
 
 int main(int argc, char **argv) {
-
-  
-
-  //  G4Random::setTheEngine(new CLHEP::MTwistEngine);
 
   auto *runManager=G4RunManagerFactory::CreateRunManager();
   G4int nThreads = 1;
@@ -97,8 +92,6 @@ int main(int argc, char **argv) {
 
     }
 
-
-  //runManager->BeamOn(100);
   // Write results to output
     
     std::ofstream file_out2("./photon_dist/photon_position_generation.raw");

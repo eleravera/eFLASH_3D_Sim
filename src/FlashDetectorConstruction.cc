@@ -85,8 +85,6 @@ FlashDetectorConstruction::FlashDetectorConstruction()
 
     SetDetectorThickness(1*mm);
     SetDetectorWidth(15*cm);
-
-    DefineSurfaces(); 
         
 }
 
@@ -162,6 +160,18 @@ void FlashDetectorConstruction::DefineMaterials() {
 
 void FlashDetectorConstruction::DefineSurfaces(){
 
+    //Surface: Phantom-world
+    std::vector<G4double> reflectivity_phantom = {1., 1.};
+    std::vector<G4double> energy     = {2.48 * eV, 3.1 * eV}; //sto generando solo tra i 400 e i 500 nm. lambda [nm] = 1240/E[eV]
+
+    PhantomOpticalSurface = new G4OpticalSurface("PhantomOpticalSurface");
+    PhantomOpticalSurface->SetType(dielectric_dielectric);  
+    PhantomOpticalSurface->SetModel(unified); 
+    PhantomOpticalSurface->SetFinish(polished);  
+    G4MaterialPropertiesTable* WrappingProperty = new G4MaterialPropertiesTable();
+    WrappingProperty->AddProperty("REFLECTIVITY", energy, reflectivity_phantom); 
+    PhantomOpticalSurface->SetMaterialPropertiesTable(WrappingProperty);
+    PhantomSurface = new G4LogicalBorderSurface("PhantomOpticalSurface", fPhantom_physical, physicalTreatmentRoom, PhantomOpticalSurface);
 
     /*G4OpticalSurface* PinholeOpticalSurface = new G4OpticalSurface("PinholeOpticalSurface");
     new G4LogicalBorderSurface("PinholeOpticalSurface", physicalTreatmentRoom, Pihole_phys1, PinholeOpticalSurface);
@@ -209,33 +219,6 @@ G4VPhysicalVolume *FlashDetectorConstruction::ConstructPhantom(G4double CollPos)
     G4double maxStep = 0.1 * mm;
     fStepLimit = new G4UserLimits(maxStep);
     fPhantomLogicalVolume->SetUserLimits(fStepLimit);
-
-
-    //Surface: Phantom-world
-    std::vector<G4double> reflectivity_phantom = {1., 1.};
-    std::vector<G4double> energy     = {2.48 * eV, 3.1 * eV}; //sto generando solo tra i 400 e i 500 nm. lambda [nm] = 1240/E[eV]
-
-    G4OpticalSurface* PhantomOpticalSurface = new G4OpticalSurface("PhantomOpticalSurface");
-    PhantomOpticalSurface->SetType(dielectric_dielectric);  
-    PhantomOpticalSurface->SetModel(unified); 
-    PhantomOpticalSurface->SetFinish(polished);  
-    G4MaterialPropertiesTable* WrappingProperty = new G4MaterialPropertiesTable();
-    WrappingProperty->AddProperty("REFLECTIVITY", energy, reflectivity_phantom); 
-    PhantomOpticalSurface->SetMaterialPropertiesTable(WrappingProperty);
-    G4LogicalBorderSurface* Surface = new G4LogicalBorderSurface("PhantomOpticalSurface", fPhant_phys, physicalTreatmentRoom, PhantomOpticalSurface);
-
-    /*G4OpticalSurface* PhantomOpticalSurface_reverse = new G4OpticalSurface("PhantomOpticalSurface_reverse");
-    PhantomOpticalSurface->SetType(dielectric_dielectric);  
-    PhantomOpticalSurface->SetModel(unified); 
-    PhantomOpticalSurface->SetFinish(polished);  
-    G4MaterialPropertiesTable* WrappingProperty_reverse = new G4MaterialPropertiesTable();
-    std::vector<G4double> reflectivity_phantom_reverse = {0., 0.};
-    WrappingProperty_reverse->AddProperty("REFLECTIVITY", energy, reflectivity_phantom_reverse); 
-    PhantomOpticalSurface->SetMaterialPropertiesTable(WrappingProperty_reverse);
-    G4LogicalBorderSurface* Surface_reverse = new G4LogicalBorderSurface("PhantomOpticalSurface_reverse", physicalTreatmentRoom,fPhant_phys, PhantomOpticalSurface_reverse);*/
-
-
-
 
     // Visualisation attributes of the phantom
     red = new G4VisAttributes(G4Colour(0 / 255., 255 / 255., 0 / 255.));
@@ -338,7 +321,6 @@ G4VPhysicalVolume *FlashDetectorConstruction::Construct() {
     // -----------------------------
     // Treatment room - World volume
     //------------------------------
-    // Treatment room sizes 
     const G4double worldX = 400.0 * cm;
     const G4double worldY = 400.0 * cm;
     const G4double worldZ = 400.0 * cm;
@@ -364,16 +346,16 @@ G4VPhysicalVolume *FlashDetectorConstruction::Construct() {
     // -----------------------------
     // Detector pannel
     //------------------------------
-    ConstructDetector();
+    Detector_physical = ConstructDetector();
     
-     return physicalTreatmentRoom;
+    DefineSurfaces(); 
+    return physicalTreatmentRoom;
 }
 
 
 void FlashDetectorConstruction::ConstructSDandField() {
 //modify this function if you want to insert a sensitive detector
 }
-
 
 
 
