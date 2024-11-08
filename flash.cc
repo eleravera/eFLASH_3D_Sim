@@ -53,10 +53,10 @@ tbb::concurrent_vector<photonProcess> photonProcess_vector;
 int main(int argc, char **argv) {
 
   auto *runManager=G4RunManagerFactory::CreateRunManager();
-  G4int nThreads = 8;
+  G4int nThreads = 1;
   runManager->SetNumberOfThreads(nThreads);
  
-  G4Random::setTheSeed(45692);
+  G4Random::setTheSeed(45694);
 
   runManager->SetUserInitialization(new FlashDetectorConstruction);
 
@@ -91,7 +91,7 @@ int main(int argc, char **argv) {
     }
 
   // Write results to output
-    std::ofstream file_out1("./optical_properties/seed_45692_100evt.raw");
+    std::ofstream file_out1("./optical_properties/seed_45694_100evt.raw");
     for (uint32_t i=0; i<photonProcess_vector.size(); i++) {
       file_out1.write(reinterpret_cast<char*>(&photonProcess_vector[i]), sizeof(photonProcess));
       //std::cout<< reinterpret_cast<char*>(&photonProcess_vector[i]) << std::endl; 

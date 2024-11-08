@@ -49,9 +49,9 @@ void FlashRunAction::BeginOfRunAction(const G4Run *run) {
   G4cout << "### Run " << run->GetRunID() << " start." << G4endl;
   G4RunManager::GetRunManager()->SetRandomNumberStore(false);
 
-  G4AnalysisManager* analysisManager = G4AnalysisManager::Instance();
+  /*G4AnalysisManager* analysisManager = G4AnalysisManager::Instance();
   analysisManager->OpenFile("output_test_histogram.csv");
-  analysisManager->CreateH1("H1", "Example Histogram", 100, 0., 100.); // ID: 0
+  analysisManager->CreateH1("H1", "Example Histogram", 100, 0., 100.); // ID: 0*/
 
   }
 
@@ -79,9 +79,10 @@ void FlashRunAction::EndOfRunAction(const G4Run *run) {
   G4cout << "  Spike reflection: " << FlashSteppingAction::SpikeReflectionCount << G4endl;
   G4cout << "  Backscattering: " << FlashSteppingAction::BackScatteringCount << G4endl;
   G4cout << "  Absorption: " << FlashSteppingAction::AbsorptionCount << G4endl;
+  G4cout << "  Photons reaching the world: " << FlashSteppingAction::PhotonsOutOfWorld << G4endl; 
 
-  G4AnalysisManager* analysisManager = G4AnalysisManager::Instance();
+  /*G4AnalysisManager* analysisManager = G4AnalysisManager::Instance();
   analysisManager->Write();
-  analysisManager->CloseFile();
+  analysisManager->CloseFile();*/
 
 }

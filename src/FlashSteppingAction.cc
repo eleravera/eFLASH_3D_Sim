@@ -60,8 +60,10 @@ G4int FlashSteppingAction::LobeReflectionCount = 0 ;
 G4int FlashSteppingAction::SpikeReflectionCount = 0 ; 
 G4int FlashSteppingAction::BackScatteringCount = 0 ; 
 G4int FlashSteppingAction::AbsorptionCount = 0 ; 
-
 G4int FlashSteppingAction::PhotonTotalInternalReflectionCount = 0 ;
+G4int FlashSteppingAction::PhotonRefractionCount = 0 ;
+G4int FlashSteppingAction::PhotonReflectionCount = 0 ;
+G4int FlashSteppingAction::PhotonsOutOfWorld = 0 ;
 
 static std::unordered_set<G4int> trappedPhoton;
 
@@ -73,7 +75,7 @@ FlashSteppingAction::~FlashSteppingAction() {}
 
 void FlashSteppingAction::UserSteppingAction(const G4Step *aStep)
 {
-    G4AnalysisManager* analysisMan = G4AnalysisManager::Instance();
+    //G4AnalysisManager* analysisMan = G4AnalysisManager::Instance();
 
     G4Track* track = aStep->GetTrack();
     G4StepPoint *postStep = aStep->GetPostStepPoint();
@@ -98,10 +100,11 @@ void FlashSteppingAction::UserSteppingAction(const G4Step *aStep)
 
 
     if(track->GetDefinition() == opticalphoton) { 
-      PhotonTotalInternalReflectionCount = 0;//reset this variable for every photon
+      //reset this variable for every photon
     
-      //if(!(aStep->GetPostStepPoint()->GetPhysicalVolume())){//out of world
-      //  return;}
+      if(!(aStep->GetPostStepPoint()->GetPhysicalVolume())){//out of world
+        PhotonsOutOfWorld++; 
+        return;}
     
       if(postStep->GetStepStatus() == fGeomBoundary) { // if at boundary
         theStatus = boundary->GetStatus();
@@ -112,14 +115,17 @@ void FlashSteppingAction::UserSteppingAction(const G4Step *aStep)
               break;
             case FresnelRefraction:
               FresnelRefractionCount++;
+              PhotonRefractionCount++;
               //std::cout << "REFRACTION: " << track->GetTrackID()  << std::endl; 
               break;
             case FresnelReflection:
               FresnelReflectionCount++;
+              PhotonReflectionCount++;
               //std::cout << "REFLECTION: " << track->GetTrackID()  << std::endl; 
               break;
             case TotalInternalReflection: 
               TotalInternalReflectionCount++;
+              PhotonTotalInternalReflectionCount++; 
               trappedPhoton.insert(track->GetTrackID()); // Add photon to trapped set if it undergoes total internal reflection
               //std::cout << "TOTAL INTERNAL REFLECTION: " << track->GetTrackID()  << std::endl; 
               break;
@@ -142,11 +148,9 @@ void FlashSteppingAction::UserSteppingAction(const G4Step *aStep)
         
         if (track->GetTrackStatus() == fStopAndKill) { // Check if the photon is absorbed within the volume and had previously undergone TIR
             G4String thePrePV = preStep->GetPhysicalVolume()->GetName();
-            //AbsorptionLocation loc;
 
             photonProcess::AbsorptionLocation loc;
             G4ThreeVector genPosition = track->GetVertexPosition();
-            //std::cout<< "Starting position: " << genPosition << std::endl; 
             G4ThreeVector momentumDir = track->GetVertexMomentumDirection();
             G4double theta = momentumDir.angle(G4ThreeVector(0, 1, 0)); // angle with the y-axis
             G4double phi = std::atan2(momentumDir.x(), momentumDir.z()); // angle with the zx-plane. It should be zero if on z-axis
@@ -168,11 +172,14 @@ void FlashSteppingAction::UserSteppingAction(const G4Step *aStep)
                   loc = photonProcess::OTHER;
                 }
                 
-                photonProcess photon = photonProcess(track->GetTrackID(), genPosition.x()/mm, genPosition.y()/mm, genPosition.z()/mm, theta, phi, TotalInternalReflectionCount, loc) ; 
+                photonProcess photon = photonProcess(track->GetTrackID(), genPosition.x()/mm, genPosition.y()/mm, genPosition.z()/mm, theta, phi, PhotonTotalInternalReflectionCount, PhotonReflectionCount, PhotonRefractionCount, loc) ; 
                 //photon.print(); 
                 photonProcess_vector.push_back(photon);
 
                 trappedPhoton.erase(track->GetTrackID()); // Remove from the set as it’s now absorbed
+                PhotonTotalInternalReflectionCount = 0; 
+                PhotonRefractionCount = 0; 
+                PhotonReflectionCount = 0; 
             }
         } /* end of if killed */
     }   /* end of if optical photon */

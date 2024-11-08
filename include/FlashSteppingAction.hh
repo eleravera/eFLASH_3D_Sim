@@ -55,6 +55,9 @@ public:
   static G4int BackScatteringCount; 
   static G4int AbsorptionCount; 
   static G4int PhotonTotalInternalReflectionCount; 
+  static G4int PhotonsOutOfWorld; 
+  static G4int PhotonRefractionCount;
+  static G4int PhotonReflectionCount;
 
 
 };
