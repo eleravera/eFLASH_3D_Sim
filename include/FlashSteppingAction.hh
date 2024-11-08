@@ -33,8 +33,8 @@
 #include "G4UserSteppingAction.hh"
 #include "globals.hh"
 #include <fstream>
-class FlashEventAction;
 
+class FlashEventAction;
 class G4LogicalVolume;
 
 class FlashSteppingAction : public G4UserSteppingAction {
@@ -54,7 +54,9 @@ public:
   static G4int SpikeReflectionCount; 
   static G4int BackScatteringCount; 
   static G4int AbsorptionCount; 
-  
+  static G4int PhotonTotalInternalReflectionCount; 
+
+
 };
 
 

@@ -139,7 +139,7 @@ void FlashDetectorConstruction::DefineMaterials() {
     G4MaterialPropertiesTable* MPT_Phantom = new G4MaterialPropertiesTable();
     MPT_Phantom->AddProperty("RINDEX", energy, rindex_phantom);
     MPT_Phantom->AddProperty("ABSLENGTH", energy, absorption_phantom);
-    MPT_Phantom->AddConstProperty("SCINTILLATIONYIELD", 100./MeV);
+    MPT_Phantom->AddConstProperty("SCINTILLATIONYIELD", 10000./MeV);
     MPT_Phantom-> AddProperty("SCINTILLATIONCOMPONENT1", energy, scint_spectrum);
     MPT_Phantom->AddConstProperty("RESOLUTIONSCALE", 1.0);
     MPT_Phantom->AddConstProperty("SCINTILLATIONTIMECONSTANT1", 2.1*ns);

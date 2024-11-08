@@ -48,16 +48,15 @@
 #include <common.hh>
 
 // concurrent vector to write output in multithread mode without conflicts 
-tbb::concurrent_vector<detection> detection_vector1;
-tbb::concurrent_vector<detection> detection_vector2;
+tbb::concurrent_vector<photonProcess> photonProcess_vector;
 
 int main(int argc, char **argv) {
 
   auto *runManager=G4RunManagerFactory::CreateRunManager();
-  G4int nThreads = 1;
+  G4int nThreads = 8;
   runManager->SetNumberOfThreads(nThreads);
  
-  G4Random::setTheSeed(45691);
+  G4Random::setTheSeed(45692);
 
   runManager->SetUserInitialization(new FlashDetectorConstruction);
 
@@ -74,8 +73,7 @@ int main(int argc, char **argv) {
   
 
   // clears output vectors before run
-  detection_vector1.clear();    
-  detection_vector2.clear();
+  photonProcess_vector.clear();    
 
   G4UIExecutive *ui = 0;
     if (argc == 1) {
@@ -93,25 +91,13 @@ int main(int argc, char **argv) {
     }
 
   // Write results to output
-    
-    std::ofstream file_out2("./photon_dist/photon_position_generation.raw");
-    for (uint32_t i=0; i<detection_vector1.size(); i++) {
-      file_out2.write(reinterpret_cast<char*>(&detection_vector1[i]), sizeof(detection));
-    
-      //std::cout<< reinterpret_cast<char*>(&detection_vector1[i]) << std::endl; 
+    std::ofstream file_out1("./optical_properties/seed_45692_100evt.raw");
+    for (uint32_t i=0; i<photonProcess_vector.size(); i++) {
+      file_out1.write(reinterpret_cast<char*>(&photonProcess_vector[i]), sizeof(photonProcess));
+      //std::cout<< reinterpret_cast<char*>(&photonProcess_vector[i]) << std::endl; 
     }
+    file_out1.close();
 
-    file_out2.close();
-
-
-    std::ofstream file_out3("./photon_dist/photon_angle_generation.raw");
-    for (uint32_t i=0; i<detection_vector2.size(); i++) {
-      file_out3.write(reinterpret_cast<char*>(&detection_vector2[i]), sizeof(detection));
-    
-      //std::cout<< reinterpret_cast<char*>(&detection_vector1[i]) << std::endl; 
-    }
-
-    file_out3.close();
 
   delete visManager;
   delete runManager;
