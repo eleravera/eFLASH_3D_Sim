@@ -116,18 +116,18 @@ void FlashSteppingAction::UserSteppingAction(const G4Step *aStep)
             case FresnelRefraction:
               FresnelRefractionCount++;
               PhotonRefractionCount++;
-              //std::cout << "REFRACTION: " << track->GetTrackID()  << std::endl; 
               break;
             case FresnelReflection:
               FresnelReflectionCount++;
               PhotonReflectionCount++;
-              //std::cout << "REFLECTION: " << track->GetTrackID()  << std::endl; 
               break;
             case TotalInternalReflection: 
               TotalInternalReflectionCount++;
               PhotonTotalInternalReflectionCount++; 
               trappedPhoton.insert(track->GetTrackID()); // Add photon to trapped set if it undergoes total internal reflection
-              //std::cout << "TOTAL INTERNAL REFLECTION: " << track->GetTrackID()  << std::endl; 
+              if (PhotonTotalInternalReflectionCount > 10) { // Kill photons with internal reflection very high
+                track->SetTrackStatus(fStopAndKill);
+              } 
               break;
             case LambertianReflection:
               LambertianReflectionCount++;
@@ -144,9 +144,45 @@ void FlashSteppingAction::UserSteppingAction(const G4Step *aStep)
             default: 
               break;
             }
+
+          //Save photons 
+          G4String volumeName = postStep->GetPhysicalVolume()->GetLogicalVolume()->GetName();
+          G4String prevolumeName = preStep->GetPhysicalVolume()->GetLogicalVolume()->GetName();
+
+          if (prevolumeName == "phantomLog" && volumeName ==  "logicTreatmentRoom") {
+            G4ThreeVector photonDirection = track->GetMomentumDirection();  
+            // Define a small tolerance value as cosThetaMax
+            const G4double cosThetaMax = std::cos(0.5 * CLHEP::pi / 180.0);  // conv degree in radians
+
+            // Calcola il coseno dell'angolo rispetto agli assi
+            G4double cosThetaX = photonDirection.x();  // Prodotto scalare con (1,0,0)
+            G4double cosThetaY = photonDirection.y();  // Prodotto scalare con (0,1,0)
+            G4double cosThetaZ = photonDirection.z();  // Prodotto scalare con (0,0,1)
+
+            // Se il fotone è entro 1 grado rispetto a uno degli assi principali killalo
+            if (!(cosThetaX > cosThetaMax || cosThetaY > cosThetaMax || cosThetaZ > cosThetaMax)) {
+                track->SetTrackStatus(fStopAndKill); 
+
+            } 
+            }
+
+      if (prevolumeName == "logicTreatmentRoom" && volumeName ==  "DetectorLog") {
+        G4double pos_x = aStep->GetTrack()->GetPosition().x();
+        G4double pos_y = aStep->GetTrack()->GetPosition().y();
+        G4double pos_z = aStep->GetTrack()->GetPosition().z();
+
+        // append to detection_vector the current info
+        detection photon_maps =  detection(pos_x/mm, pos_y/mm, pos_z/mm);
+        detection_vector1.push_back(photon_maps);
+        //std::cout << "A photon has been saved on file" << std::endl;  
+        //photon_maps.print();
+        }    
+
         }
         
-        if (track->GetTrackStatus() == fStopAndKill) { // Check if the photon is absorbed within the volume and had previously undergone TIR
+
+        //SE VOGLIO SALVARE I PROCESSI ALL'INTERFACCIA
+        /*if (track->GetTrackStatus() == fStopAndKill) { // Check if the photon is absorbed within the volume and had previously undergone TIR
             G4String thePrePV = preStep->GetPhysicalVolume()->GetName();
 
             photonProcess::AbsorptionLocation loc;
@@ -158,17 +194,14 @@ void FlashSteppingAction::UserSteppingAction(const G4Step *aStep)
             if (trappedPhoton.find(track->GetTrackID()) != trappedPhoton.end()) {// If the track ID exists in the set, the photon was previously "trapped"
                 
                 if (thePrePV == "phantomPhys"){
-                  //std::cout << "Photon absorbed in volume: " << thePrePV << " with a track id = " << track->GetTrackID() << std::endl;
                   loc = photonProcess::PHANTOM;
                 }
 
                 else if (thePrePV == "physicalTreatmentRoom") {
-                  //std::cout << "Photon absorbed in volume: " << thePrePV << " with a track id = " << track->GetTrackID() << std::endl;
                   loc = photonProcess::TREATMENT_ROOM;
                 }
 
                 else {
-                  //std::cout << "Photon absorbed in ANOTHER volume: " << thePrePV << " with a track id = " << track->GetTrackID() << std::endl;
                   loc = photonProcess::OTHER;
                 }
                 
@@ -181,7 +214,10 @@ void FlashSteppingAction::UserSteppingAction(const G4Step *aStep)
                 PhotonRefractionCount = 0; 
                 PhotonReflectionCount = 0; 
             }
-        } /* end of if killed */
+        }*/ /* end of if killed */
+       
+
+    
     }   /* end of if optical photon */
 
 }

@@ -43,12 +43,14 @@
 #include "FlashDetectorConstruction.hh"
 #include "FlashPhysicsList.hh"
 #include "G4ScoringManager.hh"
+#include "G4Timer.hh"
 
 #include "Randomize.hh"
 #include <common.hh>
 
 // concurrent vector to write output in multithread mode without conflicts 
 tbb::concurrent_vector<photonProcess> photonProcess_vector;
+tbb::concurrent_vector<detection> detection_vector1;
 
 int main(int argc, char **argv) {
 
@@ -56,7 +58,7 @@ int main(int argc, char **argv) {
   G4int nThreads = 1;
   runManager->SetNumberOfThreads(nThreads);
  
-  G4Random::setTheSeed(45694);
+  G4Random::setTheSeed(45696);
 
   runManager->SetUserInitialization(new FlashDetectorConstruction);
 
@@ -72,14 +74,19 @@ int main(int argc, char **argv) {
   G4ScoringManager::GetScoringManager();
   
 
+  G4Timer timer;
+  timer.Start();  
+
   // clears output vectors before run
   photonProcess_vector.clear();    
+  detection_vector1.clear();    
+
 
   G4UIExecutive *ui = 0;
     if (argc == 1) {
       ui = new G4UIExecutive(argc, argv);
       UImanager->ApplyCommand("/control/execute init_vis.mac");
-      ui->SessionStart();
+      //ui->SessionStart();
       delete ui;
     }
     else
@@ -89,15 +96,27 @@ int main(int argc, char **argv) {
     UImanager->ApplyCommand(command + fileName);
 
     }
+    
+    timer.Stop();
+
 
   // Write results to output
-    std::ofstream file_out1("./optical_properties/seed_45694_100evt.raw");
+    std::ofstream file_out1("./optical_properties/foo.raw");
     for (uint32_t i=0; i<photonProcess_vector.size(); i++) {
       file_out1.write(reinterpret_cast<char*>(&photonProcess_vector[i]), sizeof(photonProcess));
       //std::cout<< reinterpret_cast<char*>(&photonProcess_vector[i]) << std::endl; 
     }
     file_out1.close();
 
+  // Write results to output
+    std::ofstream file_out2("./optical_properties/my_test_with_telecentric_1.raw");
+    for (uint32_t i=0; i<detection_vector1.size(); i++) {
+      file_out2.write(reinterpret_cast<char*>(&detection_vector1[i]), sizeof(detection));
+    }
+    file_out2.close();
+
+
+  std::cout << "Elapsed time: " << timer.GetRealElapsed() << " seconds" << std::endl;
 
   delete visManager;
   delete runManager;

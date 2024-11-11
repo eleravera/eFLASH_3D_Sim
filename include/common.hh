@@ -36,17 +36,16 @@ public:
     };
 
     uint32_t event_id;
-    float x;
+    float x;                       //Coordinate della scintillazione 
     float y;
     float z;
-    float theta;
+    float theta;                    //Angoli di emissione al punto di generazione
     float phi;
-    uint32_t tirCount;            // TIR = total internal reflection
-    uint32_t reflectionCount;      // Contatore per riflessione
+    uint32_t tirCount;            // Contatore per TIR = total internal reflection
+    uint32_t reflectionCount;      // Contatore per riflessione 
     uint32_t refractionCount;      // Contatore per rifrazione
     AbsorptionLocation volume;
 
-    // Costruttore aggiornato per includere reflectionCount e refractionCount
     photonProcess(uint32_t e, float x_p, float y_p, float z_p, float theta_p, float phi_p, 
                   uint32_t tir_count, uint32_t reflection_count, uint32_t refraction_count, 
                   AbsorptionLocation v)

@@ -162,7 +162,7 @@ void FlashDetectorConstruction::DefineSurfaces(){
 
     //Surface: Phantom-world
     std::vector<G4double> reflectivity_phantom = {1., 1.};
-    std::vector<G4double> energy     = {2.48 * eV, 3.1 * eV}; //sto generando solo tra i 400 e i 500 nm. lambda [nm] = 1240/E[eV]
+    std::vector<G4double> energy     = {2.48 * eV, 3.1 * eV}; //lamda in range 400-500 nm; lambda [nm] = 1240/E[eV]
 
     PhantomOpticalSurface = new G4OpticalSurface("PhantomOpticalSurface");
     PhantomOpticalSurface->SetType(dielectric_dielectric);  
@@ -172,18 +172,6 @@ void FlashDetectorConstruction::DefineSurfaces(){
     WrappingProperty->AddProperty("REFLECTIVITY", energy, reflectivity_phantom); 
     PhantomOpticalSurface->SetMaterialPropertiesTable(WrappingProperty);
     PhantomSurface = new G4LogicalBorderSurface("PhantomOpticalSurface", fPhantom_physical, physicalTreatmentRoom, PhantomOpticalSurface);
-
-    /*G4OpticalSurface* PinholeOpticalSurface = new G4OpticalSurface("PinholeOpticalSurface");
-    new G4LogicalBorderSurface("PinholeOpticalSurface", physicalTreatmentRoom, Pihole_phys1, PinholeOpticalSurface);
-    PinholeOpticalSurface->SetType(dielectric_dielectric);  
-    PinholeOpticalSurface->SetModel(unified); 
-    PinholeOpticalSurface->SetFinish(polished); */
-
-    //G4MaterialPropertiesTable* WrappingProperty_Pinhole = new G4MaterialPropertiesTable();
-    //WrappingProperty_Pinhole->AddProperty("REFLECTIVITY", energy, reflectivity_pinhole); 
-    //WrappingProperty_Pinhole->AddProperty("TRANSMITTANCE", energy, trasmittance_pinhole); 
-
-    //PinholeOpticalSurface->SetMaterialPropertiesTable(WrappingProperty_Pinhole);
 
 }
 
@@ -253,28 +241,28 @@ G4VPhysicalVolume *FlashDetectorConstruction::ConstructPinhole() {
     G4double PinholePosition_t =  fPhantomSizeX + PinholeDistance * 0.5; 
 
     //Pinhole 1 
-    //G4RotationMatrix* rotationMatrix_y = new G4RotationMatrix();
-    //rotationMatrix_y->rotateY(90.*deg); // Ruota di 90 gradi attorno all'asse Y
+    G4RotationMatrix* rotationMatrix_y = new G4RotationMatrix();
+    rotationMatrix_y->rotateY(90.*deg); // Ruota di 90 gradi attorno all'asse Y
     //Pihole_phys1 = new G4PVPlacement(rotationMatrix_y, G4ThreeVector(PinholePosition_t, 0., 0.), "pinholePhys", PinholeLogicalVolume, physicalTreatmentRoom, false, 0,fCheckOverlaps);
 
     //Pinhole 2 
-    /*G4RotationMatrix* rotationMatrix_x1 = new G4RotationMatrix();
+    G4RotationMatrix* rotationMatrix_x1 = new G4RotationMatrix();
     rotationMatrix_x1->rotateX(-90.*deg); // Ruota di 90 gradi attorno all'asse Z
-    Pihole_phys2 = new G4PVPlacement(rotationMatrix_x1, G4ThreeVector(fPhantomSizeX * 0.5, PinholePosition_l, 0.), "pinholePhys", PinholeLogicalVolume, physicalTreatmentRoom, false, 0, fCheckOverlaps);
+    //Pihole_phys2 = new G4PVPlacement(rotationMatrix_x1, G4ThreeVector(fPhantomSizeX * 0.5, PinholePosition_l, 0.), "pinholePhys", PinholeLogicalVolume, physicalTreatmentRoom, false, 0, fCheckOverlaps);
 
      //Pinhole 3    
     G4RotationMatrix* rotationMatrix_x2 = new G4RotationMatrix();
     rotationMatrix_x2->rotateX(+90.*deg); // Ruota di 90 gradi attorno all'asse Z
-    Pihole_phys3 = new G4PVPlacement(rotationMatrix_x2, G4ThreeVector(fPhantomSizeX * 0.5, -PinholePosition_l, 0.), "pinholePhys", PinholeLogicalVolume, physicalTreatmentRoom, false, 0, fCheckOverlaps);
+    //Pihole_phys3 = new G4PVPlacement(rotationMatrix_x2, G4ThreeVector(fPhantomSizeX * 0.5, -PinholePosition_l, 0.), "pinholePhys", PinholeLogicalVolume, physicalTreatmentRoom, false, 0, fCheckOverlaps);
     
     //Pinhole 5 
-    Pihole_phys5 = new G4PVPlacement(0, G4ThreeVector(fPhantomSizeX * 0.5, 0., -PinholePosition_l), "pinholePhys", PinholeLogicalVolume, physicalTreatmentRoom, false, 0, fCheckOverlaps);
+    //Pihole_phys5 = new G4PVPlacement(0, G4ThreeVector(fPhantomSizeX * 0.5, 0., -PinholePosition_l), "pinholePhys", PinholeLogicalVolume, physicalTreatmentRoom, false, 0, fCheckOverlaps);
     G4RotationMatrix* reverse = new G4RotationMatrix();
     reverse->rotateX(180.*deg);
     
     //Pinhole 4 
-    Pihole_phys4 = new G4PVPlacement(reverse, G4ThreeVector(fPhantomSizeX * 0.5, 0., PinholePosition_l), "pinholePhys", PinholeLogicalVolume, physicalTreatmentRoom, false, 0, fCheckOverlaps);
-    */
+    //Pihole_phys4 = new G4PVPlacement(reverse, G4ThreeVector(fPhantomSizeX * 0.5, 0., PinholePosition_l), "pinholePhys", PinholeLogicalVolume, physicalTreatmentRoom, false, 0, fCheckOverlaps);
+    
 
     // Visualisation attributes of the pinhole
     gray = new G4VisAttributes(G4Colour(211 / 255., 211 / 255., 211 / 255.));
@@ -300,12 +288,12 @@ G4VPhysicalVolume *FlashDetectorConstruction::ConstructDetector(){
 
     // Definition of the logical volume of the Detector
     fDetLogicalVolume = new G4LogicalVolume(Det_box, DetectorMaterial, "DetectorLog", 0, 0, 0);
-    //fDet_phys1 = new G4PVPlacement(0,G4ThreeVector(fDetectorPosition_t, 0., 0.), "DetPhys",fDetLogicalVolume,physicalTreatmentRoom,false, 0, fCheckOverlaps);
-    /*fDet_phys2 = new G4PVPlacement(rotationMatrix_z,G4ThreeVector(fPhantomSizeX * 0.5, fDetectorPosition_l, 0.), "DetPhys",fDetLogicalVolume,physicalTreatmentRoom,false, 0, fCheckOverlaps);
+    fDet_phys1 = new G4PVPlacement(0,G4ThreeVector(fDetectorPosition_t, 0., 0.), "DetPhys",fDetLogicalVolume,physicalTreatmentRoom,false, 0, fCheckOverlaps);
+    fDet_phys2 = new G4PVPlacement(rotationMatrix_z,G4ThreeVector(fPhantomSizeX * 0.5, fDetectorPosition_l, 0.), "DetPhys",fDetLogicalVolume,physicalTreatmentRoom,false, 0, fCheckOverlaps);
     fDet_phys3 = new G4PVPlacement(rotationMatrix_z,G4ThreeVector(fPhantomSizeX * 0.5, -fDetectorPosition_l, 0.), "DetPhys",fDetLogicalVolume,physicalTreatmentRoom,false, 0, fCheckOverlaps);
     fDet_phys4 = new G4PVPlacement(rotationMatrix_y, G4ThreeVector(fPhantomSizeX * 0.5, 0., fDetectorPosition_l), "DetPhys", fDetLogicalVolume, physicalTreatmentRoom, false, 0, fCheckOverlaps);
     fDet_phys5 = new G4PVPlacement(rotationMatrix_y, G4ThreeVector(fPhantomSizeX * 0.5, 0., -fDetectorPosition_l), "DetPhys", fDetLogicalVolume, physicalTreatmentRoom, false, 0, fCheckOverlaps);
-    */
+    
 
     // Visualisation attributes of the detector
     gray = new G4VisAttributes(G4Colour(1.0, 1.0, 0.0));
