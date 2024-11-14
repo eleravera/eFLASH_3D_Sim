@@ -34,6 +34,7 @@
 #include "FlashStackingAction.hh"
 #include "FlashRunAction.hh"
 #include "FlashSteppingVerbose.hh"
+#include "FlashTrackingAction.hh"
 
 
 FlashActionInitialization::FlashActionInitialization()
@@ -56,12 +57,18 @@ void FlashActionInitialization::Build() const {
   SetUserAction(runAction);
 
   FlashEventAction *eventAction = new FlashEventAction();
-  
   SetUserAction(eventAction);
   
+  FlashSteppingAction *steppingAction = new FlashSteppingAction(eventAction);
+  SetUserAction(steppingAction);
+
   
-  SetUserAction(new FlashSteppingAction(eventAction));
   SetUserAction(new FlashStackingAction());
+
+  FlashTrackingAction *trackingAction = new FlashTrackingAction(steppingAction);
+
+  SetUserAction(trackingAction);
+
   
 }
 

@@ -51,7 +51,7 @@
 #include "G4AnalysisManager.hh"
 #include <unordered_set>
 
-G4int FlashSteppingAction::TransmissionCount = 0 ; //ma sto facendo bene a fare questa cosa o è una porcheria???
+G4int FlashSteppingAction::TransmissionCount = 0 ;
 G4int FlashSteppingAction::FresnelRefractionCount = 0 ; 
 G4int FlashSteppingAction::FresnelReflectionCount = 0 ;
 G4int FlashSteppingAction::TotalInternalReflectionCount = 0 ;
@@ -65,7 +65,6 @@ G4int FlashSteppingAction::PhotonRefractionCount = 0 ;
 G4int FlashSteppingAction::PhotonReflectionCount = 0 ;
 G4int FlashSteppingAction::PhotonsOutOfWorld = 0 ;
 
-static std::unordered_set<G4int> trappedPhoton;
 
 
 FlashSteppingAction::FlashSteppingAction(FlashEventAction *)
@@ -100,8 +99,6 @@ void FlashSteppingAction::UserSteppingAction(const G4Step *aStep)
 
 
     if(track->GetDefinition() == opticalphoton) { 
-      //reset this variable for every photon
-    
       if(!(aStep->GetPostStepPoint()->GetPhysicalVolume())){//out of world
         PhotonsOutOfWorld++; 
         return;}
@@ -112,22 +109,26 @@ void FlashSteppingAction::UserSteppingAction(const G4Step *aStep)
         switch(theStatus){
             case Absorption: 
               AbsorptionCount++;
+              std::cout<< "abs" << std::endl; 
               break;
             case FresnelRefraction:
               FresnelRefractionCount++;
               PhotonRefractionCount++;
+              std::cout<< "refraction " << PhotonRefractionCount << std::endl; 
               break;
             case FresnelReflection:
               FresnelReflectionCount++;
               PhotonReflectionCount++;
+              std::cout<< "reflection " << PhotonReflectionCount << std::endl; 
               break;
             case TotalInternalReflection: 
               TotalInternalReflectionCount++;
               PhotonTotalInternalReflectionCount++; 
-              trappedPhoton.insert(track->GetTrackID()); // Add photon to trapped set if it undergoes total internal reflection
               if (PhotonTotalInternalReflectionCount > 10) { // Kill photons with internal reflection very high
                 track->SetTrackStatus(fStopAndKill);
               } 
+              std::cout<< "TIR" << std::endl; 
+
               break;
             case LambertianReflection:
               LambertianReflectionCount++;
@@ -144,8 +145,58 @@ void FlashSteppingAction::UserSteppingAction(const G4Step *aStep)
             default: 
               break;
             }
+        }
+        
+            
+            /*
+        /*if ((track->GetTrackStatus() == fStopAndKill) || (track->GetTrackStatus() == fWorldBoundary)) { // Check if the photon is absorbed within the volume and had previously undergone TIR
+            
+            
+            G4String thePrePV = preStep->GetPhysicalVolume()->GetName();
 
-          //Save photons 
+            photonProcess::AbsorptionLocation loc;
+            G4ThreeVector genPosition = track->GetVertexPosition();
+            G4ThreeVector momentumDir = track->GetVertexMomentumDirection();
+            G4double theta = momentumDir.angle(G4ThreeVector(0, 1, 0)); // angle with the y-axis
+            G4double phi = std::atan2(momentumDir.x(), momentumDir.z()); // angle with the zx-plane. It should be zero if on z-axis
+
+            //if (trappedPhoton.find(track->GetTrackID()) != trappedPhoton.end()) {// If the track ID exists in the set, the photon was previously "trapped"
+                
+                if (thePrePV == "phantomPhys"){
+                  loc = photonProcess::PHANTOM;
+                }
+
+                else if (thePrePV == "physicalTreatmentRoom") {
+                  loc = photonProcess::TREATMENT_ROOM;
+                }
+
+                else {
+                  loc = photonProcess::OTHER;
+                }
+                
+                photonProcess photon = photonProcess(track->GetTrackID(), genPosition.x()/mm, genPosition.y()/mm, genPosition.z()/mm, theta, phi, PhotonTotalInternalReflectionCount, PhotonReflectionCount, PhotonRefractionCount, loc) ; 
+                //photon.print(); 
+                photonProcess_vector.push_back(photon);
+
+                trappedPhoton.erase(track->GetTrackID()); // Remove from the set as it’s now absorbed
+
+          
+            //}
+        } /* end of if killed */
+       
+
+    
+    }   /* end of if optical photon */
+
+}
+
+
+
+
+
+
+
+/*//Save photons 
           G4String volumeName = postStep->GetPhysicalVolume()->GetLogicalVolume()->GetName();
           G4String prevolumeName = preStep->GetPhysicalVolume()->GetLogicalVolume()->GetName();
 
@@ -176,49 +227,4 @@ void FlashSteppingAction::UserSteppingAction(const G4Step *aStep)
         detection_vector1.push_back(photon_maps);
         //std::cout << "A photon has been saved on file" << std::endl;  
         //photon_maps.print();
-        }    
-
-        }
-        
-
-        //SE VOGLIO SALVARE I PROCESSI ALL'INTERFACCIA
-        /*if (track->GetTrackStatus() == fStopAndKill) { // Check if the photon is absorbed within the volume and had previously undergone TIR
-            G4String thePrePV = preStep->GetPhysicalVolume()->GetName();
-
-            photonProcess::AbsorptionLocation loc;
-            G4ThreeVector genPosition = track->GetVertexPosition();
-            G4ThreeVector momentumDir = track->GetVertexMomentumDirection();
-            G4double theta = momentumDir.angle(G4ThreeVector(0, 1, 0)); // angle with the y-axis
-            G4double phi = std::atan2(momentumDir.x(), momentumDir.z()); // angle with the zx-plane. It should be zero if on z-axis
-
-            if (trappedPhoton.find(track->GetTrackID()) != trappedPhoton.end()) {// If the track ID exists in the set, the photon was previously "trapped"
-                
-                if (thePrePV == "phantomPhys"){
-                  loc = photonProcess::PHANTOM;
-                }
-
-                else if (thePrePV == "physicalTreatmentRoom") {
-                  loc = photonProcess::TREATMENT_ROOM;
-                }
-
-                else {
-                  loc = photonProcess::OTHER;
-                }
-                
-                photonProcess photon = photonProcess(track->GetTrackID(), genPosition.x()/mm, genPosition.y()/mm, genPosition.z()/mm, theta, phi, PhotonTotalInternalReflectionCount, PhotonReflectionCount, PhotonRefractionCount, loc) ; 
-                //photon.print(); 
-                photonProcess_vector.push_back(photon);
-
-                trappedPhoton.erase(track->GetTrackID()); // Remove from the set as it’s now absorbed
-                PhotonTotalInternalReflectionCount = 0; 
-                PhotonRefractionCount = 0; 
-                PhotonReflectionCount = 0; 
-            }
-        }*/ /* end of if killed */
-       
-
-    
-    }   /* end of if optical photon */
-
-}
-
+        }    */

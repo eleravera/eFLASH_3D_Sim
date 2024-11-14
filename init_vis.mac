@@ -5,7 +5,7 @@
 /control/verbose 1
 /control/saveHistory
 /run/verbose 0
-/tracking/verbose 0
+/tracking/verbose 2
 
 
 #
@@ -21,7 +21,7 @@
 /control/execute 9MeVEF.mac #Quello corrected è uguale 
 
 
-/run/beamOn 10000
+/run/beamOn 1
 /control/execute vis.mac
 
 

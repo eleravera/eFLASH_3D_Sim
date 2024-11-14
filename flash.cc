@@ -86,7 +86,7 @@ int main(int argc, char **argv) {
     if (argc == 1) {
       ui = new G4UIExecutive(argc, argv);
       UImanager->ApplyCommand("/control/execute init_vis.mac");
-      //ui->SessionStart();
+      ui->SessionStart();
       delete ui;
     }
     else
@@ -109,11 +109,11 @@ int main(int argc, char **argv) {
     file_out1.close();
 
   // Write results to output
-    std::ofstream file_out2("./optical_properties/my_test_with_telecentric_1.raw");
+    /*std::ofstream file_out2("./optical_properties/my_test_with_telecentric_1.raw");
     for (uint32_t i=0; i<detection_vector1.size(); i++) {
       file_out2.write(reinterpret_cast<char*>(&detection_vector1[i]), sizeof(detection));
     }
-    file_out2.close();
+    file_out2.close();*/
 
 
   std::cout << "Elapsed time: " << timer.GetRealElapsed() << " seconds" << std::endl;

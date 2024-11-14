@@ -139,7 +139,7 @@ void FlashDetectorConstruction::DefineMaterials() {
     G4MaterialPropertiesTable* MPT_Phantom = new G4MaterialPropertiesTable();
     MPT_Phantom->AddProperty("RINDEX", energy, rindex_phantom);
     MPT_Phantom->AddProperty("ABSLENGTH", energy, absorption_phantom);
-    MPT_Phantom->AddConstProperty("SCINTILLATIONYIELD", 10000./MeV);
+    MPT_Phantom->AddConstProperty("SCINTILLATIONYIELD", 10./MeV);
     MPT_Phantom-> AddProperty("SCINTILLATIONCOMPONENT1", energy, scint_spectrum);
     MPT_Phantom->AddConstProperty("RESOLUTIONSCALE", 1.0);
     MPT_Phantom->AddConstProperty("SCINTILLATIONTIMECONSTANT1", 2.1*ns);
@@ -288,12 +288,12 @@ G4VPhysicalVolume *FlashDetectorConstruction::ConstructDetector(){
 
     // Definition of the logical volume of the Detector
     fDetLogicalVolume = new G4LogicalVolume(Det_box, DetectorMaterial, "DetectorLog", 0, 0, 0);
-    fDet_phys1 = new G4PVPlacement(0,G4ThreeVector(fDetectorPosition_t, 0., 0.), "DetPhys",fDetLogicalVolume,physicalTreatmentRoom,false, 0, fCheckOverlaps);
+    /*fDet_phys1 = new G4PVPlacement(0,G4ThreeVector(fDetectorPosition_t, 0., 0.), "DetPhys",fDetLogicalVolume,physicalTreatmentRoom,false, 0, fCheckOverlaps);
     fDet_phys2 = new G4PVPlacement(rotationMatrix_z,G4ThreeVector(fPhantomSizeX * 0.5, fDetectorPosition_l, 0.), "DetPhys",fDetLogicalVolume,physicalTreatmentRoom,false, 0, fCheckOverlaps);
     fDet_phys3 = new G4PVPlacement(rotationMatrix_z,G4ThreeVector(fPhantomSizeX * 0.5, -fDetectorPosition_l, 0.), "DetPhys",fDetLogicalVolume,physicalTreatmentRoom,false, 0, fCheckOverlaps);
     fDet_phys4 = new G4PVPlacement(rotationMatrix_y, G4ThreeVector(fPhantomSizeX * 0.5, 0., fDetectorPosition_l), "DetPhys", fDetLogicalVolume, physicalTreatmentRoom, false, 0, fCheckOverlaps);
     fDet_phys5 = new G4PVPlacement(rotationMatrix_y, G4ThreeVector(fPhantomSizeX * 0.5, 0., -fDetectorPosition_l), "DetPhys", fDetLogicalVolume, physicalTreatmentRoom, false, 0, fCheckOverlaps);
-    
+    */
 
     // Visualisation attributes of the detector
     gray = new G4VisAttributes(G4Colour(1.0, 1.0, 0.0));

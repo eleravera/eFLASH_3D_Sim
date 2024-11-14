@@ -31,6 +31,7 @@
 #define FlashTrackingAction_h 1
 
 #include "G4UserTrackingAction.hh"
+#include "FlashSteppingAction.hh"
 #include <fstream>
 //
 /// User tracking action class
@@ -41,16 +42,24 @@
 /// - void PostUserTrackingAction(const G4Track*)
 ///     does nothing
 //
+
+class FlashSteppingAction; 
+
 class FlashTrackingAction : public G4UserTrackingAction {
 
+private:
+  std::ofstream EndFile;
+  FlashSteppingAction* fSteppingAction;
+
   public:
-    FlashTrackingAction() ;
+    FlashTrackingAction(FlashSteppingAction* steppingAction);
     virtual ~FlashTrackingAction();
    
     virtual void PreUserTrackingAction(const G4Track*);
     virtual void PostUserTrackingAction(const G4Track*);
-private:
-  std::ofstream EndFile;
+
+
+
 };
 
 #endif
