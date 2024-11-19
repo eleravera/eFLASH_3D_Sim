@@ -10,11 +10,11 @@ output_dir="$base_dir/simulations_$timestamp"
 mkdir "$output_dir"
 
 # Ciclo che esegue la simulazione 100 volte
-for i in {0..10}
+for i in {0..100}
 do
 
   # Imposta il seed uguale all'indice 'i', o un altro calcolo se preferisci
-  seed=$((4300 + i))
+  seed=$((4000 + i))
 
   # Definisce il nome del file di output
   output_file="$output_dir/my_outputfile_${i}.raw" 

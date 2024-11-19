@@ -62,11 +62,9 @@ int main(int argc, char **argv) {
   int seed = std::stoi(argv[2]);
   G4String outputFileName = argv[3];
 
-  std::cout<< "OUTPUTFILE: " << outputFileName << std::endl; 
-
   G4Random::setTheSeed(seed);
   auto *runManager = new G4MTRunManager();
-  G4int nThreads = 1;
+  G4int nThreads = 230;
   runManager->SetNumberOfThreads(nThreads);
  
   runManager->SetUserInitialization(new FlashDetectorConstruction);
