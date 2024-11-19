@@ -24,10 +24,9 @@
 // ********************************************************************
 //
 //
-//  flash.cc
-// Authors: J.Pensavalle, G.Milluzzo, F. Romano
-// jake.pensavalle@pi.infn.it, giuliana.milluzzo@ct.infn.it, francesco.romano@ct.infn.it
-
+// flash.cc
+// Authors: Eleonora Ravera, eleonora.ravera@phd.unipi.it
+//Based on a GEANT4 Example
 
 
 #include "G4Types.hh"
@@ -54,11 +53,72 @@ tbb::concurrent_vector<detection> detection_vector;
 
 int main(int argc, char **argv) {
 
+  if (argc < 4) {
+        G4cerr << "Usage: " << argv[0] << " <macro_file> <seed> <output_file>" << G4endl;
+        return 1;
+    }
+
+  G4String macroFile = argv[1];
+  int seed = std::stoi(argv[2]);
+  G4String outputFileName = argv[3];
+
+  std::cout<< "OUTPUTFILE: " << outputFileName << std::endl; 
+
+  G4Random::setTheSeed(seed);
+  auto *runManager = new G4MTRunManager();
+  G4int nThreads = 1;
+  runManager->SetNumberOfThreads(nThreads);
+ 
+  runManager->SetUserInitialization(new FlashDetectorConstruction);
+  runManager->SetUserInitialization(new FlashPhysicsList);
+  runManager->SetUserInitialization(new FlashActionInitialization);
+
+  G4VisManager *visManager = new G4VisExecutive;
+  visManager->Initialize();
+
+  // clears output vectors before run
+  detection_vector.clear();  
+  G4UImanager *UImanager = G4UImanager::GetUIpointer();
+  G4Timer timer;
+  timer.Start();  
+  UImanager->ApplyCommand("/control/execute " + macroFile);
+  timer.Stop();
+
+  std::ofstream file_out2(outputFileName.c_str());
+  if (!file_out2.is_open()) {
+    G4cerr << "Error: unable to open file " << outputFileName << G4endl;
+  }
+  else{
+  // Write results to output
+  for (uint32_t i=0; i<detection_vector.size(); i++) {
+      file_out2.write(reinterpret_cast<char*>(&detection_vector[i]), sizeof(detection));
+    }
+  }
+  
+  //print some interesting information
+  std::cout<< "Photons passing the selection: " << detection_vector.size() << std::endl;
+  file_out2.close();
+
+  std::cout << "        ------      " << std::endl;
+  std::cout << "Number of threds: " << runManager->GetNumberOfThreads() << std::endl;
+  std::cout << "Elapsed time: " << timer.GetRealElapsed() << " seconds" << std::endl;
+  std::cout<<"outputFileName: " << outputFileName <<std::endl;
+  std::cout<<"Seed: " << seed << std::endl;
+
+  delete visManager;
+  delete runManager;
+  return 0;
+}
+
+
+
+/*int main(int argc, char **argv) {
+
   auto *runManager=G4RunManagerFactory::CreateRunManager();
   G4int nThreads = 1;
   runManager->SetNumberOfThreads(nThreads);
  
-  G4Random::setTheSeed(45691);
+  G4Random::setTheSeed(45692);
 
   runManager->SetUserInitialization(new FlashDetectorConstruction);
 
@@ -86,7 +146,7 @@ int main(int argc, char **argv) {
     if (argc == 1) {
       ui = new G4UIExecutive(argc, argv);
       UImanager->ApplyCommand("/control/execute init_vis.mac");
-      ui->SessionStart();
+      //ui->SessionStart();
       delete ui;
     }
     else
@@ -101,15 +161,15 @@ int main(int argc, char **argv) {
 
 
   // Write results to output
-    /*std::ofstream file_out1("./optical_properties/seed_45691_100evt.raw");
+    std::ofstream file_out1("./optical_properties/seed_45691_100evt.raw");
     for (uint32_t i=0; i<photonProcess_vector.size(); i++) {
       file_out1.write(reinterpret_cast<char*>(&photonProcess_vector[i]), sizeof(photonProcess));
       //std::cout<< reinterpret_cast<char*>(&photonProcess_vector[i]) << std::endl; 
     }
-    file_out1.close();*/
+    file_out1.close();
 
   // Write results to output
-    std::ofstream file_out2("./photon_dist/pinhole/d1-5cm_d2-5cm_o500um/test.raw");
+    std::ofstream file_out2("./photon_dist/pinhole/d1-5cm_d2-5cm_o500um/1000evt_45692seed.raw");
     for (uint32_t i=0; i<detection_vector.size(); i++) {
       file_out2.write(reinterpret_cast<char*>(&detection_vector[i]), sizeof(detection));
     }
@@ -121,6 +181,6 @@ int main(int argc, char **argv) {
   delete visManager;
   delete runManager;
   return 0;
-}
+}*/
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo.....

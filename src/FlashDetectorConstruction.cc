@@ -105,7 +105,7 @@ FlashDetectorConstruction::FlashDetectorConstruction()
     SetAirGap(0.011*cm); // Set the air gap between the water phantom and the end of the applicator
     SetPhantomSize(10. *cm, 10. *cm, 10. *cm);
     SetPinholeDistance(5 *cm); // Set the air gap between the water phantom and the pinhole
-    SetDetectorDistance(10.*cm); // Set the air gap between the water phantom and the detector
+    SetDetectorDistance(10*cm); // Set the air gap between the water phantom and the detector
         
 }
 
@@ -359,7 +359,7 @@ std::vector<G4VPhysicalVolume*> FlashDetectorConstruction::ConstructPinhole(G4do
     gray->SetVisibility(true);
     PinholeLogicalVolume->SetVisAttributes(gray);
 
-    std::vector<G4VPhysicalVolume*> fPinhole_Phys = {Pinhole_phys1, Pinhole_phys2, Pinhole_phys3, Pinhole_phys4, Pinhole_phys5};
+    std::vector<G4VPhysicalVolume*> fPinhole_Phys = {Pinhole_phys1, Pinhole_phys2, Pinhole_phys3, Pinhole_phys4, Pinhole_phys5,Pinhole_phys6};
     return fPinhole_Phys;
 }
 
@@ -486,15 +486,13 @@ G4VPhysicalVolume *FlashDetectorConstruction::Construct() {
 
     // -----------------------------
     // Pinhole camera
-    //------------------------------
-    std::cout << " fOuterRadiusFirstApplicatorFlash : " << Collimator->fOuterRadiusFirstApplicatorFlash << std::endl;
-    
+    //------------------------------  
     Pihole_physical = ConstructPinhole( Collimator->fOuterRadiusFirstApplicatorFlash);
 
     // -----------------------------
     // Detector pannel
     //------------------------------
-    //Detector_physical = ConstructDetector();
+    Detector_physical = ConstructDetector();
     
     DefineSurfaces(); 
     return physicalTreatmentRoom;

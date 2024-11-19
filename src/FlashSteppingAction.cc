@@ -145,7 +145,7 @@ void FlashSteppingAction::UserSteppingAction(const G4Step *aStep)
     G4String volumeName = postStep->GetPhysicalVolume()->GetLogicalVolume()->GetName();
     G4String prevolumeName = preStep->GetPhysicalVolume()->GetLogicalVolume()->GetName();
 
-    if (prevolumeName == "logicTreatmentRoom" && volumeName ==  "pinholeLog"){
+    /*if (prevolumeName == "logicTreatmentRoom" && volumeName ==  "pinholeLog"){
 
       G4double pos_x = aStep->GetTrack()->GetPosition().x();
       G4double pos_y = aStep->GetTrack()->GetPosition().y();
@@ -157,9 +157,9 @@ void FlashSteppingAction::UserSteppingAction(const G4Step *aStep)
       photon_maps.print();
       std::cout << std::endl << std::endl; 
 
-    }
+    }*/
 
-    /*if (prevolumeName == "logicTreatmentRoom" && volumeName ==  "DetectorLog"){
+    if (prevolumeName == "logicTreatmentRoom" && volumeName ==  "DetectorLog"){
 
       G4double pos_x = aStep->GetTrack()->GetPosition().x();
       G4double pos_y = aStep->GetTrack()->GetPosition().y();
@@ -167,10 +167,10 @@ void FlashSteppingAction::UserSteppingAction(const G4Step *aStep)
       
       detection photon_maps =  detection(pos_x/mm, pos_y/mm, pos_z/mm);
       detection_vector.push_back(photon_maps);
-      std::cout << "DETECTOR: " << std::endl; 
+      /*std::cout << "DETECTOR: " << std::endl; 
       photon_maps.print();
-      std::cout << std::endl << std::endl; 
-    }*/
+      std::cout << std::endl << std::endl; */
+    }
     
     }   /* end of if optical photon */
 

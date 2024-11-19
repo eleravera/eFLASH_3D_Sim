@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #Definisci il percorso della sottocartella
-base_dir="./photon_dist/telecentric"
+base_dir="./photon_dist/pinhole"
 mkdir -p "$base_dir"  # Crea la cartella base se non esiste
 
 # Crea una cartella con data e ora all'interno della sottocartella
@@ -10,7 +10,7 @@ output_dir="$base_dir/simulations_$timestamp"
 mkdir "$output_dir"
 
 # Ciclo che esegue la simulazione 100 volte
-for i in {0..100}
+for i in {0..10}
 do
 
   # Imposta il seed uguale all'indice 'i', o un altro calcolo se preferisci
