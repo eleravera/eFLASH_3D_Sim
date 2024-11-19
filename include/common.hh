@@ -7,21 +7,20 @@
 /* Detection of photons detected by the imaging system.
    The class has 3 attributes and a print member. 
 */
-class detection{
+class detection {
     float x;
     float y;
-    float z; 
-    
-    public:
-        detection(float x_p, float y_p, float z_p){
-            x = x_p;
-            y = y_p;
-            z = z_p;
-        }
+    float z;
 
-    void print() {
-        std::cout<< x << " " << y << " " << z << std::endl; 
-        }
+public:
+    detection(float x_p, float y_p, float z_p) : x(x_p), y(y_p), z(z_p) {}
+
+    void print() const {
+        std::cout << "Detection coordinates:\n"
+                  << "  x: " << std::fixed << std::setprecision(2) << x << "\n"
+                  << "  y: " << std::fixed << std::setprecision(2) << y << "\n"
+                  << "  z: " << std::fixed << std::setprecision(2) << z << "\n";
+    }
 };
 
 /* photonProcess --.
@@ -73,6 +72,15 @@ public:
             case TREATMENT_ROOM:
                 std::cout << "TREATMENT_ROOM";
                 break;
+            case PINHOLE:
+                std::cout << "PINHOLE";
+                break; 
+            case DETECTOR:
+                std::cout << "DETECTOR";
+                break;
+            case OUT_OF_WORLD:
+                std::cout << "OUT_OF_WORLD";
+                break;
             case OTHER:
                 std::cout << "OTHER";
                 break;
@@ -85,8 +93,7 @@ public:
 
 
 
-extern tbb::concurrent_vector<detection> detection_vector1;
-extern tbb::concurrent_vector<detection> detection_vector2;
+extern tbb::concurrent_vector<detection> detection_vector;
 extern tbb::concurrent_vector<photonProcess> photonProcess_vector;
 
 #endif

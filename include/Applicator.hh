@@ -48,6 +48,7 @@ public:
 
   G4double fFinalApplicatorXPositionFlash;
   G4double fHightFinalApplicatorFlash;
+  G4double fOuterRadiusFirstApplicatorFlash;
 
   void SetOuterRadius(G4double radius);
    void SetApplicatorLength(G4double length);
@@ -113,7 +114,6 @@ void ConstructCollimator(G4VPhysicalVolume *);
   G4VisAttributes *skyBlue;
   G4VisAttributes *magenta;
 
-  G4double fOuterRadiusFirstApplicatorFlash;
   G4Tubs *fSolidFirstApplicatorFlash;
   G4VPhysicalVolume *fPhysiFirstApplicatorFlash;
   G4Material *fFirstApplicatorMaterialFlash;

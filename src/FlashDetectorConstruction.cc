@@ -73,18 +73,39 @@
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 FlashDetectorConstruction::FlashDetectorConstruction()
-    : G4VUserDetectorConstruction(), physicalTreatmentRoom(0),logicTreatmentRoom(0), Collimator(0), fPhantom(0), fPhantomLogicalVolume(0), fPhant_phys(0), fCheckOverlaps(true) {
+    : G4VUserDetectorConstruction(),logicTreatmentRoom(0), physicalTreatmentRoom(0), Collimator(0), fPhantom(0), fPhantomLogicalVolume(0), fPhant_phys(0), fCheckOverlaps(true) {
+    /*
+    This constructor initializes the FlashDetectorConstruction class, which is derived from `G4VUserDetectorConstruction`.
+   It sets up the materials, the treatment room, and other parameters required for constructing the detector, phantom, 
+   and collimator. It also sets the necessary physical and logical volumes, and prepares the detector messenger for 
+   communication with the user interface.
+
+   Initialization:
+   1. `DefineMaterials()` is called to define the materials used for the phantom, collimator, and detector.
+   2. A new instance of `FlashDetectorMessenger` is created (?)
+   3. Physical parameters like air gap, phantom size, pinhole distance, and detector distance are set through setter methods.
+   4. The detector's thickness and width are also initialized.
+
+   Parameters:
+   - AirGap: Air gap between the phantom and applicator or detector.
+   - Phantom Size: Dimensions of the phantom (10 cm x 10 cm x 10 cm).
+   - PinholeDistance: Distance for pinhole collimator setup (5 cm).
+   - DetectorDistance: Distance between the phantom and the detector (5 cm).
+   - DetectorThickness: Thickness of the detector (1 mm).
+   - DetectorWidth: Width of the detector (15 cm).
+
+   Notes:
+   - The constructor ensures that the necessary parameters are initialized before the actual construction of the detector 
+     and phantom. It also prepares the room and interaction setup (e.g., overlaps checking).
+     */
 
     DefineMaterials();
     fDetectorMessenger = new FlashDetectorMessenger(this);
 
     SetAirGap(0.011*cm); // Set the air gap between the water phantom and the end of the applicator
     SetPhantomSize(10. *cm, 10. *cm, 10. *cm);
-    SetPinholeDistance(5 *cm);
-    SetDetectorDistance(10.*cm); // Set the air gap between the water phantom and the end of the detector
-
-    SetDetectorThickness(1*mm);
-    SetDetectorWidth(15*cm);
+    SetPinholeDistance(5 *cm); // Set the air gap between the water phantom and the pinhole
+    SetDetectorDistance(10.*cm); // Set the air gap between the water phantom and the detector
         
 }
 
@@ -139,7 +160,7 @@ void FlashDetectorConstruction::DefineMaterials() {
     G4MaterialPropertiesTable* MPT_Phantom = new G4MaterialPropertiesTable();
     MPT_Phantom->AddProperty("RINDEX", energy, rindex_phantom);
     MPT_Phantom->AddProperty("ABSLENGTH", energy, absorption_phantom);
-    MPT_Phantom->AddConstProperty("SCINTILLATIONYIELD", 10./MeV);
+    MPT_Phantom->AddConstProperty("SCINTILLATIONYIELD", 10000./MeV);
     MPT_Phantom-> AddProperty("SCINTILLATIONCOMPONENT1", energy, scint_spectrum);
     MPT_Phantom->AddConstProperty("RESOLUTIONSCALE", 1.0);
     MPT_Phantom->AddConstProperty("SCINTILLATIONTIMECONSTANT1", 2.1*ns);
@@ -179,15 +200,27 @@ void FlashDetectorConstruction::DefineSurfaces(){
 
 
 G4VPhysicalVolume *FlashDetectorConstruction::ConstructPhantom(G4double CollPos) {
-    /* This function creates a cubic phantom - with material properties defined in function DefineMaterials(). 
-        The folling parameters are: 
-        fPosition_coefficient = 
-        fPhantom_coordinateX = 
-        fPhantomPosition = 
+    /*
+   This function creates a cubic phantom with material properties defined in the `DefineMaterials` method. 
+   The phantom's dimensions, position, and other properties are set based on member variables. 
+   The phantom is placed in the treatment room volume and is associated with a dedicated region 
+   to control simulation settings like step limits and physics cuts.
 
-        Let's keep in mind that there is a shif in the Phantom position (due to Air Gap)
+   Parameters:
+   - CollPos: A coefficient that determines the phantom's position along the X-axis, relative to the applicator.
 
-        The surface of the Phantom are defined as ... 
+   Key Steps:
+   1. Calculate the phantom's position (`fPhantomPosition`) based on `CollPos`, 
+      including a shift to account for the air gap.
+   2. Construct a G4Box object for the phantom geometry.
+   3. Create a logical volume (`fPhantomLogicalVolume`) using the predefined phantom material.
+   4. Place the logical volume within the treatment room as a physical volume.
+   5. Define a dedicated region (`PhantomRegion`) for the phantom to apply specific physics cuts.
+   6. Set a step limit for the phantom to control the maximum step size during tracking.
+   7. Apply visualization attributes to the phantom for graphical rendering.
+
+   Returns:
+   - A pointer to the physical volume (`fPhant_phys`) representing the phantom in the simulation.
     */
 
     fPosition_coefficient = CollPos;
@@ -219,90 +252,214 @@ G4VPhysicalVolume *FlashDetectorConstruction::ConstructPhantom(G4double CollPos)
 
 }
 
+std::vector<G4VPhysicalVolume*> FlashDetectorConstruction::ConstructPinhole(G4double CollRadius) {
+    /* 
+    This function constructs a pinhole collimator composed of multiple sheets, each featuring a central hole. 
+   The sheets are modeled as truncated pyramids (`G4Trd`) with a cylindrical hole (`G4Tubs`) subtracted 
+   to create the pinhole structure. The sheets are positioned and rotated to form a cubical arrangement around the phantom.
 
-G4VPhysicalVolume *FlashDetectorConstruction::ConstructPinhole() {
-    /* This function creates a pinhole collimator with sheet, each with an hole at the center  - with material properties defined in function DefineMaterials(). A pinhole sheet is made by a G4Trd, so that the sheets can be places to form "a  cube" without overlapping. It is created by the subtraction of G4Trd and G4Tubs.
-        The folling parameters are: 
-        collimatorThickness = 
-        squareSize = 
-        innerRadius = 
+   Parameters:
+   - collimatorThickness: Thickness of each collimator sheet.
+   - squareSize: Size of the square cross-section of the sheet, influenced by `PinholeDistance`.
+   - innerRadius: Radius of the central hole.
+
+   Key Steps:
+   1. Define the geometry of a single pinhole sheet by subtracting a cylinder from a truncated pyramid.
+   2. Create a logical volume (`PinholeLogicalVolume`) using the defined geometry and material properties.
+   3. Calculate the positions and orientations for each sheet.
+   4. Place the sheets in the treatment room, forming a cubical arrangement around the phantom, using `G4PVPlacement` 
+      and appropriate rotation matrices.
+   5. Assign visualization attributes for graphical representation.
+   6. Return a vector of physical volumes representing the constructed pinhole collimator sheets.
+
+   Returns:
+   - A `std::vector<G4VPhysicalVolume*>` containing the physical volumes of all pinhole sheets.
+
+   Notes:
+   - Ensures proper alignment and non-overlapping placement of sheets.
+   - Uses rotation matrices to orient the sheets correctly in the 3D space.
     */
+    G4double pinholeThickness = 0.3 * cm;
+    G4double pinholeSquareSize = fPhantomSizeX + PinholeDistance * 2;
+    G4double innerRadius = 5 * mm;
 
-    G4double collimatorThickness = 0.3*cm;
-    G4double squareSize = 10*cm + PinholeDistance;
-    G4double innerRadius = 0.5*mm; 
-
-    G4Trd* squareSolid = new G4Trd("BlackSheet", (squareSize+collimatorThickness)/2, (squareSize-collimatorThickness)/2, (squareSize+collimatorThickness)/2,  (squareSize-collimatorThickness)/2, collimatorThickness/2);
-    G4Tubs* innerCylinder = new G4Tubs("InnerCylinder", 0, innerRadius, collimatorThickness/2, 0.*deg, 360.*deg);
-    G4SubtractionSolid* PinholeCilinder = new G4SubtractionSolid("Pinhole", squareSolid, innerCylinder);   
+    // Geometry
+    G4Trd* squareSolid = new G4Trd("BlackSheet", (pinholeSquareSize + pinholeThickness) / 2, 
+                                   (pinholeSquareSize - pinholeThickness) / 2, 
+                                   (pinholeSquareSize + pinholeThickness) / 2, 
+                                   (pinholeSquareSize - pinholeThickness) / 2, 
+                                   pinholeThickness / 2);
+    G4Tubs* innerCylinder = new G4Tubs("InnerCylinder", 0, innerRadius, pinholeThickness / 2, 0. * deg, 360. * deg);
+    G4SubtractionSolid* PinholeCilinder = new G4SubtractionSolid("Pinhole", squareSolid, innerCylinder);
     PinholeLogicalVolume = new G4LogicalVolume(PinholeCilinder, PinholeMaterial, "pinholeLog", 0, 0, 0);
 
-    G4double PinholePosition_l =  fPhantomSizeX * 0.5 + PinholeDistance * 0.5;
-    G4double PinholePosition_t =  fPhantomSizeX + PinholeDistance * 0.5; 
 
-    //Pinhole 1 
+    G4Tubs* innerCylinder_back = new G4Tubs("InnerCylinder", 0, CollRadius , pinholeThickness / 2, 0. * deg, 360. * deg);
+    G4SubtractionSolid* PinholeCilinder_back = new G4SubtractionSolid("PinholeBack", squareSolid, innerCylinder_back);
+    PinholeLogicalVolume_back = new G4LogicalVolume(PinholeCilinder_back, PinholeMaterial, "pinholeLogBack", 0, 0, 0);
+
+    G4double PinholePosition_l = fPhantomSizeX * 0.5 + PinholeDistance;
+    G4double PinholePosition_t = fPhantomSizeX + PinholeDistance;
+
+    // Pinhole 1
     G4RotationMatrix* rotationMatrix_y = new G4RotationMatrix();
-    rotationMatrix_y->rotateY(90.*deg); // Ruota di 90 gradi attorno all'asse Y
-    //Pihole_phys1 = new G4PVPlacement(rotationMatrix_y, G4ThreeVector(PinholePosition_t, 0., 0.), "pinholePhys", PinholeLogicalVolume, physicalTreatmentRoom, false, 0,fCheckOverlaps);
+    rotationMatrix_y->rotateY(90. * deg); // Rotazione attorno all'asse Y
+    G4VPhysicalVolume* Pinhole_phys1 = new G4PVPlacement(rotationMatrix_y, 
+                                                         G4ThreeVector(PinholePosition_t + fAirGap, 0., 0.), 
+                                                         "pinholePhys", 
+                                                         PinholeLogicalVolume, 
+                                                         physicalTreatmentRoom, false, 0, fCheckOverlaps);
 
-    //Pinhole 2 
+    // Pinhole 2
     G4RotationMatrix* rotationMatrix_x1 = new G4RotationMatrix();
-    rotationMatrix_x1->rotateX(-90.*deg); // Ruota di 90 gradi attorno all'asse Z
-    //Pihole_phys2 = new G4PVPlacement(rotationMatrix_x1, G4ThreeVector(fPhantomSizeX * 0.5, PinholePosition_l, 0.), "pinholePhys", PinholeLogicalVolume, physicalTreatmentRoom, false, 0, fCheckOverlaps);
+    rotationMatrix_x1->rotateX(-90. * deg); // Rotazione attorno all'asse X
+    G4VPhysicalVolume* Pinhole_phys2 = new G4PVPlacement(rotationMatrix_x1, 
+                                                         G4ThreeVector(fPhantomSizeX * 0.5 + fAirGap, PinholePosition_l, 0.), 
+                                                         "pinholePhys", 
+                                                         PinholeLogicalVolume, 
+                                                         physicalTreatmentRoom, false, 0, fCheckOverlaps);
 
-     //Pinhole 3    
+    // Pinhole 3
     G4RotationMatrix* rotationMatrix_x2 = new G4RotationMatrix();
-    rotationMatrix_x2->rotateX(+90.*deg); // Ruota di 90 gradi attorno all'asse Z
-    //Pihole_phys3 = new G4PVPlacement(rotationMatrix_x2, G4ThreeVector(fPhantomSizeX * 0.5, -PinholePosition_l, 0.), "pinholePhys", PinholeLogicalVolume, physicalTreatmentRoom, false, 0, fCheckOverlaps);
-    
-    //Pinhole 5 
-    //Pihole_phys5 = new G4PVPlacement(0, G4ThreeVector(fPhantomSizeX * 0.5, 0., -PinholePosition_l), "pinholePhys", PinholeLogicalVolume, physicalTreatmentRoom, false, 0, fCheckOverlaps);
-    G4RotationMatrix* reverse = new G4RotationMatrix();
-    reverse->rotateX(180.*deg);
-    
-    //Pinhole 4 
-    //Pihole_phys4 = new G4PVPlacement(reverse, G4ThreeVector(fPhantomSizeX * 0.5, 0., PinholePosition_l), "pinholePhys", PinholeLogicalVolume, physicalTreatmentRoom, false, 0, fCheckOverlaps);
-    
+    rotationMatrix_x2->rotateX(90. * deg); // Rotazione attorno all'asse X
+    G4VPhysicalVolume* Pinhole_phys3 = new G4PVPlacement(rotationMatrix_x2, 
+                                                         G4ThreeVector(fPhantomSizeX * 0.5 + fAirGap, -PinholePosition_l, 0.), 
+                                                         "pinholePhys", 
+                                                         PinholeLogicalVolume, 
+                                                         physicalTreatmentRoom, false, 0, fCheckOverlaps);
 
-    // Visualisation attributes of the pinhole
+    // Pinhole 4
+    G4RotationMatrix* reverse = new G4RotationMatrix();
+    reverse->rotateX(180. * deg); // Rotazione inversa attorno all'asse X
+    G4VPhysicalVolume* Pinhole_phys4 = new G4PVPlacement(reverse, 
+                                                         G4ThreeVector(fPhantomSizeX * 0.5 + fAirGap, 0., PinholePosition_l), 
+                                                         "pinholePhys", 
+                                                         PinholeLogicalVolume, 
+                                                         physicalTreatmentRoom, false, 0, fCheckOverlaps);
+
+    // Pinhole 5
+    G4VPhysicalVolume* Pinhole_phys5 = new G4PVPlacement(0, 
+                                                         G4ThreeVector(fPhantomSizeX * 0.5 + fAirGap, 0., -PinholePosition_l), 
+                                                         "pinholePhys", 
+                                                         PinholeLogicalVolume, 
+                                                         physicalTreatmentRoom, false, 0, fCheckOverlaps);
+
+
+    // Pinhole 6
+    G4RotationMatrix* rotationMatrix_y2 = new G4RotationMatrix();
+    rotationMatrix_y2->rotateY(-90. * deg); // Rotazione attorno all'asse Y
+    G4VPhysicalVolume* Pinhole_phys6 = new G4PVPlacement(rotationMatrix_y2, 
+                                                         G4ThreeVector(-PinholeDistance + fAirGap, 0., 0.), 
+                                                         "pinholePhys", 
+                                                         PinholeLogicalVolume_back, 
+                                                         physicalTreatmentRoom, false, 0, fCheckOverlaps);
+
+    // Visualization
     gray = new G4VisAttributes(G4Colour(211 / 255., 211 / 255., 211 / 255.));
     gray->SetVisibility(true);
     PinholeLogicalVolume->SetVisAttributes(gray);
 
-    return Pihole_phys1, Pihole_phys2, Pihole_phys3, Pihole_phys4, Pihole_phys5;
-
+    std::vector<G4VPhysicalVolume*> fPinhole_Phys = {Pinhole_phys1, Pinhole_phys2, Pinhole_phys3, Pinhole_phys4, Pinhole_phys5};
+    return fPinhole_Phys;
 }
 
 
-G4VPhysicalVolume *FlashDetectorConstruction::ConstructDetector(){
-    
-    Det_box = new G4Box("Detector", fDet_thickness/2, fDet_width/2,fDet_width/2);
-    fDetectorPosition_t = fPhantomSizeX + DetectorDistance + fAirGap;
-    fDetectorPosition_l = fPhantomSizeX*0.5 + DetectorDistance ; //CONTROLLARE: fDet_thickness/2 è da togliere credo. 
 
-    G4RotationMatrix* rotationMatrix_z = new G4RotationMatrix();
-    rotationMatrix_z->rotateZ(90.*deg); // Ruota di 90 gradi attorno all'asse Z
+std::vector<G4VPhysicalVolume*> FlashDetectorConstruction::ConstructDetector(){
+    /*
+    This function constructs a detector with a box shape (`G4Box`) and places it in five different positions around 
+   the phantom to form a cubical arrangement. The detector is constructed using the material properties defined 
+   in the `DefineMaterials()` function. The detector is rotated and positioned using `G4RotationMatrix` to ensure 
+   proper orientation in the treatment room.
+
+   Parameters:
+   - Det_thickness: Thickness of the detector.
+   - Det_width: Width of the detector.
+   - DetectorMaterial: Material used to construct the detector.
+   - DetectorDistance: Distance from the phantom to the detector.
+   - AirGap: Gap between the phantom and the detector.
+   - fPhantomSizeX: Size of the phantom in the X direction.
+
+   Key Steps:
+   1. Define the geometry of the detector using `G4Box` with specified thickness and width.
+   2. Calculate the positions of the detector, taking into account the phantom size and specified distances.
+   3. Create rotation matrices to rotate the detector into the correct orientation.
+   4. Create logical volumes for the detector and place them in the treatment room using `G4PVPlacement`.
+   5. Assign visualization attributes to the detector for graphical representation.
+
+   Returns:
+   - A `std::vector<G4VPhysicalVolume*>` containing the physical volumes of the detector placed in the treatment room.
+
+   Notes:
+   - The detector is placed in five different positions: along the X, Y, and Z axes with various rotations to form 
+     a cubical arrangement around the phantom.
+   - The air gap and the distance between the phantom and the detector are considered when calculating the positions.
+   */
+    
+    G4double detectorSquareSize = fPhantomSizeX + DetectorDistance * 2;
+    G4double detectorThickness = 0.3 * cm;
+
+    // Definizione della geometria del detector
+    G4Trd* squareSolid = new G4Trd("Detector", 
+                                   (detectorSquareSize + detectorThickness) / 2, 
+                                   (detectorSquareSize - detectorThickness) / 2, 
+                                   (detectorSquareSize + detectorThickness) / 2, 
+                                   (detectorSquareSize - detectorThickness) / 2, 
+                                   detectorThickness / 2);
+
+    fDetectorPosition_l = fPhantomSizeX * 0.5 + DetectorDistance;
+    fDetectorPosition_t = fPhantomSizeX + DetectorDistance;
+
+    fDetLogicalVolume = new G4LogicalVolume(squareSolid, DetectorMaterial, "DetectorLog", 0, 0, 0);
+
+    // Detector 1
     G4RotationMatrix* rotationMatrix_y = new G4RotationMatrix();
-    rotationMatrix_y->rotateY(90.*deg); // Ruota di 90 gradi attorno all'asse Y
+    rotationMatrix_y->rotateY(90. * deg); // Rotazione attorno all'asse Y
+    fDet_phys1 = new G4PVPlacement(rotationMatrix_y, G4ThreeVector(fDetectorPosition_t + fAirGap, 0., 0.), 
+                                                       "DetPhys", 
+                                                       fDetLogicalVolume, 
+                                                       physicalTreatmentRoom, false, 0, fCheckOverlaps);
+
+    // Detector 2
+    G4RotationMatrix* rotationMatrix_x1 = new G4RotationMatrix();
+    rotationMatrix_x1->rotateX(-90. * deg);
+    fDet_phys2 = new G4PVPlacement(rotationMatrix_x1, G4ThreeVector(fPhantomSizeX * 0.5 + fAirGap, fDetectorPosition_l, 0.), 
+                                                       "DetPhys", 
+                                                       fDetLogicalVolume, 
+                                                       physicalTreatmentRoom, false, 0, fCheckOverlaps);
     
+    // Detector 3
+    G4RotationMatrix* rotationMatrix_x2 = new G4RotationMatrix();
+    rotationMatrix_x2->rotateX(90. * deg); // Rotazione attorno all'asse X
+    fDet_phys3 = new G4PVPlacement(rotationMatrix_x2, G4ThreeVector(fPhantomSizeX * 0.5 + fAirGap, -fDetectorPosition_l, 0.), 
+                                                       "DetPhys", 
+                                                       fDetLogicalVolume, 
+                                                       physicalTreatmentRoom, false, 0, fCheckOverlaps);
 
-    // Definition of the logical volume of the Detector
-    fDetLogicalVolume = new G4LogicalVolume(Det_box, DetectorMaterial, "DetectorLog", 0, 0, 0);
-    /*fDet_phys1 = new G4PVPlacement(0,G4ThreeVector(fDetectorPosition_t, 0., 0.), "DetPhys",fDetLogicalVolume,physicalTreatmentRoom,false, 0, fCheckOverlaps);
-    fDet_phys2 = new G4PVPlacement(rotationMatrix_z,G4ThreeVector(fPhantomSizeX * 0.5, fDetectorPosition_l, 0.), "DetPhys",fDetLogicalVolume,physicalTreatmentRoom,false, 0, fCheckOverlaps);
-    fDet_phys3 = new G4PVPlacement(rotationMatrix_z,G4ThreeVector(fPhantomSizeX * 0.5, -fDetectorPosition_l, 0.), "DetPhys",fDetLogicalVolume,physicalTreatmentRoom,false, 0, fCheckOverlaps);
-    fDet_phys4 = new G4PVPlacement(rotationMatrix_y, G4ThreeVector(fPhantomSizeX * 0.5, 0., fDetectorPosition_l), "DetPhys", fDetLogicalVolume, physicalTreatmentRoom, false, 0, fCheckOverlaps);
-    fDet_phys5 = new G4PVPlacement(rotationMatrix_y, G4ThreeVector(fPhantomSizeX * 0.5, 0., -fDetectorPosition_l), "DetPhys", fDetLogicalVolume, physicalTreatmentRoom, false, 0, fCheckOverlaps);
-    */
+    // Detector 4
+    G4RotationMatrix* reverse = new G4RotationMatrix();
+    reverse->rotateX(180. * deg); // Rotazione inversa attorno all'asse X
+    fDet_phys4 = new G4PVPlacement(reverse, G4ThreeVector(fPhantomSizeX * 0.5 + fAirGap, 0., fDetectorPosition_l), 
+                                                       "DetPhys", 
+                                                       fDetLogicalVolume, 
+                                                       physicalTreatmentRoom, false, 0, fCheckOverlaps);
 
-    // Visualisation attributes of the detector
+    // Detector 5
+    fDet_phys5 = new G4PVPlacement(0, G4ThreeVector(fPhantomSizeX * 0.5 + fAirGap, 0., -fDetectorPosition_l), 
+                                                       "DetPhys", 
+                                                       fDetLogicalVolume, 
+                                                       physicalTreatmentRoom, false, 0, fCheckOverlaps);
+
+    // Attributi di visualizzazione
     gray = new G4VisAttributes(G4Colour(1.0, 1.0, 0.0));
     gray->SetVisibility(true);
     fDetLogicalVolume->SetVisAttributes(gray);
 
-    return fDet_phys1, fDet_phys2, fDet_phys3, fDet_phys4, fDet_phys5;
-
+    // Ritorno dei volumi fisici in ordine
+    std::vector<G4VPhysicalVolume*> fDet_Phys = {fDet_phys1, fDet_phys2, fDet_phys3, fDet_phys4, fDet_phys5};
+    return fDet_Phys;
 }
+
 
 
 G4VPhysicalVolume *FlashDetectorConstruction::Construct() {
@@ -326,15 +483,18 @@ G4VPhysicalVolume *FlashDetectorConstruction::Construct() {
     Collimator = new Applicator(physicalTreatmentRoom);
     fPhantom_physical = ConstructPhantom(Collimator->fFinalApplicatorXPositionFlash +Collimator->fHightFinalApplicatorFlash+fAirGap);
 
+
     // -----------------------------
     // Pinhole camera
     //------------------------------
-    Pihole_physical = ConstructPinhole();
+    std::cout << " fOuterRadiusFirstApplicatorFlash : " << Collimator->fOuterRadiusFirstApplicatorFlash << std::endl;
+    
+    Pihole_physical = ConstructPinhole( Collimator->fOuterRadiusFirstApplicatorFlash);
 
     // -----------------------------
     // Detector pannel
     //------------------------------
-    Detector_physical = ConstructDetector();
+    //Detector_physical = ConstructDetector();
     
     DefineSurfaces(); 
     return physicalTreatmentRoom;
@@ -432,21 +592,5 @@ G4bool FlashDetectorConstruction::SetDetectorMaterial(G4String material)
 
     return true;
 }
-
-
-
-
-void FlashDetectorConstruction::SetDetectorThickness(G4double thickness)
-{
-   fDet_thickness=thickness;
-}
-
-
-void FlashDetectorConstruction::SetDetectorWidth(G4double width)
-{
-   fDet_width=width;
-}
-
-
 
 

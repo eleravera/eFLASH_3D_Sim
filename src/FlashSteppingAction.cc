@@ -74,7 +74,7 @@ FlashSteppingAction::~FlashSteppingAction() {}
 
 void FlashSteppingAction::UserSteppingAction(const G4Step *aStep)
 {
-    //G4AnalysisManager* analysisMan = G4AnalysisManager::Instance();
+    //G4AnalysisManager* analysisMan = G4AnalysisManager::Instance(); //DA IMPLEMENTARE PER VEDERE ANGOLI E RISOLUZIONE. 
 
     G4Track* track = aStep->GetTrack();
     G4StepPoint *postStep = aStep->GetPostStepPoint();
@@ -109,17 +109,14 @@ void FlashSteppingAction::UserSteppingAction(const G4Step *aStep)
         switch(theStatus){
             case Absorption: 
               AbsorptionCount++;
-              std::cout<< "abs" << std::endl; 
               break;
             case FresnelRefraction:
               FresnelRefractionCount++;
               PhotonRefractionCount++;
-              std::cout<< "refraction " << PhotonRefractionCount << std::endl; 
               break;
             case FresnelReflection:
               FresnelReflectionCount++;
               PhotonReflectionCount++;
-              std::cout<< "reflection " << PhotonReflectionCount << std::endl; 
               break;
             case TotalInternalReflection: 
               TotalInternalReflectionCount++;
@@ -127,8 +124,6 @@ void FlashSteppingAction::UserSteppingAction(const G4Step *aStep)
               if (PhotonTotalInternalReflectionCount > 10) { // Kill photons with internal reflection very high
                 track->SetTrackStatus(fStopAndKill);
               } 
-              std::cout<< "TIR" << std::endl; 
-
               break;
             case LambertianReflection:
               LambertianReflectionCount++;
@@ -146,47 +141,42 @@ void FlashSteppingAction::UserSteppingAction(const G4Step *aStep)
               break;
             }
         }
-        
-            
-            /*
-        /*if ((track->GetTrackStatus() == fStopAndKill) || (track->GetTrackStatus() == fWorldBoundary)) { // Check if the photon is absorbed within the volume and had previously undergone TIR
-            
-            
-            G4String thePrePV = preStep->GetPhysicalVolume()->GetName();
 
-            photonProcess::AbsorptionLocation loc;
-            G4ThreeVector genPosition = track->GetVertexPosition();
-            G4ThreeVector momentumDir = track->GetVertexMomentumDirection();
-            G4double theta = momentumDir.angle(G4ThreeVector(0, 1, 0)); // angle with the y-axis
-            G4double phi = std::atan2(momentumDir.x(), momentumDir.z()); // angle with the zx-plane. It should be zero if on z-axis
+    G4String volumeName = postStep->GetPhysicalVolume()->GetLogicalVolume()->GetName();
+    G4String prevolumeName = preStep->GetPhysicalVolume()->GetLogicalVolume()->GetName();
 
-            //if (trappedPhoton.find(track->GetTrackID()) != trappedPhoton.end()) {// If the track ID exists in the set, the photon was previously "trapped"
-                
-                if (thePrePV == "phantomPhys"){
-                  loc = photonProcess::PHANTOM;
-                }
+    if (prevolumeName == "logicTreatmentRoom" && volumeName ==  "pinholeLog"){
 
-                else if (thePrePV == "physicalTreatmentRoom") {
-                  loc = photonProcess::TREATMENT_ROOM;
-                }
+      G4double pos_x = aStep->GetTrack()->GetPosition().x();
+      G4double pos_y = aStep->GetTrack()->GetPosition().y();
+      G4double pos_z = aStep->GetTrack()->GetPosition().z();
+      
+      detection photon_maps =  detection(pos_x/mm, pos_y/mm, pos_z/mm);
+      detection_vector.push_back(photon_maps);
+      std::cout << "PINHOLE: " << std::endl; 
+      photon_maps.print();
+      std::cout << std::endl << std::endl; 
 
-                else {
-                  loc = photonProcess::OTHER;
-                }
-                
-                photonProcess photon = photonProcess(track->GetTrackID(), genPosition.x()/mm, genPosition.y()/mm, genPosition.z()/mm, theta, phi, PhotonTotalInternalReflectionCount, PhotonReflectionCount, PhotonRefractionCount, loc) ; 
-                //photon.print(); 
-                photonProcess_vector.push_back(photon);
+    }
 
-                trappedPhoton.erase(track->GetTrackID()); // Remove from the set as it’s now absorbed
+    /*if (prevolumeName == "logicTreatmentRoom" && volumeName ==  "DetectorLog"){
 
-          
-            //}
-        } /* end of if killed */
-       
-
+      G4double pos_x = aStep->GetTrack()->GetPosition().x();
+      G4double pos_y = aStep->GetTrack()->GetPosition().y();
+      G4double pos_z = aStep->GetTrack()->GetPosition().z();
+      
+      detection photon_maps =  detection(pos_x/mm, pos_y/mm, pos_z/mm);
+      detection_vector.push_back(photon_maps);
+      std::cout << "DETECTOR: " << std::endl; 
+      photon_maps.print();
+      std::cout << std::endl << std::endl; 
+    }*/
     
     }   /* end of if optical photon */
+
+
+    
+
 
 }
 
