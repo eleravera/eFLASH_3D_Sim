@@ -10,19 +10,20 @@ output_dir="$base_dir/simulations_$timestamp"
 mkdir "$output_dir"
 
 # Ciclo che esegue la simulazione 100 volte
-for i in {0..100}
+for i in {0..499}
 do
 
   # Imposta il seed uguale all'indice 'i', o un altro calcolo se preferisci
   seed=$((4000 + i))
 
   # Definisce il nome del file di output
-  output_file="$output_dir/my_outputfile_${i}.raw" 
+  output_file="$output_dir/hole500um_${seed}.raw" 
+  log_file="$output_dir/log_hole500um_${seed}.log"
   
   # Comando per lanciare la simulazione
-  #./flash init_vis.mac $seed $output_file >> "$output_dir/log_simulation.log" 2>&1
-  ./flash init_vis.mac $seed $output_file | tee -a "$output_dir/log_simulation.log"
+  ./flash init_vis.mac $seed $output_file | tee "$log_file"
 
   # Facoltativo: stampa per vedere l'iterazione in corso
-  echo "Eseguito run $i con seed $seed e file di output $output_file"
+    echo "Eseguito run $i con seed $seed, file di output $output_file e log $log_file"
+
 done
