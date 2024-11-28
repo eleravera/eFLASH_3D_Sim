@@ -279,9 +279,9 @@ std::vector<G4VPhysicalVolume*> FlashDetectorConstruction::ConstructPinhole(G4do
    - Ensures proper alignment and non-overlapping placement of sheets.
    - Uses rotation matrices to orient the sheets correctly in the 3D space.
     */
-    G4double pinholeThickness = 0.3 * cm;
+    G4double pinholeThickness = 0.11*mm;
     G4double pinholeSquareSize = fPhantomSizeX + PinholeDistance * 2;
-    G4double innerRadius = 0.25 * mm;
+    G4double innerRadius = 0.500 * mm;
 
     // Geometry
     G4Trd* squareSolid = new G4Trd("BlackSheet", (pinholeSquareSize + pinholeThickness) / 2, 
@@ -397,7 +397,7 @@ std::vector<G4VPhysicalVolume*> FlashDetectorConstruction::ConstructDetector(){
    */
     
     G4double detectorSquareSize = fPhantomSizeX + DetectorDistance * 2;
-    G4double detectorThickness = 0.3 * cm;
+    G4double detectorThickness = 0.1 * cm;
 
     // Definizione della geometria del detector
     G4Trd* squareSolid = new G4Trd("Detector", 
