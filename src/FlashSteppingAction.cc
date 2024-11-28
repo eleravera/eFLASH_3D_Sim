@@ -64,7 +64,8 @@ G4int FlashSteppingAction::PhotonTotalInternalReflectionCount = 0 ;
 G4int FlashSteppingAction::PhotonRefractionCount = 0 ;
 G4int FlashSteppingAction::PhotonReflectionCount = 0 ;
 G4int FlashSteppingAction::PhotonsOutOfWorld = 0 ;
-
+long long FlashSteppingAction::TotalPhotonGeneratedCount = 0; 
+long long FlashSteppingAction::PhotonExitingPhantomCount = 0; 
 
 
 FlashSteppingAction::FlashSteppingAction(FlashEventAction *)
@@ -99,6 +100,7 @@ void FlashSteppingAction::UserSteppingAction(const G4Step *aStep)
 
 
     if(track->GetDefinition() == opticalphoton) { 
+      TotalPhotonGeneratedCount++;
       if(!(aStep->GetPostStepPoint()->GetPhysicalVolume())){//out of world
         PhotonsOutOfWorld++; 
         return;}
@@ -158,6 +160,11 @@ void FlashSteppingAction::UserSteppingAction(const G4Step *aStep)
       std::cout << std::endl << std::endl; 
 
     }*/
+
+    if (prevolumeName == "phantomLog" && volumeName ==  "logicTreatmentRoom"){ 
+      PhotonExitingPhantomCount++;
+    }
+
 
     if (prevolumeName == "logicTreatmentRoom" && volumeName ==  "DetectorLog"){
 

@@ -80,6 +80,9 @@ void FlashRunAction::EndOfRunAction(const G4Run *run) {
   G4cout << "  Backscattering: " << FlashSteppingAction::BackScatteringCount << G4endl;
   G4cout << "  Absorption: " << FlashSteppingAction::AbsorptionCount << G4endl;
   G4cout << "  Photons reaching the world: " << FlashSteppingAction::PhotonsOutOfWorld << G4endl; 
+  G4cout << "  Total photons generated: " << FlashSteppingAction::TotalPhotonGeneratedCount << G4endl; 
+  G4cout << "  Photons exiting the phantom: " << FlashSteppingAction::PhotonExitingPhantomCount << G4endl; 
+
 
   /*G4AnalysisManager* analysisManager = G4AnalysisManager::Instance();
   analysisManager->Write();

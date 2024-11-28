@@ -58,6 +58,8 @@ public:
   static G4int PhotonsOutOfWorld; 
   static G4int PhotonRefractionCount;
   static G4int PhotonReflectionCount;
+  static long long TotalPhotonGeneratedCount; 
+  static long long PhotonExitingPhantomCount; 
 
 
 };
