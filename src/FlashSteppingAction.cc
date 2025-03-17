@@ -51,21 +51,16 @@
 #include "G4AnalysisManager.hh"
 #include <unordered_set>
 
-G4int FlashSteppingAction::TransmissionCount = 0 ;
 G4int FlashSteppingAction::FresnelRefractionCount = 0 ; 
 G4int FlashSteppingAction::FresnelReflectionCount = 0 ;
 G4int FlashSteppingAction::TotalInternalReflectionCount = 0 ;
-G4int FlashSteppingAction::LambertianReflectionCount = 0 ; 
-G4int FlashSteppingAction::LobeReflectionCount = 0 ;
-G4int FlashSteppingAction::SpikeReflectionCount = 0 ; 
-G4int FlashSteppingAction::BackScatteringCount = 0 ; 
 G4int FlashSteppingAction::AbsorptionCount = 0 ; 
 G4int FlashSteppingAction::PhotonTotalInternalReflectionCount = 0 ;
 G4int FlashSteppingAction::PhotonRefractionCount = 0 ;
 G4int FlashSteppingAction::PhotonReflectionCount = 0 ;
-G4int FlashSteppingAction::PhotonsOutOfWorld = 0 ;
 long long FlashSteppingAction::TotalPhotonGeneratedCount = 0; 
 long long FlashSteppingAction::PhotonExitingPhantomCount = 0; 
+
 
 
 FlashSteppingAction::FlashSteppingAction(FlashEventAction *)
@@ -73,130 +68,132 @@ FlashSteppingAction::FlashSteppingAction(FlashEventAction *)
 
 FlashSteppingAction::~FlashSteppingAction() {}
 
-void FlashSteppingAction::UserSteppingAction(const G4Step *aStep)
-{
-    //G4AnalysisManager* analysisMan = G4AnalysisManager::Instance(); //DA IMPLEMENTARE PER VEDERE ANGOLI E RISOLUZIONE. 
 
+
+void FlashSteppingAction::HandleBoundaryProcesses(const G4Step* aStep, G4StepPoint* preStep, G4StepPoint* postStep) {
     G4Track* track = aStep->GetTrack();
-    G4StepPoint *postStep = aStep->GetPostStepPoint();
-    G4StepPoint *preStep = aStep->GetPreStepPoint();
-    static G4ParticleDefinition* opticalphoton = G4OpticalPhoton::OpticalPhotonDefinition();
-
     G4OpBoundaryProcessStatus theStatus = Undefined;
-    static G4ThreadLocal G4OpBoundaryProcess* boundary = NULL; 
-    //find the boundary process only once
-    if(!boundary){
-      G4ProcessManager* pm = aStep->GetTrack()->GetDefinition()->GetProcessManager();
-      G4int nprocesses = pm->GetProcessListLength();
-      G4ProcessVector* pv = pm->GetProcessList();
-      G4int i;
-      for( i=0;i<nprocesses;i++){
-        if((*pv)[i]->GetProcessName()=="OpBoundary"){
-          boundary = (G4OpBoundaryProcess*)(*pv)[i];
-          break;
-          }
-        }
-      }
+    static G4ThreadLocal G4OpBoundaryProcess* boundary = NULL;
 
-
-    if(track->GetDefinition() == opticalphoton) { 
-      TotalPhotonGeneratedCount++;
-      if(!(aStep->GetPostStepPoint()->GetPhysicalVolume())){//out of world
-        PhotonsOutOfWorld++; 
-        return;}
-    
-      if(postStep->GetStepStatus() == fGeomBoundary) { // if at boundary
-        theStatus = boundary->GetStatus();
-
-        switch(theStatus){
-            case Absorption: 
-              AbsorptionCount++;
-              break;
-            case FresnelRefraction:
-              FresnelRefractionCount++;
-              PhotonRefractionCount++;
-              break;
-            case FresnelReflection:
-              FresnelReflectionCount++;
-              PhotonReflectionCount++;
-              break;
-            case TotalInternalReflection: 
-              TotalInternalReflectionCount++;
-              PhotonTotalInternalReflectionCount++; 
-              if (PhotonTotalInternalReflectionCount > 10) { // Kill photons with internal reflection very high
-                track->SetTrackStatus(fStopAndKill);
-              } 
-              break;
-            case LambertianReflection:
-              LambertianReflectionCount++;
-              break;
-            case LobeReflection:
-              LobeReflectionCount++;
-              break;
-            case SpikeReflection:
-              SpikeReflectionCount++;
-              break;
-            case BackScattering:
-              BackScatteringCount++;
-              break;
-            default: 
-              break;
+    if (!boundary) {
+        G4ProcessManager* pm = track->GetDefinition()->GetProcessManager();
+        G4int nprocesses = pm->GetProcessListLength();
+        G4ProcessVector* pv = pm->GetProcessList();
+        for (G4int i = 0; i < nprocesses; i++) {
+            if ((*pv)[i]->GetProcessName() == "OpBoundary") {
+                boundary = (G4OpBoundaryProcess*)(*pv)[i];
+                break;
             }
         }
-
-    G4String volumeName = postStep->GetPhysicalVolume()->GetLogicalVolume()->GetName();
-    G4String prevolumeName = preStep->GetPhysicalVolume()->GetLogicalVolume()->GetName();
-
-    /*if (prevolumeName == "logicTreatmentRoom" && volumeName ==  "pinholeLog"){
-
-      G4double pos_x = aStep->GetTrack()->GetPosition().x();
-      G4double pos_y = aStep->GetTrack()->GetPosition().y();
-      G4double pos_z = aStep->GetTrack()->GetPosition().z();
-      
-      detection photon_maps =  detection(pos_x/mm, pos_y/mm, pos_z/mm);
-      detection_vector.push_back(photon_maps);
-      std::cout << "PINHOLE: " << std::endl; 
-      photon_maps.print();
-      std::cout << std::endl << std::endl; 
-
-    }*/
-
-    if (prevolumeName == "phantomLog" && volumeName ==  "logicTreatmentRoom"){ 
-      PhotonExitingPhantomCount++;
-    }
-
-
-    if (prevolumeName == "logicTreatmentRoom" && volumeName ==  "DetectorLog"){
-
-      G4double pos_x = aStep->GetTrack()->GetPosition().x();
-      G4double pos_y = aStep->GetTrack()->GetPosition().y();
-      G4double pos_z = aStep->GetTrack()->GetPosition().z();
-      
-      detection photon_maps =  detection(pos_x/mm, pos_y/mm, pos_z/mm);
-      detection_vector.push_back(photon_maps);
-      /*std::cout << "DETECTOR: " << std::endl; 
-      photon_maps.print();
-      std::cout << std::endl << std::endl; */
     }
     
-    }   /* end of if optical photon */
-
-
-    
-
-
+    if (postStep->GetStepStatus() == fGeomBoundary) {
+        switch (boundary->GetStatus()) {
+            case Absorption: AbsorptionCount++; break;
+            case FresnelRefraction: FresnelRefractionCount++; PhotonRefractionCount++; break;
+            case FresnelReflection: FresnelReflectionCount++; PhotonReflectionCount++; break;
+            case TotalInternalReflection:
+                TotalInternalReflectionCount++; PhotonTotalInternalReflectionCount++;
+                if (PhotonTotalInternalReflectionCount > 10) {
+                    track->SetTrackStatus(fStopAndKill);
+                }
+                break;
+            default: break;
+        }
+    }
 }
 
 
+void FlashSteppingAction::CheckPhotonExit(const G4Step* aStep, G4StepPoint* preStep, G4StepPoint* postStep) {
+    // Controllo se il passo è valido
+    if (!aStep) {
+        G4cerr << "Errore: Step non valido!" << G4endl;
+        return;
+    }
+
+    // Recupero del fotone
+    G4Track* track = aStep->GetTrack();
+    if (!track) {
+        G4cerr << "Errore: Track non valido!" << G4endl;
+        return;
+    }
+
+    // Verifica dello stato del fotone (non deve essere fermato)
+    if (track->GetTrackStatus() == fStopAndKill) {
+        G4cerr << "Errore: Il fotone è fermato." << G4endl;
+        return;
+    }
 
 
 
+    // Get the names of the volumes
+    G4String volumeName = postStep->GetPhysicalVolume()->GetLogicalVolume()->GetName();
+    G4String prevolumeName = preStep->GetPhysicalVolume()->GetLogicalVolume()->GetName();
+
+    // Check if the photon is exiting the 'phantomLog' to the 'logicTreatmentRoom'
+    if (prevolumeName == "phantomLog" && volumeName == "logicTreatmentRoom") {
+        // Get the position where the photon exits the 'phantomLog' (before it enters 'logicTreatmentRoom')
+        G4ThreeVector exitPosition = preStep->GetPosition();
+        
+        // Get the momentum of the photon before it exits (inside 'phantomLog')
+        G4ThreeVector preExitMomentum = preStep->GetMomentum();
+        
+        // Get the momentum of the photon after it exits ('logicTreatmentRoom')
+        G4ThreeVector postExitMomentum = aStep->GetTrack()->GetMomentum();
+
+        // Log or save the positions and momentum
+        G4cout << "Photon exited the phantom at position: "
+               << exitPosition.x() / mm << " mm, "
+               << exitPosition.y() / mm << " mm, "
+               << exitPosition.z() / mm << " mm" << G4endl;
+
+        G4cout << "Photon momentum before exiting (inside phantom): "
+               << preExitMomentum.x() / GeV << " GeV/c, "
+               << preExitMomentum.y() / GeV << " GeV/c, "
+               << preExitMomentum.z() / GeV << " GeV/c" << G4endl;
+
+        G4cout << "Photon momentum after exiting (inside treatment room): "
+               << postExitMomentum.x() / GeV << " GeV/c, "
+               << postExitMomentum.y() / GeV << " GeV/c, "
+               << postExitMomentum.z() / GeV << " GeV/c" << G4endl;
+
+        // Also print the information to standard output for convenience
+        std::cout << "Exit Position: " << exitPosition.x() / mm << " " << exitPosition.y() / mm << " " << exitPosition.z() / mm << " mm\n";
+        std::cout << "Momentum before exiting: " << preExitMomentum.x() / GeV << " " << preExitMomentum.y() / GeV << " " << preExitMomentum.z() / GeV << " GeV/c\n";
+        std::cout << "Momentum after exiting: " << postExitMomentum.x() / GeV << " " << postExitMomentum.y() / GeV << " " << postExitMomentum.z() / GeV << " GeV/c\n"<< G4endl << G4endl;
+        
+        // Increment the count of photons exiting the phantom
+        PhotonExitingPhantomCount++;
+    }
+}
 
 
-/*//Save photons 
-          G4String volumeName = postStep->GetPhysicalVolume()->GetLogicalVolume()->GetName();
-          G4String prevolumeName = preStep->GetPhysicalVolume()->GetLogicalVolume()->GetName();
+void FlashSteppingAction::HandlePhotonDetection(const G4Step* aStep, G4StepPoint* preStep, G4StepPoint* postStep) {
+    G4String preVolumeName = preStep->GetPhysicalVolume()->GetLogicalVolume()->GetName();
+    G4String postVolumeName = postStep->GetPhysicalVolume()->GetLogicalVolume()->GetName();
+    if (preVolumeName == "logicTreatmentRoom" && postVolumeName == "DetectorLog") {
+        G4ThreeVector position = aStep->GetTrack()->GetPosition();
+        detection photon_maps(position.x() / mm, position.y() / mm, position.z() / mm);
+        detection_vector.push_back(photon_maps);
+        photon_maps.print();
+    }
+}
 
+void FlashSteppingAction::UserSteppingAction(const G4Step *aStep) {
+    G4Track* track = aStep->GetTrack();
+    if (track->GetDefinition() == G4OpticalPhoton::OpticalPhotonDefinition()) { 
+        TotalPhotonGeneratedCount++;
+        G4StepPoint* preStep = aStep->GetPreStepPoint();
+        G4StepPoint* postStep = aStep->GetPostStepPoint();
+        HandleBoundaryProcesses(aStep, preStep, postStep);
+
+        //CheckPhotonExit(aStep, preStep, postStep); //- > per studiare Snell 
+        //HandlePhotonDetection(aStep, preStep, postStep); //-> per salvare i dati e le mappe. 
+    }
+}
+
+
+/*//Save photons with telecentric
           if (prevolumeName == "phantomLog" && volumeName ==  "logicTreatmentRoom") {
             G4ThreeVector photonDirection = track->GetMomentumDirection();  
             // Define a small tolerance value as cosThetaMax
@@ -212,16 +209,4 @@ void FlashSteppingAction::UserSteppingAction(const G4Step *aStep)
                 track->SetTrackStatus(fStopAndKill); 
 
             } 
-            }
-
-      if (prevolumeName == "logicTreatmentRoom" && volumeName ==  "DetectorLog") {
-        G4double pos_x = aStep->GetTrack()->GetPosition().x();
-        G4double pos_y = aStep->GetTrack()->GetPosition().y();
-        G4double pos_z = aStep->GetTrack()->GetPosition().z();
-
-        // append to detection_vector the current info
-        detection photon_maps =  detection(pos_x/mm, pos_y/mm, pos_z/mm);
-        detection_vector1.push_back(photon_maps);
-        //std::cout << "A photon has been saved on file" << std::endl;  
-        //photon_maps.print();
-        }    */
+            } */

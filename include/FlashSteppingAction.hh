@@ -31,6 +31,7 @@
 #define FlashSteppingAction_h 1
 
 #include "G4UserSteppingAction.hh"
+#include "G4Step.hh"
 #include "globals.hh"
 #include <fstream>
 
@@ -45,22 +46,21 @@ public:
 
   virtual void UserSteppingAction(const G4Step *);
 
-  static G4int TransmissionCount; 
   static G4int FresnelRefractionCount; 
   static G4int FresnelReflectionCount;
   static G4int TotalInternalReflectionCount;
-  static G4int LambertianReflectionCount; 
-  static G4int LobeReflectionCount;
-  static G4int SpikeReflectionCount; 
-  static G4int BackScatteringCount; 
   static G4int AbsorptionCount; 
   static G4int PhotonTotalInternalReflectionCount; 
-  static G4int PhotonsOutOfWorld; 
   static G4int PhotonRefractionCount;
   static G4int PhotonReflectionCount;
   static long long TotalPhotonGeneratedCount; 
   static long long PhotonExitingPhantomCount; 
 
+
+private:
+    void HandleBoundaryProcesses(const G4Step* aStep, G4StepPoint* preStep, G4StepPoint* postStep);
+    void CheckPhotonExit(const G4Step* aStep, G4StepPoint* preStep, G4StepPoint* postStep);
+    void HandlePhotonDetection(const G4Step* aStep, G4StepPoint* preStep, G4StepPoint* postStep);
 
 };
 

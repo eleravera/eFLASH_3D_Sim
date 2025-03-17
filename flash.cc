@@ -51,6 +51,8 @@
 tbb::concurrent_vector<photonProcess> photonProcess_vector;
 tbb::concurrent_vector<detection> detection_vector;
 
+
+
 int main(int argc, char **argv) {
 
   if (argc < 4) {
@@ -64,7 +66,7 @@ int main(int argc, char **argv) {
 
   G4Random::setTheSeed(seed);
   auto *runManager = new G4MTRunManager();
-  G4int nThreads = 230;
+  G4int nThreads = 2;
   runManager->SetNumberOfThreads(nThreads);
  
   runManager->SetUserInitialization(new FlashDetectorConstruction);
@@ -110,7 +112,10 @@ int main(int argc, char **argv) {
 
 
 
-/*int main(int argc, char **argv) {
+
+/*
+//QUESTO MAIL È PER ME PER RUNNARE TEST SUL MIO PC
+int main(int argc, char **argv) {
 
   auto *runManager=G4RunManagerFactory::CreateRunManager();
   G4int nThreads = 1;
@@ -144,7 +149,7 @@ int main(int argc, char **argv) {
     if (argc == 1) {
       ui = new G4UIExecutive(argc, argv);
       UImanager->ApplyCommand("/control/execute init_vis.mac");
-      //ui->SessionStart();
+      //ui->SessionStart(); // If you want to start the interactive session
       delete ui;
     }
     else
@@ -159,15 +164,14 @@ int main(int argc, char **argv) {
 
 
   // Write results to output
-    std::ofstream file_out1("./optical_properties/seed_45691_100evt.raw");
+    std::ofstream file_out1("./optical_properties/test.raw");
     for (uint32_t i=0; i<photonProcess_vector.size(); i++) {
       file_out1.write(reinterpret_cast<char*>(&photonProcess_vector[i]), sizeof(photonProcess));
-      //std::cout<< reinterpret_cast<char*>(&photonProcess_vector[i]) << std::endl; 
     }
     file_out1.close();
 
   // Write results to output
-    std::ofstream file_out2("./photon_dist/pinhole/d1-5cm_d2-5cm_o500um/1000evt_45692seed.raw");
+    std::ofstream file_out2("./photon_dist/pinhole/test.raw");
     for (uint32_t i=0; i<detection_vector.size(); i++) {
       file_out2.write(reinterpret_cast<char*>(&detection_vector[i]), sizeof(detection));
     }
