@@ -1,14 +1,13 @@
-# Macro file for the initialization
-# in interactive session
-#
 # Set some default verbose
 /control/verbose 1
-/run/verbose 1
-#
-#
-# Initialize kernel
-#
-# Visualization setting
-/run/initialize
-/control/execute vis.mac
+/control/saveHistory
+/run/verbose 0
+/tracking/verbose 0
 
+# Setting for optical process
+/process/optical/processActivation Cerenkov false # non aggiunti in source (librerie etc)
+/process/optical/processActivation Scintillation true
+
+/run/initialize
+/control/execute 9MeVEF.mac #Quello corrected è uguale 
+/run/beamOn 5000

@@ -14,14 +14,14 @@ for i in {0..499}
 do
 
   # Imposta il seed uguale all'indice 'i', o un altro calcolo se preferisci
-  seed=$((4000 + i))
+  seed=$((5000 + i))
 
   # Definisce il nome del file di output
-  output_file="$output_dir/hole500um_${seed}.raw" 
-  log_file="$output_dir/log_hole500um_${seed}.log"
+  output_file="$output_dir/hole200um_${seed}.raw" 
+  log_file="$output_dir/log_hole200um_${seed}.log"
   
   # Comando per lanciare la simulazione
-  ./flash init_vis.mac $seed $output_file | tee "$log_file"
+  ./flash run.mac $seed $output_file | tee "$log_file"
 
   # Facoltativo: stampa per vedere l'iterazione in corso
     echo "Eseguito run $i con seed $seed, file di output $output_file e log $log_file"

@@ -104,8 +104,8 @@ FlashDetectorConstruction::FlashDetectorConstruction()
 
     SetAirGap(0.011*cm); // Set the air gap between the water phantom and the end of the applicator
     SetPhantomSize(10. *cm, 10. *cm, 10. *cm);
-    SetPinholeDistance(5 *cm); // Set the air gap between the water phantom and the pinhole
-    SetDetectorDistance(10*cm); // Set the air gap between the water phantom and the detector
+    SetPinholeDistance(25 *cm); // Set the air gap between the water phantom and the pinhole
+    SetDetectorDistance(30*cm); // Set the air gap between the water phantom and the detector
         
 }
 

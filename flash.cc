@@ -66,7 +66,7 @@ int main(int argc, char **argv) {
 
   G4Random::setTheSeed(seed);
   auto *runManager = new G4MTRunManager();
-  G4int nThreads = 2;
+  G4int nThreads = 135;
   runManager->SetNumberOfThreads(nThreads);
  
   runManager->SetUserInitialization(new FlashDetectorConstruction);
@@ -113,9 +113,9 @@ int main(int argc, char **argv) {
 
 
 
-/*
+
 //QUESTO MAIL È PER ME PER RUNNARE TEST SUL MIO PC
-int main(int argc, char **argv) {
+/*int main(int argc, char **argv) {
 
   auto *runManager=G4RunManagerFactory::CreateRunManager();
   G4int nThreads = 1;
@@ -149,7 +149,7 @@ int main(int argc, char **argv) {
     if (argc == 1) {
       ui = new G4UIExecutive(argc, argv);
       UImanager->ApplyCommand("/control/execute init_vis.mac");
-      //ui->SessionStart(); // If you want to start the interactive session
+      ui->SessionStart(); // If you want to start the interactive session
       delete ui;
     }
     else

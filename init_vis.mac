@@ -21,7 +21,7 @@
 
 
 /run/beamOn 3
-#/control/execute vis.mac #QUESTA è da commentare quando uso la macchina del dipartimento. 
+/control/execute vis.mac
 
 
 
