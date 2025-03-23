@@ -14,7 +14,7 @@ for i in {0..499}
 do
 
   # Imposta il seed uguale all'indice 'i', o un altro calcolo se preferisci
-  seed=$((5500 + i))
+  seed=$((6000 + i))
 
   # Definisce il nome del file di output
   output_file="$output_dir/d15cm_hole300um_${seed}.raw" 
