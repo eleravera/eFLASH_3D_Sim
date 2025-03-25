@@ -290,9 +290,6 @@ std::vector<G4VPhysicalVolume*> FlashDetectorConstruction::ConstructPinhole(G4do
                                    (pinholeSquareSize - pinholeThickness) / 2, 
                                    pinholeThickness / 2);
     G4Tubs* innerCylinder = new G4Tubs("InnerCylinder", 0, innerRadius, pinholeThickness / 2, 0. * deg, 360. * deg);
-    G4SubtractionSolid* PinholeCilinder = new G4SubtractionSolid("Pinhole", squareSolid, innerCylinder);
-    PinholeLogicalVolume = new G4LogicalVolume(PinholeCilinder, PinholeMaterial, "pinholeLog", 0, 0, 0);
-
 
     G4Tubs* innerCylinder_back = new G4Tubs("InnerCylinder", 0, CollRadius , pinholeThickness / 2, 0. * deg, 360. * deg);
     G4SubtractionSolid* PinholeCilinder_back = new G4SubtractionSolid("PinholeBack", squareSolid, innerCylinder_back);
@@ -461,6 +458,49 @@ std::vector<G4VPhysicalVolume*> FlashDetectorConstruction::ConstructDetector(){
 }
 
 
+G4VPhysicalVolume* FlashDetectorConstruction::ConstructWrap(G4double CollRadius) {
+
+    // Creazione del cubo cavo
+    G4double outerCubeSize = fPhantomSizeX * 0.5 + DetectorDistance ;  // Dimensioni del cubo esterno
+    G4double innerCubeSize = fPhantomSizeX * 0.5;   // Dimensioni del cubo interno (phantom)
+
+    G4Box* solidOuterCube = new G4Box("OuterCube", outerCubeSize / 2, outerCubeSize / 2, outerCubeSize / 2);
+    G4Box* solidInnerCube = new G4Box("InnerCube", innerCubeSize / 2, innerCubeSize / 2, innerCubeSize / 2);
+    G4SubtractionSolid* solidHollowCube = new G4SubtractionSolid("HollowCube", solidOuterCube, solidInnerCube);
+
+    G4Tubs* solidApplicatorHole = new G4Tubs("ApplicatorHole", 0, CollRadius , outerCubeSize / 2, 0. * deg, 360. * deg);
+    G4SubtractionSolid* solidExternalWrap = new G4SubtractionSolid("ExternalWrap", solidHollowCube, solidApplicatorHole);
+
+    // Creazione del materiale (ad esempio, vuoto per il cubo esterno)
+    G4Material* material = G4Material::GetMaterial("G4_WATER");  // O qualsiasi altro materiale
+
+    // Creazione del volume logico
+    G4LogicalVolume* logicalExternalWrap = new G4LogicalVolume(solidExternalWrap, material, "ExternalWrapLog");
+
+    // Posizionamento nel volume fisico (per esempio, al centro)
+    G4VPhysicalVolume* Wrap_phys = new G4PVPlacement(
+        nullptr,                   // Rotazione (nessuna)
+        G4ThreeVector(0., 0., 0.), // Posizione
+        logicalExternalWrap,         // Volume logico
+        "ExternalWrapPhys",            // Nome del volume fisico
+        nullptr,                   // Volume madre (se applicabile)
+        false,                     // No replica
+        0);                        // Numero di replica
+
+
+    // Attributi di visualizzazione
+    red = new G4VisAttributes(G4Colour(1.0, 0.0, 0.0));
+    red->SetVisibility(true);
+    logicalExternalWrap->SetVisAttributes(red);
+
+
+
+    // Restituire il volume fisico del wrap
+    return Wrap_phys;  // Assicurati che fWrap_physical sia correttamente definito
+}
+
+
+
 
 G4VPhysicalVolume *FlashDetectorConstruction::Construct() {
     // -----------------------------
@@ -487,13 +527,18 @@ G4VPhysicalVolume *FlashDetectorConstruction::Construct() {
     // -----------------------------
     // Pinhole camera
     //------------------------------  
-    Pihole_physical = ConstructPinhole( Collimator->fOuterRadiusFirstApplicatorFlash);
+    Pihole_physical = ConstructPinhole(Collimator->fOuterRadiusFirstApplicatorFlash);
 
     // -----------------------------
     // Detector pannel
     //------------------------------
     Detector_physical = ConstructDetector();
     
+    // -----------------------------
+    // Wrap
+    //------------------------------
+    //fWrap_physical = ConstructWrap(Collimator->fOuterRadiusFirstApplicatorFlash);
+
     DefineSurfaces(); 
     return physicalTreatmentRoom;
 }
