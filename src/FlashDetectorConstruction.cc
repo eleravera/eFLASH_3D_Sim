@@ -48,6 +48,7 @@
 #include "G4SubtractionSolid.hh"
 #include "G4Tubs.hh"
 #include "G4Trd.hh"
+#include "G4Tet.hh"
 
 #include "G4GeometryManager.hh"
 #include "G4GeometryTolerance.hh"
@@ -73,7 +74,7 @@
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 FlashDetectorConstruction::FlashDetectorConstruction()
-    : G4VUserDetectorConstruction(),logicTreatmentRoom(0), physicalTreatmentRoom(0), Collimator(0), fPhantom(0), fPhantomLogicalVolume(0), fPhant_phys(0), fCheckOverlaps(true) {
+    : G4VUserDetectorConstruction(),logicTreatmentRoom(0), physicalTreatmentRoom(0), Collimator(0), fPhantom_Box(0), fPhantomLogicalVolume(0), fPhant_phys(0), fCheckOverlaps(true) {
     /*
     This constructor initializes the FlashDetectorConstruction class, which is derived from `G4VUserDetectorConstruction`.
    It sets up the materials, the treatment room, and other parameters required for constructing the detector, phantom, 
@@ -102,7 +103,7 @@ FlashDetectorConstruction::FlashDetectorConstruction()
     DefineMaterials();
     fDetectorMessenger = new FlashDetectorMessenger(this);
 
-    SetAirGap(0.011*cm); // Set the air gap between the water phantom and the end of the applicator
+    SetAirGap(30*cm); // Set the air gap between the water phantom and the end of the applicator
     SetPhantomSize(10. *cm, 10. *cm, 10. *cm);
     SetPinholeDistance(15 *cm); // Set the air gap between the water phantom and the pinhole
     SetDetectorDistance(20*cm); // Set the air gap between the water phantom and the detector
@@ -227,8 +228,8 @@ G4VPhysicalVolume *FlashDetectorConstruction::ConstructPhantom(G4double CollPos)
     fPhantom_coordinateX = (fPosition_coefficient * mm + fPhantomSizeX / 2);
     fPhantomPosition =  G4ThreeVector(fPhantom_coordinateX, 0. * mm, 0. * mm); //phantom is constructed with the entrance surface attached to the applicator 
     
-    fPhantom = new G4Box("Phantom", fPhantomSizeX / 2, fPhantomSizeY / 2, fPhantomSizeZ / 2);
-    fPhantomLogicalVolume = new G4LogicalVolume(fPhantom, fPhantomMaterial, "phantomLog", 0, 0, 0);
+    fPhantom_Box = new G4Box("Phantom", fPhantomSizeX / 2, fPhantomSizeY / 2, fPhantomSizeZ / 2);
+    fPhantomLogicalVolume = new G4LogicalVolume(fPhantom_Box, fPhantomMaterial, "phantomLog", 0, 0, 0);
     fPhant_phys = new G4PVPlacement(0, fPhantomPosition, "phantomPhys", fPhantomLogicalVolume, physicalTreatmentRoom, false, 0);
     
     //define the region to set cuts in FlashPhysicsList.cc and step limit
@@ -291,9 +292,12 @@ std::vector<G4VPhysicalVolume*> FlashDetectorConstruction::ConstructPinhole(G4do
                                    pinholeThickness / 2);
     G4Tubs* innerCylinder = new G4Tubs("InnerCylinder", 0, innerRadius, pinholeThickness / 2, 0. * deg, 360. * deg);
 
+    fPinhole_Cilinder = new G4SubtractionSolid("Pinhole", squareSolid, innerCylinder);
+    PinholeLogicalVolume = new G4LogicalVolume(fPinhole_Cilinder, PinholeMaterial, "pinholeLog", 0, 0, 0);
+
     G4Tubs* innerCylinder_back = new G4Tubs("InnerCylinder", 0, CollRadius , pinholeThickness / 2, 0. * deg, 360. * deg);
-    G4SubtractionSolid* PinholeCilinder_back = new G4SubtractionSolid("PinholeBack", squareSolid, innerCylinder_back);
-    PinholeLogicalVolume_back = new G4LogicalVolume(PinholeCilinder_back, PinholeMaterial, "pinholeLogBack", 0, 0, 0);
+    fPinhole_Cilinder_back = new G4SubtractionSolid("PinholeBack", squareSolid, innerCylinder_back);
+    PinholeLogicalVolume_back = new G4LogicalVolume(fPinhole_Cilinder_back, PinholeMaterial, "pinholeLogBack", 0, 0, 0);
 
     G4double PinholePosition_l = fPhantomSizeX * 0.5 + PinholeDistance;
     G4double PinholePosition_t = fPhantomSizeX + PinholeDistance;
@@ -448,56 +452,58 @@ std::vector<G4VPhysicalVolume*> FlashDetectorConstruction::ConstructDetector(){
                                                        physicalTreatmentRoom, false, 0, fCheckOverlaps);
 
     // Attributi di visualizzazione
-    gray = new G4VisAttributes(G4Colour(1.0, 1.0, 0.0));
-    gray->SetVisibility(true);
-    fDetLogicalVolume->SetVisAttributes(gray);
+    yellow = new G4VisAttributes(G4Colour(1.0, 1.0, 0.0));
+    yellow->SetVisibility(true);
+    fDetLogicalVolume->SetVisAttributes(yellow);
 
     // Ritorno dei volumi fisici in ordine
     std::vector<G4VPhysicalVolume*> fDet_Phys = {fDet_phys1, fDet_phys2, fDet_phys3, fDet_phys4, fDet_phys5};
     return fDet_Phys;
 }
 
-/*
-G4VPhysicalVolume* FlashDetectorConstruction::ConstructWrap(G4double CollRadius) {
 
-    // Creazione del cubo cavo
-    G4double outerCubeSize = fPhantomSizeX * 0.5 + DetectorDistance ;  // Dimensioni del cubo esterno
-    G4double innerCubeSize = fPhantomSizeX * 0.5;   // Dimensioni del cubo interno (phantom)
+G4VPhysicalVolume* FlashDetectorConstruction::ConstructWrap() {
+
+    G4double detectorThickness = 0.1 * cm;
+    G4double outerCubeSize = fPhantomSizeX + 2 * DetectorDistance - detectorThickness ;  // Dimensioni del cubo esterno
+    G4double innerCubeSize = fPhantomSizeX ;   // Dimensioni del cubo interno (phantom)
 
     G4Box* solidOuterCube = new G4Box("OuterCube", outerCubeSize / 2, outerCubeSize / 2, outerCubeSize / 2);
     G4Box* solidInnerCube = new G4Box("InnerCube", innerCubeSize / 2, innerCubeSize / 2, innerCubeSize / 2);
     G4SubtractionSolid* solidHollowCube = new G4SubtractionSolid("HollowCube", solidOuterCube, solidInnerCube);
 
-    G4Tubs* solidApplicatorHole = new G4Tubs("ApplicatorHole", 0, CollRadius , outerCubeSize / 2, 0. * deg, 360. * deg);
-    G4SubtractionSolid* solidExternalWrap = new G4SubtractionSolid("ExternalWrap", solidHollowCube, solidApplicatorHole);
+    G4Trd* solidTrapezoid = new G4Trd("Trapezoid",
+                                               outerCubeSize / 2,         // Base maggiore
+                                               innerCubeSize / 2,         // Base minore
+                                               outerCubeSize / 2,     // Dimensione lungo X
+                                               innerCubeSize / 2,    // Dimensione lungo Y
+                                               (outerCubeSize - innerCubeSize) / 2 /2 );   // Altezza
 
-    // Creazione del materiale (ad esempio, vuoto per il cubo esterno)
-    G4Material* material = G4Material::GetMaterial("G4_WATER");  // O qualsiasi altro materiale
+    G4RotationMatrix* rotationMatrix = new G4RotationMatrix();
+    rotationMatrix->rotateY(-90.0 * deg);  // 90 gradi di rotazione lungo l'asse Y
 
-    // Creazione del volume logico
+    G4SubtractionSolid* solidExternalWrap = new G4SubtractionSolid(
+        "ExternalWrap", solidHollowCube, solidTrapezoid, rotationMatrix, G4ThreeVector(- innerCubeSize / 2 -(outerCubeSize - innerCubeSize) / 2 /2, 0, 0));
+
+
+    solidExternalWrap = new G4SubtractionSolid(
+        "ExternalWrap", solidExternalWrap, fPinhole_Cilinder, 0, G4ThreeVector(0., 0., 0.));
+
+
+
+    G4Material* material = G4Material::GetMaterial("G4_AIR");  
+
     G4LogicalVolume* logicalExternalWrap = new G4LogicalVolume(solidExternalWrap, material, "ExternalWrapLog");
-
-    // Posizionamento nel volume fisico (per esempio, al centro)
-    G4VPhysicalVolume* Wrap_phys = new G4PVPlacement(
-        nullptr,                   // Rotazione (nessuna)
-        G4ThreeVector(0., 0., 0.), // Posizione
-        logicalExternalWrap,         // Volume logico
-        "ExternalWrapPhys",            // Nome del volume fisico
-        nullptr,                   // Volume madre (se applicabile)
-        false,                     // No replica
-        0);                        // Numero di replica
-
+    fWrap_phys = new G4PVPlacement(0, fPhantomPosition,  "ExternalWrapPhys", logicalExternalWrap, 
+                                    physicalTreatmentRoom,    false, 0, fCheckOverlaps );
 
     // Attributi di visualizzazione
     red = new G4VisAttributes(G4Colour(1.0, 0.0, 0.0));
     red->SetVisibility(true);
     logicalExternalWrap->SetVisAttributes(red);
 
-
-
-    // Restituire il volume fisico del wrap
-    return Wrap_phys;  // Assicurati che fWrap_physical sia correttamente definito
-}*/
+    return fWrap_phys;  
+}
 
 
 
@@ -532,12 +538,12 @@ G4VPhysicalVolume *FlashDetectorConstruction::Construct() {
     // -----------------------------
     // Detector pannel
     //------------------------------
-    Detector_physical = ConstructDetector();
+    //Detector_physical = ConstructDetector();
     
     // -----------------------------
     // Wrap
     //------------------------------
-    //fWrap_physical = ConstructWrap(Collimator->fOuterRadiusFirstApplicatorFlash);
+    fWrap_physical = ConstructWrap();
 
     DefineSurfaces(); 
     return physicalTreatmentRoom;

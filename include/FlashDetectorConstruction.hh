@@ -38,6 +38,7 @@
 #include "G4UserLimits.hh"
 #include "G4OpticalSurface.hh"
 #include "G4LogicalBorderSurface.hh"
+#include "G4SubtractionSolid.hh"
 
 class G4VPhysicalVolume;
 class G4LogicalVolume;
@@ -66,7 +67,7 @@ public:
   //The functions to create Phantom, Pinhole and Photodetector - and so set the carachteristic of the detector
   G4VPhysicalVolume *ConstructPhantom(G4double CollPos);
   std::vector<G4VPhysicalVolume*> ConstructPinhole(G4double CollRadius);
-  //G4VPhysicalVolume *ConstructWrap(G4double CollRadius);
+  G4VPhysicalVolume *ConstructWrap();
 
   std::vector<G4VPhysicalVolume*> ConstructDetector();
   virtual G4VPhysicalVolume *Construct();
@@ -87,6 +88,7 @@ public:
   G4VisAttributes *blue;
   G4VisAttributes *green;
   G4VisAttributes *gray;
+  G4VisAttributes *yellow;
 
   
 private:
@@ -110,8 +112,9 @@ private:
   G4double PinholeDistance;
   G4double DetectorDistance;
 
-  G4double fDet_thickness,fDet_width, fDet_sub_thickness; 
-  G4double fDetectorPosition_t, fDetectorPosition_l, fAirGap_phantom_det;
+  G4double fDet_thickness, fDet_width, fDet_sub_thickness;  //non usati
+  G4double fDetectorPosition_t, fDetectorPosition_l;
+
   //Materials 
   G4Element *Si;
   G4Element *C;
@@ -119,13 +122,15 @@ private:
   G4Material *DetectorMaterial;
 
   //Phantom
-  G4Box *fPhantom;
+  G4Box *fPhantom_Box;
   G4LogicalVolume *fPhantomLogicalVolume;
   G4VPhysicalVolume *fPhant_phys;
   G4VPhysicalVolume *fPhantom_physical;
 
 
   //Pinhole 
+  G4SubtractionSolid* fPinhole_Cilinder;
+  G4SubtractionSolid* fPinhole_Cilinder_back;
   G4LogicalVolume *PinholeLogicalVolume;
   G4LogicalVolume *PinholeLogicalVolume_back;
   G4VPhysicalVolume *Pihole_phys1, *Pihole_phys2, *Pihole_phys3, *Pihole_phys4, *Pihole_phys5;
@@ -139,9 +144,9 @@ private:
 
 
   //Wrap
-  //G4LogicalVolume *WrapLogicalVolume;
-  //G4VPhysicalVolume *Wrap_phys;
-  //G4VPhysicalVolume *fWrap_physical;
+  G4LogicalVolume *WrapLogicalVolume;
+  G4VPhysicalVolume *fWrap_phys;
+  G4VPhysicalVolume *fWrap_physical;
 
 
 
