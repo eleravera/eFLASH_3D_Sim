@@ -281,7 +281,7 @@ std::vector<G4VPhysicalVolume*> FlashDetectorConstruction::ConstructPinhole(G4do
     */
     G4double pinholeThickness = 0.11*mm;
     G4double pinholeSquareSize = fPhantomSizeX + PinholeDistance * 2;
-    G4double innerRadius = 0.400 * mm;
+    G4double innerRadius = 0.300 * mm;
 
     // Geometry
     G4Trd* squareSolid = new G4Trd("BlackSheet", (pinholeSquareSize + pinholeThickness) / 2, 
