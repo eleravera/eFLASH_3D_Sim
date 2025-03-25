@@ -66,7 +66,7 @@ public:
   //The functions to create Phantom, Pinhole and Photodetector - and so set the carachteristic of the detector
   G4VPhysicalVolume *ConstructPhantom(G4double CollPos);
   std::vector<G4VPhysicalVolume*> ConstructPinhole(G4double CollRadius);
-  G4VPhysicalVolume *ConstructWrap(G4double CollRadius);
+  //G4VPhysicalVolume *ConstructWrap(G4double CollRadius);
 
   std::vector<G4VPhysicalVolume*> ConstructDetector();
   virtual G4VPhysicalVolume *Construct();
@@ -139,9 +139,9 @@ private:
 
 
   //Wrap
-  G4LogicalVolume *WrapLogicalVolume;
-  G4VPhysicalVolume *Wrap_phys;
-  G4VPhysicalVolume *fWrap_physical;
+  //G4LogicalVolume *WrapLogicalVolume;
+  //G4VPhysicalVolume *Wrap_phys;
+  //G4VPhysicalVolume *fWrap_physical;
 
 
 

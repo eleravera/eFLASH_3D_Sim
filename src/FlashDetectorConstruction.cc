@@ -457,7 +457,7 @@ std::vector<G4VPhysicalVolume*> FlashDetectorConstruction::ConstructDetector(){
     return fDet_Phys;
 }
 
-
+/*
 G4VPhysicalVolume* FlashDetectorConstruction::ConstructWrap(G4double CollRadius) {
 
     // Creazione del cubo cavo
@@ -497,7 +497,7 @@ G4VPhysicalVolume* FlashDetectorConstruction::ConstructWrap(G4double CollRadius)
 
     // Restituire il volume fisico del wrap
     return Wrap_phys;  // Assicurati che fWrap_physical sia correttamente definito
-}
+}*/
 
 
 
