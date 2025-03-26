@@ -94,9 +94,9 @@ void FlashSteppingAction::HandleBoundaryProcesses(const G4Step* aStep, G4StepPoi
             case FresnelReflection: FresnelReflectionCount++; PhotonReflectionCount++; break;
             case TotalInternalReflection:
                 TotalInternalReflectionCount++; PhotonTotalInternalReflectionCount++;
-                if (PhotonTotalInternalReflectionCount > 10) {
+                /*if (PhotonTotalInternalReflectionCount > 10) {
                     track->SetTrackStatus(fStopAndKill);
-                }
+                }*/
                 break;
             default: break;
         }
@@ -124,15 +124,13 @@ void FlashSteppingAction::CheckPhotonExit(const G4Step* aStep, G4StepPoint* preS
         return;
     }
 
-
-
     // Get the names of the volumes
     G4String volumeName = postStep->GetPhysicalVolume()->GetLogicalVolume()->GetName();
     G4String prevolumeName = preStep->GetPhysicalVolume()->GetLogicalVolume()->GetName();
 
-    // Check if the photon is exiting the 'phantomLog' to the 'logicTreatmentRoom'
-    if (prevolumeName == "phantomLog" && volumeName == "logicTreatmentRoom") {
-        // Get the position where the photon exits the 'phantomLog' (before it enters 'logicTreatmentRoom')
+    // Check if the photon is exiting the 'phantomLog' to the 'WrapLog'
+    if (prevolumeName == "phantomLog" && volumeName == "WrapLog") {
+        // Get the position where the photon exits the 'phantomLog' (before it enters 'WrapLog')
         G4ThreeVector exitPosition = preStep->GetPosition();
         
         // Get the momentum of the photon before it exits (inside 'phantomLog')
@@ -171,7 +169,7 @@ void FlashSteppingAction::CheckPhotonExit(const G4Step* aStep, G4StepPoint* preS
 void FlashSteppingAction::HandlePhotonDetection(const G4Step* aStep, G4StepPoint* preStep, G4StepPoint* postStep) {
     G4String preVolumeName = preStep->GetPhysicalVolume()->GetLogicalVolume()->GetName();
     G4String postVolumeName = postStep->GetPhysicalVolume()->GetLogicalVolume()->GetName();
-    if (preVolumeName == "logicTreatmentRoom" && postVolumeName == "DetectorLog") {
+    if (preVolumeName == "WrapLog" && postVolumeName == "DetectorLog") {
         G4ThreeVector position = aStep->GetTrack()->GetPosition();
         detection photon_maps(position.x() / mm, position.y() / mm, position.z() / mm);
         detection_vector.push_back(photon_maps);
@@ -188,7 +186,7 @@ void FlashSteppingAction::UserSteppingAction(const G4Step *aStep) {
         //HandleBoundaryProcesses(aStep, preStep, postStep);
 
         //CheckPhotonExit(aStep, preStep, postStep); //- > per studiare Snell 
-        HandlePhotonDetection(aStep, preStep, postStep); //-> per salvare i dati e le mappe. 
+        //HandlePhotonDetection(aStep, preStep, postStep); //-> per salvare i dati e le mappe. 
     }
 }
 

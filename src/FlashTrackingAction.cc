@@ -16,6 +16,7 @@ FlashTrackingAction::FlashTrackingAction(FlashSteppingAction* steppingAction)
       count_treatmentRoom(0),
       count_pinhole(0),
       count_detector(0),
+      count_wrap(0),
       count_other(0),
       count_outOfWorld(0) {}
 
@@ -96,7 +97,7 @@ void FlashTrackingAction::ProcessPhotonData(const G4Track* aTrack, const G4Step*
 
 
     //check per sapere dove viene assorbito il fotone
-    /*if (fSteppingAction->PhotonTotalInternalReflectionCount==0 &&  fSteppingAction->PhotonReflectionCount ==0   &&  fSteppingAction->PhotonRefractionCount==0){
+    if (fSteppingAction->PhotonTotalInternalReflectionCount==0 &&  fSteppingAction->PhotonReflectionCount ==0   &&  fSteppingAction->PhotonRefractionCount==0){
         G4ThreeVector finalPosition = postStep->GetPosition();
         G4double x_final_mm = finalPosition.x() / mm;
         G4double y_final_mm = finalPosition.y() / mm;
@@ -111,7 +112,7 @@ void FlashTrackingAction::ProcessPhotonData(const G4Track* aTrack, const G4Step*
           << z_final_mm << std::endl 
           << std::endl;
 
-    }*/
+    }
 }
 
 
@@ -135,6 +136,9 @@ void FlashTrackingAction::DetermineAbsorptionLocation(const G4Step* aStep, photo
         } else if (PostvolumeName == "DetectorLog") {
             loc = photonProcess::DETECTOR;
             count_detector++;  // Increment counter for detector
+        } else if (PostvolumeName == "WrapLog") {
+            loc = photonProcess::WRAP;
+            count_wrap++;  // Increment counter for wrap
         } else {
             loc = photonProcess::OTHER;
             count_other++;  // Increment counter for other
@@ -165,6 +169,7 @@ void FlashTrackingAction::PostUserTrackingAction(const G4Track* aTrack) {
   G4cout << "Photons absorbed in Treatment Room: " << count_treatmentRoom << G4endl;
   G4cout << "Photons absorbed in Pinhole: " << count_pinhole << G4endl;
   G4cout << "Photons absorbed in Detector: " << count_detector << G4endl;
+  G4cout << "Photons absorbed in Wrap: " << count_wrap << G4endl;
   G4cout << "Photons absorbed in Other location: " << count_other << G4endl;
   G4cout << "Photons out of world: " << count_outOfWorld << G4endl<<G4endl;
   

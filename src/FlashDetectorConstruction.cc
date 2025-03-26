@@ -170,21 +170,10 @@ void FlashDetectorConstruction::DefineMaterials() {
 
     //Wrap material
     WrapMaterial = nist->FindOrBuildMaterial("G4_PLASTIC_SC_VINYLTOLUENE");//(EJ200
-    /*    
-    //An alternative would be: 
-    EJ200 = new G4Material("EJ200", 1.023*g/cm3, 2); //eljen technology 1.023
-    G4int natoms;
-    EJ200->AddElement(H, natoms = 524); // su G4 nist database
-    EJ200->AddElement(C, natoms = 475);
-    */
-    std::vector<G4double> rindex_phantom     = {1.58, 1.58};
-    std::vector<G4double> absorption_phantom = {380.*cm, 380.*cm};
-    std::vector<G4double> scint_spectrum = {0.5, 0.5};
-
-    G4MaterialPropertiesTable* MPT_Wrap = new G4MaterialPropertiesTable();
+    /*G4MaterialPropertiesTable* MPT_Wrap = new G4MaterialPropertiesTable();
     MPT_Wrap->AddProperty("RINDEX", energy, rindex_phantom);
     MPT_Wrap->AddProperty("ABSLENGTH", energy, absorption_phantom);
-    WrapMaterial->SetMaterialPropertiesTable(MPT_Wrap);
+    WrapMaterial->SetMaterialPropertiesTable(MPT_Wrap);*/
 
 
     G4cout << "----- Material properties table printed by DetectorConstruction: -----" << G4endl;
@@ -193,7 +182,7 @@ void FlashDetectorConstruction::DefineMaterials() {
     G4cout << "Pinhole G4MaterialPropertiesTable:" << G4endl;
     MPT_Pinhole->DumpTable();
     G4cout << "Wrap G4MaterialPropertiesTable:" << G4endl;
-    MPT_Wrap->DumpTable();
+    //MPT_Wrap->DumpTable();
     G4cout << "Air G4MaterialPropertiesTable:" << G4endl;
     MPT_Air->DumpTable();
   }

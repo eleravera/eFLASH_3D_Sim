@@ -59,6 +59,7 @@ private:
     int count_treatmentRoom;
     int count_pinhole;
     int count_detector;
+    int count_wrap;
     int count_other;
     int count_outOfWorld;
 

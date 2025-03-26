@@ -34,7 +34,8 @@ public:
         PINHOLE = 2,
         DETECTOR = 3,
         OUT_OF_WORLD = 4,
-        OTHER = 5
+        OTHER = 5,
+        WRAP = 6
     };
 
     uint32_t event_id;
@@ -84,6 +85,8 @@ public:
             case OTHER:
                 std::cout << "OTHER";
                 break;
+            case WRAP:
+                std::cout << "WRAP";
         }
         std::cout << std::endl << std::endl;
     }
