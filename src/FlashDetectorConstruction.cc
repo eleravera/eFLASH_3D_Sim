@@ -507,8 +507,7 @@ G4VPhysicalVolume* FlashDetectorConstruction::ConstructWrap() {
     G4SubtractionSolid* solidWrap = new G4SubtractionSolid("solidWrap", solidHollowCube, solidTrapezoid, rotationMatrix, 
                                             G4ThreeVector(- innerCubeSize / 2 -(outerCubeSize - innerCubeSize) / 2 /2, 0, 0));
 
-    G4Material* material = G4Material::GetMaterial("G4_AIR");  
-    WrapLogicalVolume = new G4LogicalVolume(solidWrap, material, "WrapLog");
+    WrapLogicalVolume = new G4LogicalVolume(solidWrap, airNist, "WrapLog");
     G4VPhysicalVolume *Wrap_phys  = new G4PVPlacement(0, fPhantomPosition, WrapLogicalVolume, "WrapPhys", 
                                     logicTreatmentRoom, false, 0, fCheckOverlaps );
 
