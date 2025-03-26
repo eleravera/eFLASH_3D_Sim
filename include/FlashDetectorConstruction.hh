@@ -102,7 +102,11 @@ private:
 
 
   G4OpticalSurface *PhantomOpticalSurface;
+  G4LogicalBorderSurface *PhantomWrapSurface; 
+
+  G4OpticalSurface *PhantomWrapOpticalSurface;
   G4LogicalBorderSurface *PhantomSurface; 
+
 
   //Attributes set by some public functions, such as SetAirGap, SetPhantomSize.. 
   G4double fAirGap;
@@ -113,7 +117,6 @@ private:
   G4double DetectorDistance;
 
   G4double fDet_thickness, fDet_width, fDet_sub_thickness;  //non usati
-  G4double fDetectorPosition_t, fDetectorPosition_l;
 
   //Materials 
   G4Element *Si;
@@ -129,8 +132,6 @@ private:
 
 
   //Pinhole 
-  G4double PinholePosition_l; 
-  G4double PinholePosition_t; 
   G4SubtractionSolid* fPinhole_Cilinder;
   G4SubtractionSolid* fPinhole_Cilinder_back;
   G4LogicalVolume *PinholeLogicalVolume;
@@ -146,8 +147,7 @@ private:
 
   //Wrap
   G4LogicalVolume *WrapLogicalVolume;
-  G4VPhysicalVolume *fWrap_phys;
-  G4VPhysicalVolume *fWrap_physical;
+  G4VPhysicalVolume *Wrap_physical;
 
 
 
