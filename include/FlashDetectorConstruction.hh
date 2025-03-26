@@ -129,6 +129,8 @@ private:
 
 
   //Pinhole 
+  G4double PinholePosition_l; 
+  G4double PinholePosition_t; 
   G4SubtractionSolid* fPinhole_Cilinder;
   G4SubtractionSolid* fPinhole_Cilinder_back;
   G4LogicalVolume *PinholeLogicalVolume;
