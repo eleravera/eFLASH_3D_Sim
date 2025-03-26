@@ -7,7 +7,6 @@
 /run/verbose 0
 /tracking/verbose 0
 
-
 #
 #
 # Initialize kernel
@@ -22,7 +21,7 @@
 
 #/run/beamOn 3
 /control/execute vis.mac
-
+/geometry/test/run
 
 
 
