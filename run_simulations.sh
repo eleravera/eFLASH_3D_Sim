@@ -17,7 +17,7 @@ do
   seed=$((5000 + i))
 
   # Definisce il nome del file di output
-  output_file="$output_dir/d15cm_hole1500um_${seed}.raw" 
+  output_file="$output_dir/d15cm_hole150um_${seed}.raw" 
   log_file="$output_dir/d15cm_log_hole150um_${seed}.log"
   
   # Comando per lanciare la simulazione
