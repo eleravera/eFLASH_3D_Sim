@@ -118,35 +118,48 @@ FlashDetectorConstruction::~FlashDetectorConstruction() {
 
 void FlashDetectorConstruction::DefineMaterials() {
     std::vector<G4double> energy     = {2.48 * eV, 3.1 * eV}; //sto generando solo tra i 400 e i 500 nm. lambda [nm] = 1240/E[eV]
-    
-    // Filled with air
     std::vector<G4double> rindex_air     = {1.0, 1.0};
+
+    std::vector<G4double> rindex_phantom     = {1.58, 1.58};
+    std::vector<G4double> absorption_phantom = {380.*cm, 380.*cm};
+    std::vector<G4double> scint_spectrum = {0.5, 0.5};
+
+    std::vector<G4double> rindex_pinhole     = {0., 0.};
+
+    // Filled with air
     airNist = G4NistManager::Instance()->FindOrBuildMaterial("G4_AIR", false);
     G4MaterialPropertiesTable* MPT_Air = new G4MaterialPropertiesTable();
     MPT_Air->AddProperty("RINDEX", energy, rindex_air);
     airNist->SetMaterialPropertiesTable(MPT_Air);
 
     //Detector Material:
-    nist = G4NistManager::Instance();
     G4bool isotopes = false;
-    Si = nist->FindOrBuildElement("Si", isotopes);
-    C = nist->FindOrBuildElement("C", isotopes);
+    Si = G4NistManager::Instance()->FindOrBuildElement("Si", isotopes);
+    C = G4NistManager::Instance()->FindOrBuildElement("C", isotopes);
     G4double fDensity_SiC=3.22*g/cm3;
     SiC=new G4Material("SiC", fDensity_SiC,2);
     SiC->AddElement(Si,1);
     SiC->AddElement(C,1);
-    DetectorMaterial=SiC;
+    DetectorMaterial = SiC;
+    G4MaterialPropertiesTable* MPT_Detector = new G4MaterialPropertiesTable();
+    MPT_Detector->AddProperty("RINDEX", energy, rindex_pinhole);
+    DetectorMaterial->SetMaterialPropertiesTable(MPT_Detector); 
+    G4cout << G4endl<< "-> Detector G4MaterialPropertiesTable:" << G4endl;
+    MPT_Detector->DumpTable();
 
 
     //Pinhole Material: 
-    PinholeMaterial = DetectorMaterial; //nist->FindOrBuildMaterial("G4_WATER"); 
-    std::vector<G4double> rindex_pinhole     = {0., 0.};
+    PinholeMaterial = DetectorMaterial; 
     G4MaterialPropertiesTable* MPT_Pinhole = new G4MaterialPropertiesTable();
     MPT_Pinhole->AddProperty("RINDEX", energy, rindex_pinhole);
+    PinholeMaterial->SetMaterialPropertiesTable(MPT_Pinhole); 
 
+
+    //G4cout << G4endl<< "-> Detector G4MaterialPropertiesTable:" << G4endl;
+    //MPT_Detector->DumpTable();
 
     //Phantom Material 
-    fPhantomMaterial = nist->FindOrBuildMaterial("G4_PLASTIC_SC_VINYLTOLUENE");//(EJ200
+    fPhantomMaterial = G4NistManager::Instance()->FindOrBuildMaterial("G4_PLASTIC_SC_VINYLTOLUENE");//(EJ200
     /*    
     //An alternative would be: 
     EJ200 = new G4Material("EJ200", 1.023*g/cm3, 2); //eljen technology 1.023
@@ -154,37 +167,41 @@ void FlashDetectorConstruction::DefineMaterials() {
     EJ200->AddElement(H, natoms = 524); // su G4 nist database
     EJ200->AddElement(C, natoms = 475);
     */
-    std::vector<G4double> rindex_phantom     = {1.58, 1.58};
-    std::vector<G4double> absorption_phantom = {380.*cm, 380.*cm};
-    std::vector<G4double> scint_spectrum = {0.5, 0.5};
-
     G4MaterialPropertiesTable* MPT_Phantom = new G4MaterialPropertiesTable();
     MPT_Phantom->AddProperty("RINDEX", energy, rindex_phantom);
     MPT_Phantom->AddProperty("ABSLENGTH", energy, absorption_phantom);
-    MPT_Phantom->AddConstProperty("SCINTILLATIONYIELD", 10000./MeV);
+    MPT_Phantom->AddConstProperty("SCINTILLATIONYIELD", 100./MeV);
     MPT_Phantom-> AddProperty("SCINTILLATIONCOMPONENT1", energy, scint_spectrum);
     MPT_Phantom->AddConstProperty("RESOLUTIONSCALE", 1.0);
     MPT_Phantom->AddConstProperty("SCINTILLATIONTIMECONSTANT1", 2.1*ns);
     MPT_Phantom->AddConstProperty("SCINTILLATIONRISETIME1", 0.9*ns);   
     fPhantomMaterial->SetMaterialPropertiesTable(MPT_Phantom);
 
+
+   // G4cout << G4endl<< "-> Detector G4MaterialPropertiesTable:" << G4endl;
+    MPT_Detector->DumpTable();
+
+
     //Wrap material
-    WrapMaterial = nist->FindOrBuildMaterial("G4_PLASTIC_SC_VINYLTOLUENE");//(EJ200
-    /*G4MaterialPropertiesTable* MPT_Wrap = new G4MaterialPropertiesTable();
+    WrapMaterial = G4NistManager::Instance()->FindOrBuildMaterial("G4_POLYSTYRENE"); 
+    G4MaterialPropertiesTable* MPT_Wrap = new G4MaterialPropertiesTable();
     MPT_Wrap->AddProperty("RINDEX", energy, rindex_phantom);
     MPT_Wrap->AddProperty("ABSLENGTH", energy, absorption_phantom);
-    WrapMaterial->SetMaterialPropertiesTable(MPT_Wrap);*/
+    WrapMaterial->SetMaterialPropertiesTable(MPT_Wrap); 
 
 
-    G4cout << "----- Material properties table printed by DetectorConstruction: -----" << G4endl;
-    G4cout << "Phantom G4MaterialPropertiesTable:" << G4endl;
-    MPT_Phantom->DumpTable();
-    G4cout << "Pinhole G4MaterialPropertiesTable:" << G4endl;
-    MPT_Pinhole->DumpTable();
-    G4cout << "Wrap G4MaterialPropertiesTable:" << G4endl;
-    //MPT_Wrap->DumpTable();
-    G4cout << "Air G4MaterialPropertiesTable:" << G4endl;
+    G4cout << "----- Material properties table printed by DetectorConstruction: -----" << G4endl<<G4endl;
+    G4cout << G4endl<< "-> Air G4MaterialPropertiesTable:" << G4endl;
     MPT_Air->DumpTable();
+    G4cout << G4endl<< "-> Phantom G4MaterialPropertiesTable:" << G4endl;
+    MPT_Phantom->DumpTable();
+    G4cout << G4endl<< "-> Wrap G4MaterialPropertiesTable:" << G4endl;
+    MPT_Wrap->DumpTable();    
+    G4cout << G4endl<< "-> Pinhole G4MaterialPropertiesTable:" << G4endl;
+    MPT_Pinhole->DumpTable();
+    G4cout << G4endl<< "-> Detector G4MaterialPropertiesTable:" << G4endl;
+    MPT_Detector->DumpTable();
+    G4NistManager::Instance()->ListMaterials("all");
   }
 
 
@@ -206,14 +223,14 @@ void FlashDetectorConstruction::DefineSurfaces(){
 
 
     //Surface: Phantom-wrap
-    PhantomWrapOpticalSurface = new G4OpticalSurface("PhantomWrapOpticalSurface");
+    /*PhantomWrapOpticalSurface = new G4OpticalSurface("PhantomWrapOpticalSurface");
     PhantomWrapOpticalSurface->SetType(dielectric_dielectric);  
     PhantomWrapOpticalSurface->SetModel(unified); 
     PhantomWrapOpticalSurface->SetFinish(polished);  
     G4MaterialPropertiesTable* WrappingProperty2 = new G4MaterialPropertiesTable();
     WrappingProperty2->AddProperty("REFLECTIVITY", energy, reflectivity_phantom); 
     PhantomWrapOpticalSurface->SetMaterialPropertiesTable(WrappingProperty2);
-    PhantomWrapSurface = new G4LogicalBorderSurface("PhantomWrapOpticalSurface", fPhantom_physical, Wrap_physical, PhantomWrapOpticalSurface);
+    PhantomWrapSurface = new G4LogicalBorderSurface("PhantomWrapOpticalSurface", fPhantom_physical, Wrap_physical, PhantomWrapOpticalSurface);*/
 }
 
 
@@ -302,7 +319,7 @@ std::vector<G4VPhysicalVolume*> FlashDetectorConstruction::ConstructPinhole() {
     G4double pinholeThickness = 0.11*mm;
     G4double pinholeSquareSize = fPhantomSizeX + PinholeDistance * 2;
     G4double innerRadius = 0.300 * mm;
-    G4double innerRadius_back = 10 * cm;
+    G4double innerRadius_back = 8 * cm;
     
 
     // Geometry
@@ -516,7 +533,7 @@ G4VPhysicalVolume* FlashDetectorConstruction::ConstructWrap() {
     G4SubtractionSolid* solidWrap = new G4SubtractionSolid("solidWrap", solidHollowCube, solidTrapezoid, rotationMatrix, 
                                             G4ThreeVector(- innerCubeSize / 2 -(outerCubeSize - innerCubeSize) / 2 /2, 0, 0));
 
-    WrapLogicalVolume = new G4LogicalVolume(solidWrap, airNist, "WrapLog");
+    WrapLogicalVolume = new G4LogicalVolume(solidWrap, WrapMaterial, "WrapLog");
     G4VPhysicalVolume *Wrap_phys  = new G4PVPlacement(0, fPhantomPosition, WrapLogicalVolume, "WrapPhys", 
                                     logicTreatmentRoom, false, 0, fCheckOverlaps );
 
