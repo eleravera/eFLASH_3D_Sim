@@ -188,7 +188,7 @@ void FlashSteppingAction::UserSteppingAction(const G4Step *aStep) {
         //HandleBoundaryProcesses(aStep, preStep, postStep);
 
         //CheckPhotonExit(aStep, preStep, postStep); //- > per studiare Snell 
-        //HandlePhotonDetection(aStep, preStep, postStep); //-> per salvare i dati e le mappe. 
+        HandlePhotonDetection(aStep, preStep, postStep); //-> per salvare i dati e le mappe. 
     }
 }
 

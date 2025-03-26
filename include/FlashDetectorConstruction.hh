@@ -98,6 +98,7 @@ private:
   G4Material *airNist;
   G4Material *fPhantomMaterial;
   G4Material *PinholeMaterial;
+  G4Material *WrapMaterial; 
   Applicator *Collimator;
 
 
