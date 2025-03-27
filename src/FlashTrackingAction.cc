@@ -147,6 +147,7 @@ void FlashTrackingAction::DetermineAbsorptionLocation(const G4Step* aStep, photo
         loc = photonProcess::OUT_OF_WORLD;
         count_outOfWorld++;  // Increment counter for photons out of world
     }
+
 }
 
 

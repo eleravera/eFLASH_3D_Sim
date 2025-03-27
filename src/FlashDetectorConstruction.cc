@@ -49,6 +49,10 @@
 #include "G4Tubs.hh"
 #include "G4Trd.hh"
 #include "G4Tet.hh"
+#include "G4LogicalVolumeStore.hh"
+#include "G4PhysicalVolumeStore.hh"
+#include "G4RegionStore.hh"
+#include "G4LogicalBorderSurface.hh"
 
 #include "G4GeometryManager.hh"
 #include "G4GeometryTolerance.hh"
@@ -102,7 +106,6 @@ FlashDetectorConstruction::FlashDetectorConstruction()
 
     DefineMaterials();
     fDetectorMessenger = new FlashDetectorMessenger(this);
-
     SetAirGap(0.011*cm); // Set the air gap between the water phantom and the end of the applicator
     SetPhantomSize(10. *cm, 10. *cm, 10. *cm);
     SetPinholeDistance(15 *cm); // Set the air gap between the water phantom and the pinhole
@@ -119,11 +122,9 @@ FlashDetectorConstruction::~FlashDetectorConstruction() {
 void FlashDetectorConstruction::DefineMaterials() {
     std::vector<G4double> energy     = {2.48 * eV, 3.1 * eV}; //sto generando solo tra i 400 e i 500 nm. lambda [nm] = 1240/E[eV]
     std::vector<G4double> rindex_air     = {1.0, 1.0};
-
     std::vector<G4double> rindex_phantom     = {1.58, 1.58};
     std::vector<G4double> absorption_phantom = {380.*cm, 380.*cm};
     std::vector<G4double> scint_spectrum = {0.5, 0.5};
-
     std::vector<G4double> rindex_pinhole     = {0., 0.};
 
     // Filled with air
@@ -149,21 +150,14 @@ void FlashDetectorConstruction::DefineMaterials() {
     PinholeMaterial = G4NistManager::Instance()->FindOrBuildMaterial("G4_Si", false);
     G4MaterialPropertiesTable* MPT_Pinhole = new G4MaterialPropertiesTable();
     MPT_Pinhole->AddProperty("RINDEX", energy, rindex_pinhole);
-    PinholeMaterial->SetMaterialPropertiesTable(MPT_Pinhole); 
+    //PinholeMaterial->SetMaterialPropertiesTable(MPT_Pinhole); 
 
     //Phantom Material 
-    fPhantomMaterial = G4NistManager::Instance()->FindOrBuildMaterial("G4_PLASTIC_SC_VINYLTOLUENE");//(EJ200
-    /*    
-    //An alternative would be: 
-    EJ200 = new G4Material("EJ200", 1.023*g/cm3, 2); //eljen technology 1.023
-    G4int natoms;
-    EJ200->AddElement(H, natoms = 524); // su G4 nist database
-    EJ200->AddElement(C, natoms = 475);
-    */
+    fPhantomMaterial = G4NistManager::Instance()->FindOrBuildMaterial("G4_PLASTIC_SC_VINYLTOLUENE");//Alternativelly EJ200
     G4MaterialPropertiesTable* MPT_Phantom = new G4MaterialPropertiesTable();
     MPT_Phantom->AddProperty("RINDEX", energy, rindex_phantom);
     MPT_Phantom->AddProperty("ABSLENGTH", energy, absorption_phantom);
-    MPT_Phantom->AddConstProperty("SCINTILLATIONYIELD", 100./MeV);
+    MPT_Phantom->AddConstProperty("SCINTILLATIONYIELD", 10000./MeV);
     MPT_Phantom-> AddProperty("SCINTILLATIONCOMPONENT1", energy, scint_spectrum);
     MPT_Phantom->AddConstProperty("RESOLUTIONSCALE", 1.0);
     MPT_Phantom->AddConstProperty("SCINTILLATIONTIMECONSTANT1", 2.1*ns);
@@ -189,7 +183,6 @@ void FlashDetectorConstruction::DefineMaterials() {
     MPT_Pinhole->DumpTable();
     G4cout << G4endl<< "-> Detector G4MaterialPropertiesTable:" << G4endl;
     MPT_Detector->DumpTable();
-    G4NistManager::Instance()->ListMaterials("all");
   }
 
 
@@ -199,15 +192,17 @@ void FlashDetectorConstruction::DefineSurfaces(){
     //Surface: Phantom-world
     std::vector<G4double> reflectivity_phantom = {1., 1.};
     std::vector<G4double> energy     = {2.48 * eV, 3.1 * eV}; //lamda in range 400-500 nm; lambda [nm] = 1240/E[eV]
+    std::vector<G4double> reflectivity_wrap = reflectivity_phantom;
+    std::vector<G4double> reflectivity_pinhole = {0., 0.};
 
-    PhantomOpticalSurface = new G4OpticalSurface("PhantomOpticalSurface");
-    PhantomOpticalSurface->SetType(dielectric_dielectric);  
-    PhantomOpticalSurface->SetModel(unified); 
-    PhantomOpticalSurface->SetFinish(polished);  
-    G4MaterialPropertiesTable* WrappingProperty = new G4MaterialPropertiesTable();
-    WrappingProperty->AddProperty("REFLECTIVITY", energy, reflectivity_phantom); 
-    PhantomOpticalSurface->SetMaterialPropertiesTable(WrappingProperty);
-    PhantomSurface = new G4LogicalBorderSurface("PhantomOpticalSurface", fPhantom_physical, physicalTreatmentRoom, PhantomOpticalSurface);
+    PhantomAirOpticalSurface = new G4OpticalSurface("PhantomAirOpticalSurface");
+    PhantomAirOpticalSurface->SetType(dielectric_dielectric);  
+    PhantomAirOpticalSurface->SetModel(unified); 
+    PhantomAirOpticalSurface->SetFinish(polished);  
+    G4MaterialPropertiesTable* PhantomAirProperty = new G4MaterialPropertiesTable();
+    PhantomAirProperty->AddProperty("REFLECTIVITY", energy, reflectivity_phantom); 
+    PhantomAirOpticalSurface->SetMaterialPropertiesTable(PhantomAirProperty);
+    PhantomAirLogSurface = new G4LogicalBorderSurface("PhantomAirOpticalSurface", fPhantom_physical, physicalTreatmentRoom, PhantomAirOpticalSurface);
 
 
     //Surface: Phantom-wrap
@@ -215,10 +210,11 @@ void FlashDetectorConstruction::DefineSurfaces(){
     PhantomWrapOpticalSurface->SetType(dielectric_dielectric);  
     PhantomWrapOpticalSurface->SetModel(unified); 
     PhantomWrapOpticalSurface->SetFinish(polished);  
-    G4MaterialPropertiesTable* WrappingProperty2 = new G4MaterialPropertiesTable();
-    WrappingProperty2->AddProperty("REFLECTIVITY", energy, reflectivity_phantom); 
-    PhantomWrapOpticalSurface->SetMaterialPropertiesTable(WrappingProperty2);
-    PhantomWrapSurface = new G4LogicalBorderSurface("PhantomWrapOpticalSurface", fPhantom_physical, Wrap_physical, PhantomWrapOpticalSurface);
+    G4MaterialPropertiesTable* PhantomWrapProperty = new G4MaterialPropertiesTable();
+    PhantomWrapProperty->AddProperty("REFLECTIVITY", energy, reflectivity_wrap); 
+    PhantomWrapOpticalSurface->SetMaterialPropertiesTable(PhantomWrapProperty);
+    PhantomWrapLogSurface = new G4LogicalBorderSurface("PhantomWrapOpticalSurface", fPhantom_physical, Wrap_physical, PhantomWrapOpticalSurface);
+
 }
 
 
@@ -304,10 +300,10 @@ std::vector<G4VPhysicalVolume*> FlashDetectorConstruction::ConstructPinhole() {
     - Ensures proper alignment and non-overlapping placement of sheets inside the wrap mother volume.
     - Uses rotation matrices to orient the sheets correctly in the 3D space.
     */
-    G4double pinholeThickness = 0.11*mm;
+    G4double pinholeThickness = 0.12*mm;
     G4double pinholeSquareSize = fPhantomSizeX + PinholeDistance * 2;
     G4double innerRadius = 0.300 * mm;
-    G4double innerRadius_back = 8 * cm;
+    G4double innerRadius_back = 72.5 * mm;
     
 
     // Geometry
@@ -330,8 +326,8 @@ std::vector<G4VPhysicalVolume*> FlashDetectorConstruction::ConstructPinhole() {
     // Pinhole 1 - front (+x)
     G4RotationMatrix* rotationMatrix_y = new G4RotationMatrix();
     rotationMatrix_y->rotateY(90. * deg); // Rotazione attorno all'asse Y
-    G4VPhysicalVolume* Pinhole_phys1 = new G4PVPlacement(rotationMatrix_y, 
-                                                         G4ThreeVector(PinholePosition + fAirGap, 0., 0.), 
+    Pinhole_phys1 = new G4PVPlacement(rotationMatrix_y, 
+                                                         G4ThreeVector(PinholePosition, 0., 0.), 
                                                          PinholeLogicalVolume,
                                                          "pinholePhys1", 
                                                          WrapLogicalVolume, false, 0, fCheckOverlaps);
@@ -339,7 +335,7 @@ std::vector<G4VPhysicalVolume*> FlashDetectorConstruction::ConstructPinhole() {
     // Pinhole 2 - top (+y)
     G4RotationMatrix* rotationMatrix_x1 = new G4RotationMatrix();
     rotationMatrix_x1->rotateX(-90. * deg); // Rotazione attorno all'asse X
-    G4VPhysicalVolume* Pinhole_phys2 = new G4PVPlacement(rotationMatrix_x1, 
+    Pinhole_phys2 = new G4PVPlacement(rotationMatrix_x1, 
                                                          G4ThreeVector(0, PinholePosition, 0.), 
                                                          PinholeLogicalVolume, 
                                                          "pinholePhys2", 
@@ -348,7 +344,7 @@ std::vector<G4VPhysicalVolume*> FlashDetectorConstruction::ConstructPinhole() {
     // Pinhole 3 - bottom (-y)
     G4RotationMatrix* rotationMatrix_x2 = new G4RotationMatrix();
     rotationMatrix_x2->rotateX(90. * deg); // Rotazione attorno all'asse X
-    G4VPhysicalVolume* Pinhole_phys3 = new G4PVPlacement(rotationMatrix_x2, 
+    Pinhole_phys3 = new G4PVPlacement(rotationMatrix_x2, 
                                                          G4ThreeVector(0, -PinholePosition, 0.), 
                                                          PinholeLogicalVolume, 
                                                          "pinholePhys3", 
@@ -357,14 +353,14 @@ std::vector<G4VPhysicalVolume*> FlashDetectorConstruction::ConstructPinhole() {
     // Pinhole 4  - out (+z)
     G4RotationMatrix* reverse = new G4RotationMatrix();
     reverse->rotateX(180. * deg); // Rotazione inversa attorno all'asse X
-    G4VPhysicalVolume* Pinhole_phys4 = new G4PVPlacement(reverse, 
+    Pinhole_phys4 = new G4PVPlacement(reverse, 
                                                         G4ThreeVector(0., 0., PinholePosition), 
                                                          PinholeLogicalVolume, 
                                                          "pinholePhys4", 
                                                          WrapLogicalVolume, false, 0, fCheckOverlaps);
     
     // Pinhole 5 - in (-z)
-    G4VPhysicalVolume* Pinhole_phys5 = new G4PVPlacement(0, 
+    Pinhole_phys5 = new G4PVPlacement(0, 
                                                          G4ThreeVector(0, 0., -PinholePosition), 
                                                          PinholeLogicalVolume, 
                                                          "pinholePhys5", 
@@ -372,14 +368,14 @@ std::vector<G4VPhysicalVolume*> FlashDetectorConstruction::ConstructPinhole() {
 
 
 
-    // Pinhole 6 - back (-x)
+    // Pinhole 6 - back (-x) // cordinates in the treatment romm system 
     G4RotationMatrix* rotationMatrix_y2 = new G4RotationMatrix();
     rotationMatrix_y2->rotateY(-90. * deg); // Rotazione attorno all'asse Y
-    G4VPhysicalVolume* Pinhole_phys6 = new G4PVPlacement(rotationMatrix_y2, 
-                                                         G4ThreeVector(-PinholePosition + fAirGap, 0., 0.), 
+    Pinhole_phys6 = new G4PVPlacement(rotationMatrix_y2, 
+                                                         G4ThreeVector(-PinholeDistance + fAirGap, 0., 0.), 
                                                          PinholeLogicalVolume_back, 
                                                          "pinholePhys6", 
-                                                         WrapLogicalVolume, false, 0, fCheckOverlaps);
+                                                         logicTreatmentRoom, false, 0, fCheckOverlaps);
 
     // Visualization
     red = new G4VisAttributes(G4Colour(1.0, 0.0, 0.0));
@@ -441,7 +437,7 @@ std::vector<G4VPhysicalVolume*> FlashDetectorConstruction::ConstructDetector(){
     // Detector 1
     G4RotationMatrix* rotationMatrix_y = new G4RotationMatrix();
     rotationMatrix_y->rotateY(90. * deg); // Rotazione attorno all'asse Y
-    fDet_phys1 = new G4PVPlacement(rotationMatrix_y, G4ThreeVector(fDetectorPosition + fAirGap, 0., 0.), 
+    fDet_phys1 = new G4PVPlacement(rotationMatrix_y, G4ThreeVector(fDetectorPosition, 0., 0.), 
                                                        fDetLogicalVolume, 
                                                        "DetPhys1", 
                                                        WrapLogicalVolume, false, 0, fCheckOverlaps);
@@ -455,15 +451,6 @@ std::vector<G4VPhysicalVolume*> FlashDetectorConstruction::ConstructDetector(){
                                                        fDetLogicalVolume, 
                                                        "DetPhys2", 
                                                        WrapLogicalVolume, false, 0, fCheckOverlaps);
-    
-
-    /*    G4RotationMatrix* rotationMatrix_y2 = new G4RotationMatrix();
-    rotationMatrix_y2->rotateY(-90. * deg); // Rotazione attorno all'asse Y
-    G4VPhysicalVolume* Pinhole_phys6 = new G4PVPlacement(rotationMatrix_y2, 
-                                                         G4ThreeVector(-PinholePosition + fAirGap, 0., 0.), 
-                                                         PinholeLogicalVolume_back, 
-                                                         "pinholePhys6", 
-                                                         WrapLogicalVolume, false, 0, fCheckOverlaps);*/
 
     // Detector 3
     G4RotationMatrix* rotationMatrix_x2 = new G4RotationMatrix();
@@ -571,19 +558,17 @@ G4VPhysicalVolume *FlashDetectorConstruction::Construct() {
     // Detector pannel
     //------------------------------
     Detector_physical = ConstructDetector();
-    
-
     DefineSurfaces(); 
+
     return physicalTreatmentRoom;
 }
+
+
 
 
 void FlashDetectorConstruction::ConstructSDandField() {
 //modify this function if you want to insert a sensitive detector
 }
-
-
-
 
 
 /////MESSANGER ///

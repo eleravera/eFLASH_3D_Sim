@@ -9,7 +9,7 @@
 /vis/verbose errors
 #/tracking/verbose 2
 
-#
+
 # Draw geometry:
 /vis/drawVolume
 #
@@ -42,3 +42,4 @@
 
 
 
+#/vis/particle/color OpticalPhoton yellow

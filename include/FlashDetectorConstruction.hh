@@ -102,12 +102,14 @@ private:
   Applicator *Collimator;
 
 
-  G4OpticalSurface *PhantomOpticalSurface;
-  G4LogicalBorderSurface *PhantomWrapSurface; 
-
+  G4OpticalSurface *PhantomAirOpticalSurface;
   G4OpticalSurface *PhantomWrapOpticalSurface;
-  G4LogicalBorderSurface *PhantomSurface; 
-
+  G4OpticalSurface *WrapPinholeOpticalSurface;
+  G4OpticalSurface *AirPinholeOpticalSurface;
+  G4LogicalBorderSurface *PhantomAirLogSurface; 
+  G4LogicalBorderSurface *PhantomWrapLogSurface; 
+  G4LogicalBorderSurface *WrapPinhole1OpticalLogSurface, *WrapPinhole2OpticalLogSurface, *WrapPinhole3OpticalLogSurface, *WrapPinhole4OpticalLogSurface, *WrapPinhole5OpticalLogSurface;
+  G4LogicalBorderSurface *AitPinhole6pticalLogSurface;
 
   //Attributes set by some public functions, such as SetAirGap, SetPhantomSize.. 
   G4double fAirGap;
@@ -138,6 +140,7 @@ private:
   G4LogicalVolume *PinholeLogicalVolume;
   G4LogicalVolume *PinholeLogicalVolume_back;
   std::vector<G4VPhysicalVolume*> Pinhole_physical;
+  G4VPhysicalVolume *Pinhole_phys1, *Pinhole_phys2, *Pinhole_phys3, *Pinhole_phys4, *Pinhole_phys5, *Pinhole_phys6;
 
   //Detector
   G4Box *Det_box;

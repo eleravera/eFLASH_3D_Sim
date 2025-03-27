@@ -88,16 +88,29 @@ void FlashSteppingAction::HandleBoundaryProcesses(const G4Step* aStep, G4StepPoi
     }
     
     if (postStep->GetStepStatus() == fGeomBoundary) {
+
+
+
         switch (boundary->GetStatus()) {
             case Absorption: AbsorptionCount++; break;
             case FresnelRefraction: FresnelRefractionCount++; PhotonRefractionCount++; break;
             case FresnelReflection: FresnelReflectionCount++; PhotonReflectionCount++; break;
-            case TotalInternalReflection:
+            case TotalInternalReflection: {
                 TotalInternalReflectionCount++; PhotonTotalInternalReflectionCount++;
-                /*if (PhotonTotalInternalReflectionCount > 10) {
+                /*//FOR DEBUGGING 
+                // Ottieni i materiali dei punti pre e post boundary
+                G4Material* preMaterial = preStep->GetMaterial();
+                G4Material* postMaterial = postStep->GetMaterial();
+                
+                // Stampa i materiali coinvolti nel boundary
+                G4cout << "Boundary between materials during TIR: "
+                    << preMaterial->GetName() << " and "
+                    << postMaterial->GetName() << G4endl;*/
+
+                if (PhotonTotalInternalReflectionCount > 10) {
                     track->SetTrackStatus(fStopAndKill);
-                }*/
-                break;
+                }
+                break;}
             default: break;
         }
     }
@@ -150,7 +163,7 @@ void FlashSteppingAction::CheckPhotonExit(const G4Step* aStep, G4StepPoint* preS
                << preExitMomentum.y() / GeV << " GeV/c, "
                << preExitMomentum.z() / GeV << " GeV/c" << G4endl;
 
-        G4cout << "Photon momentum after exiting (inside treatment room): "
+        G4cout << "Photon momentum after exiting (inside wrap): "
                << postExitMomentum.x() / GeV << " GeV/c, "
                << postExitMomentum.y() / GeV << " GeV/c, "
                << postExitMomentum.z() / GeV << " GeV/c" << G4endl;
@@ -163,6 +176,14 @@ void FlashSteppingAction::CheckPhotonExit(const G4Step* aStep, G4StepPoint* preS
         // Increment the count of photons exiting the phantom
         PhotonExitingPhantomCount++;
     }
+
+    if (prevolumeName == "WrapLog" && volumeName == "PinholeLogicalVolume") {
+        std::cout<< "from WrapLog to PinholeLogicalVolume" <<std::endl; 
+    }
+    if (prevolumeName == "PinholeLogicalVolume" && volumeName == "WrapLog") {
+        std::cout<< "from PinholeLogicalVolume to WrapLog" <<std::endl; 
+    }
+
 }
 
 
@@ -183,7 +204,7 @@ void FlashSteppingAction::UserSteppingAction(const G4Step *aStep) {
         TotalPhotonGeneratedCount++;
         G4StepPoint* preStep = aStep->GetPreStepPoint();
         G4StepPoint* postStep = aStep->GetPostStepPoint();
-        //HandleBoundaryProcesses(aStep, preStep, postStep);
+        HandleBoundaryProcesses(aStep, preStep, postStep);
 
         //CheckPhotonExit(aStep, preStep, postStep); //- > per studiare Snell 
         //HandlePhotonDetection(aStep, preStep, postStep); //-> per salvare i dati e le mappe. 
