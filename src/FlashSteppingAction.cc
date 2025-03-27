@@ -194,7 +194,7 @@ void FlashSteppingAction::HandlePhotonDetection(const G4Step* aStep, G4StepPoint
         G4ThreeVector position = aStep->GetTrack()->GetPosition();
         detection photon_maps(position.x() / mm, position.y() / mm, position.z() / mm);
         detection_vector.push_back(photon_maps);
-        photon_maps.print();
+        //photon_maps.print();
     }
 }
 
