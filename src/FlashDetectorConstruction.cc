@@ -144,19 +144,12 @@ void FlashDetectorConstruction::DefineMaterials() {
     G4MaterialPropertiesTable* MPT_Detector = new G4MaterialPropertiesTable();
     MPT_Detector->AddProperty("RINDEX", energy, rindex_pinhole);
     DetectorMaterial->SetMaterialPropertiesTable(MPT_Detector); 
-    G4cout << G4endl<< "-> Detector G4MaterialPropertiesTable:" << G4endl;
-    MPT_Detector->DumpTable();
-
 
     //Pinhole Material: 
-    PinholeMaterial = DetectorMaterial; 
+    PinholeMaterial = G4NistManager::Instance()->FindOrBuildMaterial("G4_Si", false);
     G4MaterialPropertiesTable* MPT_Pinhole = new G4MaterialPropertiesTable();
     MPT_Pinhole->AddProperty("RINDEX", energy, rindex_pinhole);
     PinholeMaterial->SetMaterialPropertiesTable(MPT_Pinhole); 
-
-
-    //G4cout << G4endl<< "-> Detector G4MaterialPropertiesTable:" << G4endl;
-    //MPT_Detector->DumpTable();
 
     //Phantom Material 
     fPhantomMaterial = G4NistManager::Instance()->FindOrBuildMaterial("G4_PLASTIC_SC_VINYLTOLUENE");//(EJ200
@@ -176,11 +169,6 @@ void FlashDetectorConstruction::DefineMaterials() {
     MPT_Phantom->AddConstProperty("SCINTILLATIONTIMECONSTANT1", 2.1*ns);
     MPT_Phantom->AddConstProperty("SCINTILLATIONRISETIME1", 0.9*ns);   
     fPhantomMaterial->SetMaterialPropertiesTable(MPT_Phantom);
-
-
-   // G4cout << G4endl<< "-> Detector G4MaterialPropertiesTable:" << G4endl;
-    MPT_Detector->DumpTable();
-
 
     //Wrap material
     WrapMaterial = G4NistManager::Instance()->FindOrBuildMaterial("G4_POLYSTYRENE"); 
@@ -223,14 +211,14 @@ void FlashDetectorConstruction::DefineSurfaces(){
 
 
     //Surface: Phantom-wrap
-    /*PhantomWrapOpticalSurface = new G4OpticalSurface("PhantomWrapOpticalSurface");
+    PhantomWrapOpticalSurface = new G4OpticalSurface("PhantomWrapOpticalSurface");
     PhantomWrapOpticalSurface->SetType(dielectric_dielectric);  
     PhantomWrapOpticalSurface->SetModel(unified); 
     PhantomWrapOpticalSurface->SetFinish(polished);  
     G4MaterialPropertiesTable* WrappingProperty2 = new G4MaterialPropertiesTable();
     WrappingProperty2->AddProperty("REFLECTIVITY", energy, reflectivity_phantom); 
     PhantomWrapOpticalSurface->SetMaterialPropertiesTable(WrappingProperty2);
-    PhantomWrapSurface = new G4LogicalBorderSurface("PhantomWrapOpticalSurface", fPhantom_physical, Wrap_physical, PhantomWrapOpticalSurface);*/
+    PhantomWrapSurface = new G4LogicalBorderSurface("PhantomWrapOpticalSurface", fPhantom_physical, Wrap_physical, PhantomWrapOpticalSurface);
 }
 
 
