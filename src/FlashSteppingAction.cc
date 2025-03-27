@@ -194,7 +194,7 @@ void FlashSteppingAction::HandlePhotonDetection(const G4Step* aStep, G4StepPoint
         G4ThreeVector position = aStep->GetTrack()->GetPosition();
         detection photon_maps(position.x() / mm, position.y() / mm, position.z() / mm);
         detection_vector.push_back(photon_maps);
-        //photon_maps.print();
+        photon_maps.print();
     }
 }
 
@@ -204,10 +204,10 @@ void FlashSteppingAction::UserSteppingAction(const G4Step *aStep) {
         TotalPhotonGeneratedCount++;
         G4StepPoint* preStep = aStep->GetPreStepPoint();
         G4StepPoint* postStep = aStep->GetPostStepPoint();
-        HandleBoundaryProcesses(aStep, preStep, postStep);
+        //HandleBoundaryProcesses(aStep, preStep, postStep);
 
         //CheckPhotonExit(aStep, preStep, postStep); //- > per studiare Snell 
-        //HandlePhotonDetection(aStep, preStep, postStep); //-> per salvare i dati e le mappe. 
+        HandlePhotonDetection(aStep, preStep, postStep); //-> per salvare i dati e le mappe. 
     }
 }
 

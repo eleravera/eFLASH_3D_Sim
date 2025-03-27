@@ -51,7 +51,6 @@
 tbb::concurrent_vector<photonProcess> photonProcess_vector;
 tbb::concurrent_vector<detection> detection_vector;
 
-/*
 
 int main(int argc, char **argv) {
 
@@ -108,14 +107,14 @@ int main(int argc, char **argv) {
   delete visManager;
   delete runManager;
   return 0;
-}*/
+}
 
 
 
 
 
 //QUESTO MAIL È PER ME PER RUNNARE TEST SUL MIO PC
-int main(int argc, char **argv) {
+/*int main(int argc, char **argv) {
 
   auto *runManager=G4RunManagerFactory::CreateRunManager();
   G4int nThreads = 1;
@@ -183,6 +182,6 @@ int main(int argc, char **argv) {
   delete visManager;
   delete runManager;
   return 0;
-}
+}*/
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo.....
