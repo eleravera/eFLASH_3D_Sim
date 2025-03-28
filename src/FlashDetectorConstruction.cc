@@ -153,7 +153,7 @@ void FlashDetectorConstruction::DefineMaterials() {
     EJ200->AddElement(H, natoms = 524); // su G4 nist database
     EJ200->AddElement(C, natoms = 475);
     */
-    std::vector<G4double> rindex_phantom     = {1.58, 1.58};
+    std::vector<G4double> rindex_phantom     = {1.0, 1.0};
     std::vector<G4double> absorption_phantom = {380.*cm, 380.*cm};
     std::vector<G4double> scint_spectrum = {0.5, 0.5};
 
@@ -281,7 +281,7 @@ std::vector<G4VPhysicalVolume*> FlashDetectorConstruction::ConstructPinhole(G4do
     */
     G4double pinholeThickness = 0.11*mm;
     G4double pinholeSquareSize = fPhantomSizeX + PinholeDistance * 2;
-    G4double innerRadius = 0.350 * mm;
+    G4double innerRadius = 0.300 * mm;
 
     // Geometry
     G4Trd* squareSolid = new G4Trd("BlackSheet", (pinholeSquareSize + pinholeThickness) / 2, 
