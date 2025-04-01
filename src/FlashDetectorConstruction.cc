@@ -104,8 +104,8 @@ FlashDetectorConstruction::FlashDetectorConstruction()
 
     SetAirGap(0.011*cm); // Set the air gap between the water phantom and the end of the applicator
     SetPhantomSize(10. *cm, 10. *cm, 10. *cm);
-    SetPinholeDistance(15 *cm); // Set the air gap between the water phantom and the pinhole
-    SetDetectorDistance(20*cm); // Set the air gap between the water phantom and the detector
+    SetPinholeDistance(30 *cm); // Set the air gap between the water phantom and the pinhole
+    SetDetectorDistance(35*cm); // Set the air gap between the water phantom and the detector
 
 }
 
@@ -146,19 +146,12 @@ void FlashDetectorConstruction::DefineMaterials() {
 
     //Phantom Material 
     fPhantomMaterial = nist->FindOrBuildMaterial("G4_PLASTIC_SC_VINYLTOLUENE");//(EJ200
-    /*    
-    //An alternative would be: 
-    EJ200 = new G4Material("EJ200", 1.023*g/cm3, 2); //eljen technology 1.023
-    G4int natoms;
-    EJ200->AddElement(H, natoms = 524); // su G4 nist database
-    EJ200->AddElement(C, natoms = 475);
-    */
     std::vector<G4double> rindex_phantom     = {1.0, 1.0};
     std::vector<G4double> absorption_phantom = {380.*cm, 380.*cm};
     std::vector<G4double> scint_spectrum = {0.5, 0.5};
 
     G4MaterialPropertiesTable* MPT_Phantom = new G4MaterialPropertiesTable();
-    MPT_Phantom->AddProperty("RINDEX", energy, rindex_phantom);
+    MPT_Phantom->AddProperty("RINDEX", energy, rindex_air);
     MPT_Phantom->AddProperty("ABSLENGTH", energy, absorption_phantom);
     MPT_Phantom->AddConstProperty("SCINTILLATIONYIELD", 10000./MeV);
     MPT_Phantom-> AddProperty("SCINTILLATIONCOMPONENT1", energy, scint_spectrum);
@@ -281,7 +274,7 @@ std::vector<G4VPhysicalVolume*> FlashDetectorConstruction::ConstructPinhole(G4do
     */
     G4double pinholeThickness = 0.11*mm;
     G4double pinholeSquareSize = fPhantomSizeX + PinholeDistance * 2;
-    G4double innerRadius = 0.150 * mm;
+    G4double innerRadius = 0.300 * mm;
 
     // Geometry
     G4Trd* squareSolid = new G4Trd("BlackSheet", (pinholeSquareSize + pinholeThickness) / 2, 

@@ -88,17 +88,51 @@ void FlashSteppingAction::HandleBoundaryProcesses(const G4Step* aStep, G4StepPoi
     }
     
     if (postStep->GetStepStatus() == fGeomBoundary) {
+        G4String currentVolume = track->GetVolume() ? track->GetVolume()->GetName() : "OutOfWorld";
+        G4String nextVolume = track->GetNextVolume() ? track->GetNextVolume()->GetName() : "OutOfWorld";
+        G4ThreeVector momDirBefore = preStep->GetMomentumDirection();
+        G4ThreeVector momDirAfter = postStep->GetMomentumDirection();
+        G4int photonID = track->GetTrackID();
+        
         switch (boundary->GetStatus()) {
             case Absorption: AbsorptionCount++; break;
-            case FresnelRefraction: FresnelRefractionCount++; PhotonRefractionCount++; break;
-            case FresnelReflection: FresnelReflectionCount++; PhotonReflectionCount++; break;
+            case FresnelRefraction: FresnelRefractionCount++; PhotonRefractionCount++; 
+               /* std::cout << "Photon ID " << photonID << std::endl;
+                std::cout << "FresnelRefraction from " << currentVolume << " to " << nextVolume << std::endl;  
+                std::cout << "Momentum direction before: " 
+                        << momDirBefore.x() << " " 
+                        << momDirBefore.y() << " " 
+                        << momDirBefore.z() << std::endl;
+                std::cout << "Momentum direction after: " 
+                        << momDirAfter.x() << " " 
+                        << momDirAfter.y() << " " 
+                        << momDirAfter.z() << std::endl;*/
+                break;
+
+
+            case FresnelReflection: FresnelReflectionCount++; PhotonReflectionCount++;
+                /*std::cout << "FresnelReflection from " << currentVolume << " to " << nextVolume << std::endl; */
+                break;
+
             case TotalInternalReflection:
                 TotalInternalReflectionCount++; PhotonTotalInternalReflectionCount++;
                 if (PhotonTotalInternalReflectionCount > 10) {
                     track->SetTrackStatus(fStopAndKill);
                 }
                 break;
-            default: break;
+            default: 
+                /*std::cout << "Photon ID " << photonID << std::endl;
+                std::cout << "Other process from " << currentVolume << " to " << nextVolume << std::endl; 
+                 std::cout << "Momentum direction before: " 
+                        << momDirBefore.x() << " " 
+                        << momDirBefore.y() << " " 
+                        << momDirBefore.z() << std::endl;
+                std::cout << "Momentum direction after: " 
+                        << momDirAfter.x() << " " 
+                        << momDirAfter.y() << " " 
+                        << momDirAfter.z() << std::endl; */
+            
+            break;
         }
     }
 }
