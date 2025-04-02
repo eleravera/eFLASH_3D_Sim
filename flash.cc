@@ -52,7 +52,7 @@ tbb::concurrent_vector<photonProcess> photonProcess_vector;
 tbb::concurrent_vector<detection> detection_vector;
 
 
-/*
+
 int main(int argc, char **argv) {
 
   if (argc < 4) {
@@ -108,7 +108,7 @@ int main(int argc, char **argv) {
   delete visManager;
   delete runManager;
   return 0;
-}*/
+}
 
 
 
