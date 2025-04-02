@@ -20,7 +20,7 @@
 /control/execute 9MeVEF.mac #Quello corrected è uguale 
 
 
-/run/beamOn 3
+/run/beamOn 1
 /control/execute vis.mac
 
 

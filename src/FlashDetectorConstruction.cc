@@ -104,8 +104,8 @@ FlashDetectorConstruction::FlashDetectorConstruction()
 
     SetAirGap(0.011*cm); // Set the air gap between the water phantom and the end of the applicator
     SetPhantomSize(10. *cm, 10. *cm, 10. *cm);
-    SetPinholeDistance(30 *cm); // Set the air gap between the water phantom and the pinhole
-    SetDetectorDistance(35*cm); // Set the air gap between the water phantom and the detector
+    SetPinholeDistance(15 *cm); // Set the air gap between the water phantom and the pinhole
+    SetDetectorDistance(20*cm); // Set the air gap between the water phantom and the detector
 
 }
 
@@ -302,6 +302,8 @@ std::vector<G4VPhysicalVolume*> FlashDetectorConstruction::ConstructPinhole(G4do
                                                          "pinholePhys", 
                                                          PinholeLogicalVolume, 
                                                          physicalTreatmentRoom, false, 0, fCheckOverlaps);
+    std::cout<< "Pinhole on the front: "<< std::endl; 
+    std::cout<< G4ThreeVector(PinholePosition_t + fAirGap, 0., 0.)<< std::endl<< std::endl; 
 
     // Pinhole 2
     G4RotationMatrix* rotationMatrix_x1 = new G4RotationMatrix();
@@ -311,6 +313,9 @@ std::vector<G4VPhysicalVolume*> FlashDetectorConstruction::ConstructPinhole(G4do
                                                          "pinholePhys", 
                                                          PinholeLogicalVolume, 
                                                          physicalTreatmentRoom, false, 0, fCheckOverlaps);
+    std::cout<< "Pinhole on the side: "<< std::endl; 
+    std::cout<< G4ThreeVector(fPhantomSizeX * 0.5 + fAirGap, PinholePosition_l, 0.)<< std::endl<< std::endl; 
+
 
     // Pinhole 3
     G4RotationMatrix* rotationMatrix_x2 = new G4RotationMatrix();
@@ -413,6 +418,9 @@ std::vector<G4VPhysicalVolume*> FlashDetectorConstruction::ConstructDetector(){
                                                        fDetLogicalVolume, 
                                                        physicalTreatmentRoom, false, 0, fCheckOverlaps);
 
+    std::cout<< "Detector on the front: "<< std::endl; 
+    std::cout<< G4ThreeVector(fDetectorPosition_t + fAirGap, 0., 0.) << std::endl<< std::endl; 
+
     // Detector 2
     G4RotationMatrix* rotationMatrix_x1 = new G4RotationMatrix();
     rotationMatrix_x1->rotateX(-90. * deg);
@@ -420,7 +428,11 @@ std::vector<G4VPhysicalVolume*> FlashDetectorConstruction::ConstructDetector(){
                                                        "DetPhys", 
                                                        fDetLogicalVolume, 
                                                        physicalTreatmentRoom, false, 0, fCheckOverlaps);
-    
+
+    std::cout<< "Detector on the side: "<< std::endl; 
+    std::cout<< G4ThreeVector(fPhantomSizeX * 0.5 + fAirGap, fDetectorPosition_l, 0.) << std::endl<< std::endl; 
+
+
     // Detector 3
     G4RotationMatrix* rotationMatrix_x2 = new G4RotationMatrix();
     rotationMatrix_x2->rotateX(90. * deg); // Rotazione attorno all'asse X

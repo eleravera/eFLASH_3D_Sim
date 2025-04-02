@@ -120,9 +120,6 @@ void FlashTrackingAction::DetermineAbsorptionLocation(const G4Step* aStep, photo
     if (postStep->GetPhysicalVolume()) {
         G4String PostvolumeName = postStep->GetPhysicalVolume()->GetLogicalVolume()->GetName();
 
-        G4cout << "Photon is in volume (dentro la funzione): " << PostvolumeName << G4endl;
-
-
         if (PostvolumeName == "phantomLog") {
             loc = photonProcess::PHANTOM;
             count_phantom++;  // Increment counter for phantom
@@ -149,6 +146,35 @@ void FlashTrackingAction::DetermineAbsorptionLocation(const G4Step* aStep, photo
 
 
 void FlashTrackingAction::PostUserTrackingAction(const G4Track* aTrack) {
+    //const G4ParticleDefinition* particle = aTrack->GetParticleDefinition();
+
+    //if (particle == G4OpticalPhoton::OpticalPhotonDefinition()) {
+    //    G4ThreeVector initialPosition = aTrack->GetVertexPosition();
+    //    const G4VPhysicalVolume* originVolume = aTrack->GetTouchableHandle()->GetVolume();
+        
+        /*DEBUG
+        if (originVolume && originVolume->GetName() == "phantomPhys") {
+            G4cout << "Photon generated in phantom at: " << initialPosition / mm << " mm" << G4endl;
+        }*/
+
+        // Posizione finale (dove viene assorbito)
+        /*DEBUG
+        G4ThreeVector finalPosition = aTrack->GetPosition();
+
+        // Volume attuale (dove il fotone è assorbito)
+        const G4VPhysicalVolume* finalVolume = aTrack->GetVolume();
+
+        // Volume precedente (potrebbe essere utile per verifica)
+        const G4VPhysicalVolume* prevVolume = aTrack->GetNextVolume();
+
+        // Se il volume attuale è il detector e il fotone viene assorbito (cioè è l'ultimo step)
+        if ( finalVolume->GetName() == "DetPhys") {
+            G4cout << "Photon generated at: " << initialPosition / mm << " mm" << G4endl;
+            G4cout << "Photon absorbed at: " << finalPosition / mm << " mm" << G4endl;
+        }*/
+    //}
+    
+    
     /*const G4ParticleDefinition* particle = aTrack->GetParticleDefinition();
 
     if (particle == G4OpticalPhoton::OpticalPhotonDefinition()) {

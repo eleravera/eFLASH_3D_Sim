@@ -52,7 +52,7 @@ tbb::concurrent_vector<photonProcess> photonProcess_vector;
 tbb::concurrent_vector<detection> detection_vector;
 
 
-
+/*
 int main(int argc, char **argv) {
 
   if (argc < 4) {
@@ -108,7 +108,7 @@ int main(int argc, char **argv) {
   delete visManager;
   delete runManager;
   return 0;
-}
+}*/
 
 
 
@@ -121,7 +121,7 @@ int main(int argc, char **argv) {
   G4int nThreads = 1;
   runManager->SetNumberOfThreads(nThreads);
  
-  G4Random::setTheSeed(45692);
+  G4Random::setTheSeed(6000);
 
   runManager->SetUserInitialization(new FlashDetectorConstruction);
 
