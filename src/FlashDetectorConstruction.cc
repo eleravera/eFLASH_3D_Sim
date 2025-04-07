@@ -105,7 +105,7 @@ FlashDetectorConstruction::FlashDetectorConstruction()
     SetAirGap(0.011*cm); // Set the air gap between the water phantom and the end of the applicator
     SetPhantomSize(10. *cm, 10. *cm, 10. *cm);
     SetPinholeDistance(15 *cm); // Set the air gap between the water phantom and the pinhole
-    SetDetectorDistance(20*cm); // Set the air gap between the water phantom and the detector
+    SetDetectorDistance(6*cm); // Set the air gap between the water phantom and the detector
 
 }
 
@@ -353,9 +353,11 @@ std::vector<G4VPhysicalVolume*> FlashDetectorConstruction::ConstructPinhole(G4do
                                                          physicalTreatmentRoom, false, 0, fCheckOverlaps);
 
     // Visualization
-    gray = new G4VisAttributes(G4Colour(211 / 255., 211 / 255., 211 / 255.));
-    gray->SetVisibility(true);
-    PinholeLogicalVolume->SetVisAttributes(gray);
+    gray = new G4VisAttributes(G4VisAttributes::GetInvisible());
+    gray->SetVisibility(false);
+    PinholeLogicalVolume->SetVisAttributes(G4VisAttributes::GetInvisible());
+    PinholeLogicalVolume_back->SetVisAttributes(G4VisAttributes::GetInvisible());
+
 
     std::vector<G4VPhysicalVolume*> fPinhole_Phys = {Pinhole_phys1, Pinhole_phys2, Pinhole_phys3, Pinhole_phys4, Pinhole_phys5,Pinhole_phys6};
     return fPinhole_Phys;

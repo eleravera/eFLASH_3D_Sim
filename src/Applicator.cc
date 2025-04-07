@@ -213,7 +213,7 @@ void Applicator::FlashBeamLineVacuumSource() {
       G4Transform3D(rm1, G4ThreeVector((fXPositionVSFlash), 0., 0.)), "VSFlash",
       logVSFlash, fMotherPhys, false, 0);
 
-  logVSFlash->SetVisAttributes(green);
+  logVSFlash->SetVisAttributes(gray);
 }
 
 void Applicator::FlashBeamLineTitaniumWindows() {
@@ -244,7 +244,7 @@ void Applicator::FlashBeamLineTitaniumWindows() {
       G4Transform3D(rm2, G4ThreeVector((XPositionFTFlash), 0., 0.)), "FTFlash",
       logFTFlash, fMotherPhys, false, 0);
 
-  logFTFlash->SetVisAttributes(yellow);
+  logFTFlash->SetVisAttributes(gray);
 }
 void Applicator::FlashVWAlcover(){
 
@@ -272,7 +272,7 @@ void Applicator::FlashVWAlcover(){
       G4Transform3D(rm2, G4ThreeVector((XPosition), 0., 0.)), "cover1phys",
       log, fMotherPhys, false, 0);
 
-  log->SetVisAttributes(white);
+  log->SetVisAttributes(gray);
 
 
 }
@@ -302,7 +302,7 @@ new G4PVPlacement(
       G4Transform3D(rm2, G4ThreeVector((XPosition), 0., 0.)), "cover1phys",
       log, fMotherPhys, false, 0);
 
-  log->SetVisAttributes(red);
+  log->SetVisAttributes(gray);
   
   fInitial_pos=fInitial_pos + fHightFTFlash;
 }
@@ -342,7 +342,7 @@ G4double phi2 = 90. * deg;
       G4Transform3D(rm2, G4ThreeVector((XPosition), 0., 0.)), "cover1phys",
       logic, fMotherPhys, false, 0);
 
-  logic->SetVisAttributes(darkOrange3);
+  logic->SetVisAttributes(gray);
 fInitial_pos=XPosition+hight;
 }
 void Applicator::FlashToroid(){
@@ -371,7 +371,7 @@ G4double phi2 = 90. * deg;
       G4Transform3D(rm2, G4ThreeVector((fToroid_XPosition), 0., 0.)), "toroidphys",
       log, fMotherPhys, false, 0);
 
-  log->SetVisAttributes(blue);
+  log->SetVisAttributes(gray);
 
 fInitial_pos=fToroid_XPosition+fToroid_hight;
 }
@@ -401,7 +401,7 @@ G4double phi2 = 90. * deg;
       G4Transform3D(rm2, G4ThreeVector((fBigcover_XPosition), 0., 0.)), "coverbig_phys",
       log, fMotherPhys, false, 0);
 
-  log->SetVisAttributes(skyBlue);
+  log->SetVisAttributes(gray);
   
   
   const G4double innRadius_2 = fToroid_outRadius;
@@ -422,7 +422,7 @@ G4double phi2 = 90. * deg;
       G4Transform3D(rm2, G4ThreeVector((fBigcover_XPosition_2), 0., 0.)), "coverbig_phys",
       log_2, fMotherPhys, false, 0);
 
-  log_2->SetVisAttributes(green);
+  log_2->SetVisAttributes(gray);
   
   
 }
@@ -453,7 +453,7 @@ new G4PVPlacement(
       G4Transform3D(rm2, G4ThreeVector((XPosition), 0., 0.)), "coverbig_phys",
       log, fMotherPhys, false, 0);
 
-  log->SetVisAttributes(yellow);
+  log->SetVisAttributes(gray);
 
 }
 
@@ -485,7 +485,7 @@ G4LogicalVolume *log = new G4LogicalVolume(
       G4Transform3D(rm2, G4ThreeVector((XPosition), 0., 0.)), "coverbig_phys",
       log, fMotherPhys, false, 0);
 
-  log->SetVisAttributes(red);
+  log->SetVisAttributes(gray);
   
   G4VSolid * solid_pvdf=
       new G4Tubs("s_pvdf", innRadius, out_Radius, 0.5*mm,
@@ -529,9 +529,9 @@ G4LogicalVolume *log = new G4LogicalVolume(
   
   }
   fChamberpos = XPosition +1/2*mm;
-  log_film->SetVisAttributes(green);
-    log_al->SetVisAttributes(blue);
-      log_pvdf->SetVisAttributes(yellow);
+  log_film->SetVisAttributes(gray);
+    log_al->SetVisAttributes(gray);
+      log_pvdf->SetVisAttributes(gray);
 
 
 }
@@ -562,7 +562,7 @@ G4double phi2 = 90. * deg;
       G4Transform3D(rm2, G4ThreeVector((XPosition), 0., 0.)), "coverbig_phys",
       log, fMotherPhys, false, 0);
 
-  log->SetVisAttributes(magenta);
+  log->SetVisAttributes(gray);
   
   
   G4VSolid * solid_ =
@@ -574,7 +574,7 @@ G4double phi2 = 90. * deg;
     new G4PVPlacement(
       G4Transform3D(rm2, G4ThreeVector((fChamberpos+0.2*mm), 0., 0.)), "coverl_phys",
       log_, fMotherPhys, false, 0);  
-log_->SetVisAttributes(green);
+log_->SetVisAttributes(gray);
 
 fInitial_pos=XPosition+hight;
 }
@@ -605,7 +605,7 @@ G4double phi2 = 90. * deg;
       G4Transform3D(rm2, G4ThreeVector((XPosition), 0., 0.)), "coverbig_phys",
       log, fMotherPhys, false, 0);
 
-  log->SetVisAttributes(red);
+  log->SetVisAttributes(gray);
 fInitial_pos=XPosition+hight;
 }
 void Applicator::Bigconnector2() {
@@ -637,7 +637,7 @@ G4double phi2 = 90. * deg;
       G4Transform3D(rm2, G4ThreeVector((XPosition), 0., 0.)), "coverbig_phys",
       log, fMotherPhys, false, 0);
 
-  log->SetVisAttributes(blue);
+  log->SetVisAttributes(gray);
 fInitial_pos=XPosition+hight;
 }
 
@@ -676,7 +676,7 @@ G4double phi2 = 90. * deg;
       G4Transform3D(rm2, G4ThreeVector((XPosition), 0., 0.)), "coverbig_phys_",
       log, fMotherPhys, false, 0);
 
-  log->SetVisAttributes(yellow);
+  log->SetVisAttributes(gray);
 fInitial_pos=XPosition+hight;
 }
 
@@ -711,7 +711,7 @@ void Applicator::FlashBeamLineApplicator() {
                     G4ThreeVector((fFinalApplicatorXPositionFlash), 0., 0.)),
       "FirstApplicatorFlash", logFirstApplicatorFlash, fMotherPhys, false, 0);
 
-  logFirstApplicatorFlash->SetVisAttributes(magenta); } else{fFinalApplicatorXPositionFlash = fInitial_pos+3*cm;}
+  logFirstApplicatorFlash->SetVisAttributes(gray); } else{fFinalApplicatorXPositionFlash = fInitial_pos+3*cm;}
 } 
 
 
