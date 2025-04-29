@@ -168,7 +168,7 @@ void FlashDetectorConstruction::DefineMaterials() {
 
     //Phantom Material 
     fPhantomMaterial = nist->FindOrBuildMaterial("G4_PLASTIC_SC_VINYLTOLUENE");//(EJ200
-    std::vector<G4double> rindex_phantom(energy_eV.size(), 1.6);
+    std::vector<G4double> rindex_phantom(energy_eV.size(), 1.58);
     std::vector<G4double> absorption_phantom(energy_eV.size(), 380*cm);
     std::vector<G4double> scint_spectrum = {
     1.29325823e-03, 1.37725624e-03, 1.49392523e-03, 1.62872116e-03,
