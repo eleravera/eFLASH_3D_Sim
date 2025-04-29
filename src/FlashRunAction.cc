@@ -29,6 +29,7 @@
 
 #include "FlashRunAction.hh"
 #include "FlashSteppingAction.hh"
+#include "FlashStackingAction.hh"
 #include "FlashPrimaryGeneratorAction.hh"
 #include "G4Accumulable.hh"
 #include "G4AccumulableManager.hh"
@@ -70,7 +71,7 @@ void FlashRunAction::EndOfRunAction(const G4Run *run) {
   G4cout << "  Fresnel reflection: " << FlashSteppingAction::FresnelReflectionCount << G4endl;
   G4cout << "  Total internal reflection: " << FlashSteppingAction::TotalInternalReflectionCount << G4endl;
   G4cout << "  Absorption: " << FlashSteppingAction::AbsorptionCount << G4endl;
-  G4cout << "  Total photons generated: " << FlashSteppingAction::TotalPhotonGeneratedCount << G4endl; 
+  G4cout << "  Total photons generated: " << FlashStackingAction::TotalPhotonGeneratedCount << G4endl; 
   G4cout << "  Photons exiting the phantom: " << FlashSteppingAction::PhotonExitingPhantomCount << G4endl; 
 
 }

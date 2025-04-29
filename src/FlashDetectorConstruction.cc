@@ -69,6 +69,7 @@
 #include "G4VPrimitiveScorer.hh"
 #include "G4VisAttributes.hh"
 #include "FlashDetectorMessenger.hh"
+#include "G4PhysicsOrderedFreeVector.hh"
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -116,13 +117,34 @@ FlashDetectorConstruction::~FlashDetectorConstruction() {
 
 
 void FlashDetectorConstruction::DefineMaterials() {
-    std::vector<G4double> energy     = {2.48 * eV, 3.1 * eV}; //sto generando solo tra i 400 e i 500 nm. lambda [nm] = 1240/E[eV]
-    
+
+
+    std::vector<G4double> energy_eV =  {2.48 * eV, 2.48554 * eV, 2.49111 * eV, 2.49671 * eV, 2.50232 * eV,
+                                        2.50797 * eV, 2.51364 * eV, 2.51933 * eV, 2.52505 * eV, 2.5308 * eV,
+                                        2.53657 * eV, 2.54237 * eV, 2.5482 * eV, 2.55405 * eV, 2.55993 * eV,
+                                        2.56584 * eV, 2.57177 * eV, 2.57774 * eV, 2.58372 * eV, 2.58974 * eV,
+                                        2.59579 * eV, 2.60186 * eV, 2.60796 * eV, 2.6141 * eV, 2.62026 * eV,
+                                        2.62644 * eV, 2.63266 * eV, 2.63891 * eV, 2.64519 * eV, 2.6515 * eV,
+                                        2.65783 * eV, 2.6642 * eV, 2.6706 * eV, 2.67703 * eV, 2.68349 * eV,
+                                        2.68998 * eV, 2.6965 * eV, 2.70306 * eV, 2.70965 * eV, 2.71627 * eV,
+                                        2.72292 * eV, 2.7296 * eV, 2.73632 * eV, 2.74307 * eV, 2.74985 * eV,
+                                        2.75667 * eV, 2.76352 * eV, 2.77041 * eV, 2.77733 * eV, 2.78428 * eV,
+                                        2.79127 * eV, 2.79829 * eV, 2.80535 * eV, 2.81245 * eV, 2.81958 * eV,
+                                        2.82675 * eV, 2.83395 * eV, 2.84119 * eV, 2.84847 * eV, 2.85579 * eV,
+                                        2.86314 * eV, 2.87053 * eV, 2.87796 * eV, 2.88543 * eV, 2.89294 * eV,
+                                        2.90048 * eV, 2.90807 * eV, 2.91569 * eV, 2.92336 * eV, 2.93106 * eV,
+                                        2.93881 * eV, 2.9466 * eV, 2.95443 * eV, 2.9623 * eV, 2.97021 * eV,
+                                        2.97817 * eV, 2.98616 * eV, 2.9942 * eV, 3.00229 * eV, 3.01042 * eV,
+                                        3.01859 * eV, 3.02681 * eV, 3.03507 * eV, 3.04337 * eV, 3.05173 * eV,
+                                        3.06013 * eV, 3.06857 * eV, 3.07706 * eV, 3.0856 * eV, 3.09419 * eV,
+                                        3.10282 * eV, 3.1115 * eV, 3.12023 * eV, 3.12901 * eV, 3.13784 * eV,
+                                        3.14672 * eV, 3.15565 * eV, 3.16464 * eV, 3.17367 * eV, 3.18275 * eV};
+
     // Filled with air
-    std::vector<G4double> rindex_air     = {1.0, 1.0};
+    std::vector<G4double> rindex_air(energy_eV.size(), 1.0);
     airNist = G4NistManager::Instance()->FindOrBuildMaterial("G4_AIR", false);
     G4MaterialPropertiesTable* MPT_Air = new G4MaterialPropertiesTable();
-    MPT_Air->AddProperty("RINDEX", energy, rindex_air);
+    MPT_Air->AddProperty("RINDEX", energy_eV, rindex_air);
     airNist->SetMaterialPropertiesTable(MPT_Air);
 
     //Detector Material:
@@ -138,28 +160,60 @@ void FlashDetectorConstruction::DefineMaterials() {
 
 
     //Pinhole Material: 
-    PinholeMaterial = DetectorMaterial; //nist->FindOrBuildMaterial("G4_WATER"); 
-    std::vector<G4double> rindex_pinhole     = {0., 0.};
+    PinholeMaterial = DetectorMaterial; 
+    std::vector<G4double> rindex_pinhole(energy_eV.size(), 0.);
     G4MaterialPropertiesTable* MPT_Pinhole = new G4MaterialPropertiesTable();
-    MPT_Pinhole->AddProperty("RINDEX", energy, rindex_pinhole);
+    MPT_Pinhole->AddProperty("RINDEX", energy_eV, rindex_pinhole);
 
 
     //Phantom Material 
     fPhantomMaterial = nist->FindOrBuildMaterial("G4_PLASTIC_SC_VINYLTOLUENE");//(EJ200
-    std::vector<G4double> rindex_phantom     = {1.0, 1.0};
-    std::vector<G4double> absorption_phantom = {380.*cm, 380.*cm};
-    std::vector<G4double> scint_spectrum = {0.5, 0.5};
+    std::vector<G4double> rindex_phantom(energy_eV.size(), 1.6);
+    std::vector<G4double> absorption_phantom(energy_eV.size(), 380*cm);
+    std::vector<G4double> scint_spectrum = {
+    1.29325823e-03, 1.37725624e-03, 1.49392523e-03, 1.62872116e-03,
+    1.76709994e-03, 1.89678442e-03, 2.02925932e-03, 2.18866545e-03,
+    2.37045550e-03, 2.54485733e-03, 2.70392592e-03, 2.86984544e-03,
+    3.05539900e-03, 3.25037808e-03, 3.44686216e-03, 3.65245055e-03,
+    3.87781381e-03, 4.13403911e-03, 4.42723566e-03, 4.72360702e-03,
+    4.97654538e-03, 5.21865096e-03, 5.53591475e-03, 5.94006294e-03,
+    6.36366509e-03, 6.78060178e-03, 7.23600177e-03, 7.75049234e-03,
+    8.27073322e-03, 8.74432801e-03, 9.16317289e-03, 9.52955226e-03,
+    9.84583558e-03, 1.01158770e-02, 1.03576573e-02, 1.05959763e-02,
+    1.08362121e-02, 1.10680638e-02, 1.13086734e-02, 1.16099146e-02,
+    1.19864184e-02, 1.23784360e-02, 1.27445080e-02, 1.31200345e-02,
+    1.35390363e-02, 1.39661756e-02, 1.43594450e-02, 1.47721692e-02,
+    1.52923095e-02, 1.59151659e-02, 1.65747371e-02, 1.72259721e-02,
+    1.78464899e-02, 1.84457880e-02, 1.90794663e-02, 1.97759354e-02,
+    2.04575732e-02, 2.10574741e-02, 2.16260419e-02, 2.22218972e-02,
+    2.28063408e-02, 2.33154118e-02, 2.37603399e-02, 2.41874676e-02,
+    2.45679923e-02, 2.48154196e-02, 2.49202857e-02, 2.49653928e-02,
+    2.49451327e-02, 2.46872565e-02, 2.40419991e-02, 2.29673901e-02,
+    2.14553942e-02, 1.96407502e-02, 1.77243405e-02, 1.58008403e-02,
+    1.39000570e-02, 1.20654388e-02, 1.03490333e-02, 8.79389959e-03,
+    7.43346122e-03, 6.23781585e-03, 5.11630945e-03, 4.01780240e-03,
+    2.98042520e-03, 2.05731965e-03, 1.31345370e-03, 8.00507676e-04,
+    4.88459520e-04, 3.20924352e-04, 2.42354569e-04, 1.99351353e-04,
+    1.63441527e-04, 1.25298758e-04, 8.73247099e-05, 6.44140957e-05,
+    6.23114217e-05, 7.03130337e-05, 7.61461225e-05, 6.75378790e-05 };
 
     G4MaterialPropertiesTable* MPT_Phantom = new G4MaterialPropertiesTable();
-    MPT_Phantom->AddProperty("RINDEX", energy, rindex_air);
-    MPT_Phantom->AddProperty("ABSLENGTH", energy, absorption_phantom);
+    MPT_Phantom->AddProperty("RINDEX", energy_eV, rindex_phantom);
+    MPT_Phantom->AddProperty("ABSLENGTH", energy_eV, absorption_phantom);
     MPT_Phantom->AddConstProperty("SCINTILLATIONYIELD", 10000./MeV);
-    MPT_Phantom-> AddProperty("SCINTILLATIONCOMPONENT1", energy, scint_spectrum);
+    MPT_Phantom-> AddProperty("SCINTILLATIONCOMPONENT1", energy_eV, scint_spectrum);
     MPT_Phantom->AddConstProperty("RESOLUTIONSCALE", 1.0);
     MPT_Phantom->AddConstProperty("SCINTILLATIONTIMECONSTANT1", 2.1*ns);
     MPT_Phantom->AddConstProperty("SCINTILLATIONRISETIME1", 0.9*ns);   
     fPhantomMaterial->SetMaterialPropertiesTable(MPT_Phantom);
 
+    G4PhysicsOrderedFreeVector* spectrum = MPT_Phantom->GetProperty("SCINTILLATIONCOMPONENT1");
+    std::cout << "Scint. spectrum: "<< std::endl;
+    for (size_t i = 0; i < spectrum->GetVectorLength(); ++i) {
+        G4double energy = spectrum->Energy(i);
+        G4double value = (*spectrum)[i];
+        G4cout << energy / eV << " eV, " << value << G4endl;
+        }
 
     G4cout << "----- Material properties table printed by DetectorConstruction: -----" << G4endl;
     G4cout << "Phantom G4MaterialPropertiesTable:" << G4endl;
@@ -168,7 +222,7 @@ void FlashDetectorConstruction::DefineMaterials() {
     MPT_Pinhole->DumpTable();
         G4cout << "Air G4MaterialPropertiesTable:" << G4endl;
     MPT_Air->DumpTable();
-  }
+   }
 
 
 
@@ -176,7 +230,7 @@ void FlashDetectorConstruction::DefineSurfaces(){
 
     //Surface: Phantom-world
     std::vector<G4double> reflectivity_phantom = {1., 1.};
-    std::vector<G4double> energy     = {2.48 * eV, 3.1 * eV}; //lamda in range 400-500 nm; lambda [nm] = 1240/E[eV]
+    std::vector<G4double> energy     = {2.48 * eV,  3.18275 * eV}; //lamda in range 400-500 nm; lambda [nm] = 1240/E[eV]
 
     PhantomOpticalSurface = new G4OpticalSurface("PhantomOpticalSurface");
     PhantomOpticalSurface->SetType(dielectric_dielectric);  

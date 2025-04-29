@@ -43,6 +43,9 @@ public:
   virtual G4ClassificationOfNewTrack ClassifyNewTrack(const G4Track *aTrack);
   virtual void NewStage();
   virtual void PrepareNewEvent();
+  static long long TotalPhotonGeneratedCount; 
+  static float PhotonEnergy;
+
 
 private:
   std::ofstream OpticFile;
@@ -53,6 +56,7 @@ private:
   G4double Annihil_x;
   G4double Annihil_y;
   G4double Annihil_z;
+
 };
 
 #endif

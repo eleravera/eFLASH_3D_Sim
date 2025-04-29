@@ -62,10 +62,10 @@ void FlashActionInitialization::Build() const {
   FlashSteppingAction *steppingAction = new FlashSteppingAction(eventAction);
   SetUserAction(steppingAction);
 
-  
-  SetUserAction(new FlashStackingAction());
+  FlashStackingAction *stackingAction = new FlashStackingAction();
+  SetUserAction(stackingAction);
 
-  FlashTrackingAction *trackingAction = new FlashTrackingAction(steppingAction);
+  FlashTrackingAction *trackingAction = new FlashTrackingAction(steppingAction, stackingAction);
 
   SetUserAction(trackingAction);
 

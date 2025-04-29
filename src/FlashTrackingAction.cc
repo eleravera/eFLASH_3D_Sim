@@ -3,15 +3,12 @@
 #include "G4OpticalPhoton.hh"
 #include "G4Track.hh"
 #include "G4SystemOfUnits.hh"
-
 #include <common.hh>
 
-
-
-
-FlashTrackingAction::FlashTrackingAction(FlashSteppingAction* steppingAction)
+FlashTrackingAction::FlashTrackingAction(FlashSteppingAction* steppingAction, FlashStackingAction* stackingAction)
     : G4UserTrackingAction(), 
       fSteppingAction(steppingAction),
+      fStackingAction(stackingAction),
       count_phantom(0), 
       count_treatmentRoom(0),
       count_pinhole(0),
@@ -19,12 +16,9 @@ FlashTrackingAction::FlashTrackingAction(FlashSteppingAction* steppingAction)
       count_other(0),
       count_outOfWorld(0) {}
 
-
 FlashTrackingAction::~FlashTrackingAction() {}
 
-
 void FlashTrackingAction::PreUserTrackingAction(const G4Track*){
-
 }
 
 
@@ -81,38 +75,45 @@ void FlashTrackingAction::ProcessPhotonData(const G4Track* aTrack, const G4Step*
         genPosition.z() / mm,
         theta,
         phi,
+        fStackingAction->PhotonEnergy,
         fSteppingAction->PhotonTotalInternalReflectionCount,
         fSteppingAction->PhotonReflectionCount,
         fSteppingAction->PhotonRefractionCount,
-        loc
+        loc,
+        fSteppingAction->PhantomExitingPosition.x() / mm,
+        fSteppingAction->PhantomExitingPosition.y() / mm,
+        fSteppingAction->PhantomExitingPosition.z() / mm,
+        fSteppingAction->MomentumDirectionInside.x(),
+        fSteppingAction->MomentumDirectionInside.y(),
+        fSteppingAction->MomentumDirectionInside.z(),
+        fSteppingAction->MomentumDirectionOutside.x(),
+        fSteppingAction->MomentumDirectionOutside.y(),
+        fSteppingAction->MomentumDirectionOutside.z()
+
     );
-    
-    photonProcess_vector.push_back(photon);
+    photonProcess_vector.push_back(photon); //Save the class info into the vector 
+    //photon.print();
 
     // Reset photon counts for the next photon
     fSteppingAction->PhotonTotalInternalReflectionCount = 0;
     fSteppingAction->PhotonRefractionCount = 0;
     fSteppingAction->PhotonReflectionCount = 0;
 
+    fSteppingAction->PhantomExitingPosition.setX(0.);
+    fSteppingAction->PhantomExitingPosition.setY(0.);
+    fSteppingAction->PhantomExitingPosition.setZ(0.);
 
-    //check per sapere dove viene assorbito il fotone
-    /*if (fSteppingAction->PhotonTotalInternalReflectionCount==0 &&  fSteppingAction->PhotonReflectionCount ==0   &&  fSteppingAction->PhotonRefractionCount==0){
-        G4ThreeVector finalPosition = postStep->GetPosition();
-        G4double x_final_mm = finalPosition.x() / mm;
-        G4double y_final_mm = finalPosition.y() / mm;
-        G4double z_final_mm = finalPosition.z() / mm;
+    fSteppingAction->MomentumDirectionInside.setX(0.);
+    fSteppingAction->MomentumDirectionInside.setY(0.);
+    fSteppingAction->MomentumDirectionInside.setZ(0.);
 
-        std::cout << "All counts = 0; final loc: " << loc << std::endl
-          << "Gen position: " << genPosition.x() / mm << " " 
-          << genPosition.y() / mm << " " 
-          << genPosition.z() / mm << std::endl
-          << "Final position: " << x_final_mm << " " 
-          << y_final_mm << " " 
-          << z_final_mm << std::endl 
-          << std::endl;
+    fSteppingAction->MomentumDirectionOutside.setX(0.);
+    fSteppingAction->MomentumDirectionOutside.setY(0.);
+    fSteppingAction->MomentumDirectionOutside.setZ(0.);
 
-    }*/
+
 }
+
 
 
 void FlashTrackingAction::DetermineAbsorptionLocation(const G4Step* aStep, photonProcess::AbsorptionLocation& loc) {
@@ -146,54 +147,23 @@ void FlashTrackingAction::DetermineAbsorptionLocation(const G4Step* aStep, photo
 
 
 void FlashTrackingAction::PostUserTrackingAction(const G4Track* aTrack) {
-    //const G4ParticleDefinition* particle = aTrack->GetParticleDefinition();
 
-    //if (particle == G4OpticalPhoton::OpticalPhotonDefinition()) {
-    //    G4ThreeVector initialPosition = aTrack->GetVertexPosition();
-    //    const G4VPhysicalVolume* originVolume = aTrack->GetTouchableHandle()->GetVolume();
-        
-        /*DEBUG
-        if (originVolume && originVolume->GetName() == "phantomPhys") {
-            G4cout << "Photon generated in phantom at: " << initialPosition / mm << " mm" << G4endl;
-        }*/
-
-        // Posizione finale (dove viene assorbito)
-        /*DEBUG
-        G4ThreeVector finalPosition = aTrack->GetPosition();
-
-        // Volume attuale (dove il fotone è assorbito)
-        const G4VPhysicalVolume* finalVolume = aTrack->GetVolume();
-
-        // Volume precedente (potrebbe essere utile per verifica)
-        const G4VPhysicalVolume* prevVolume = aTrack->GetNextVolume();
-
-        // Se il volume attuale è il detector e il fotone viene assorbito (cioè è l'ultimo step)
-        if ( finalVolume->GetName() == "DetPhys") {
-            G4cout << "Photon generated at: " << initialPosition / mm << " mm" << G4endl;
-            G4cout << "Photon absorbed at: " << finalPosition / mm << " mm" << G4endl;
-        }*/
-    //}
-    
-    
-    /*const G4ParticleDefinition* particle = aTrack->GetParticleDefinition();
+    const G4ParticleDefinition* particle = aTrack->GetParticleDefinition();
 
     if (particle == G4OpticalPhoton::OpticalPhotonDefinition()) {
         const G4Step* aStep = aTrack->GetStep();
         const G4StepPoint* postStep = aStep->GetPostStepPoint();
         photonProcess::AbsorptionLocation loc;
-        // Call the refactored function to process photon data
-        ProcessPhotonData(aTrack, aStep);
-        // Optionally, you can include any additional processing logic here if needed
-        DetermineAbsorptionLocation(aStep, loc);
+        
+        ProcessPhotonData(aTrack, aStep); // Call the function to process photon data
+        DetermineAbsorptionLocation(aStep, loc); 
+    
+    /*G4cout << "Photons absorbed in Phantom: " << count_phantom << G4endl;
+    G4cout << "Photons absorbed in Treatment Room: " << count_treatmentRoom << G4endl;
+    G4cout << "Photons absorbed in Pinhole: " << count_pinhole << G4endl;
+    G4cout << "Photons absorbed in Detector: " << count_detector << G4endl;
+    G4cout << "Photons absorbed in Other location: " << count_other << G4endl;
+    G4cout << "Photons out of world: " << count_outOfWorld << G4endl<<G4endl;*/
     }
-
-  G4cout << "Photons absorbed in Phantom: " << count_phantom << G4endl;
-  G4cout << "Photons absorbed in Treatment Room: " << count_treatmentRoom << G4endl;
-  G4cout << "Photons absorbed in Pinhole: " << count_pinhole << G4endl;
-  G4cout << "Photons absorbed in Detector: " << count_detector << G4endl;
-  G4cout << "Photons absorbed in Other location: " << count_other << G4endl;
-  G4cout << "Photons out of world: " << count_outOfWorld << G4endl<<G4endl;
-  
-  */
 
 }

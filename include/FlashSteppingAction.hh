@@ -53,9 +53,10 @@ public:
   static G4int PhotonTotalInternalReflectionCount; 
   static G4int PhotonRefractionCount;
   static G4int PhotonReflectionCount;
-  static long long TotalPhotonGeneratedCount; 
   static long long PhotonExitingPhantomCount; 
-
+  static G4ThreeVector MomentumDirectionInside; 
+  static G4ThreeVector MomentumDirectionOutside;
+  static G4ThreeVector PhantomExitingPosition;
 
 private:
     void HandleBoundaryProcesses(const G4Step* aStep, G4StepPoint* preStep, G4StepPoint* postStep);

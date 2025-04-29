@@ -58,10 +58,10 @@ G4int FlashSteppingAction::AbsorptionCount = 0 ;
 G4int FlashSteppingAction::PhotonTotalInternalReflectionCount = 0 ;
 G4int FlashSteppingAction::PhotonRefractionCount = 0 ;
 G4int FlashSteppingAction::PhotonReflectionCount = 0 ;
-long long FlashSteppingAction::TotalPhotonGeneratedCount = 0; 
 long long FlashSteppingAction::PhotonExitingPhantomCount = 0; 
-
-
+G4ThreeVector FlashSteppingAction::MomentumDirectionInside = G4ThreeVector(0., 0., 0.);
+G4ThreeVector FlashSteppingAction::MomentumDirectionOutside = G4ThreeVector(0., 0., 0.);
+G4ThreeVector FlashSteppingAction::PhantomExitingPosition = G4ThreeVector(0., 0., 0.);
 
 FlashSteppingAction::FlashSteppingAction(FlashEventAction *)
     : G4UserSteppingAction() {}
@@ -92,13 +92,42 @@ void FlashSteppingAction::HandleBoundaryProcesses(const G4Step* aStep, G4StepPoi
         G4String nextVolume = track->GetNextVolume() ? track->GetNextVolume()->GetName() : "OutOfWorld";
         G4ThreeVector momDirBefore = preStep->GetMomentumDirection();
         G4ThreeVector momDirAfter = postStep->GetMomentumDirection();
+        G4ThreeVector interactionPosition = postStep->GetPosition();
         G4int photonID = track->GetTrackID();
         
         switch (boundary->GetStatus()) {
             case Absorption: AbsorptionCount++; break;
-            case FresnelRefraction: FresnelRefractionCount++; PhotonRefractionCount++; 
-               /* std::cout << "Photon ID " << photonID << std::endl;
+
+            case FresnelRefraction: //In case of REFRACTION we want to save the angle of exiting of photons (to study Snell law)
+                {FresnelRefractionCount++; PhotonRefractionCount++;
+                    
+                /*std::cout << "Photon ID " << photonID << std::endl;
                 std::cout << "FresnelRefraction from " << currentVolume << " to " << nextVolume << std::endl;  
+                std::cout << "Momentum direction before: " 
+                        << momDirBefore.x() << " " 
+                        << momDirBefore.y() << " " 
+                        << momDirBefore.z() << std::endl;
+                std::cout << "Momentum direction after: " 
+                        << momDirAfter.x() << " " 
+                        << momDirAfter.y() << " " 
+                        << momDirAfter.z() << std::endl;
+                */
+               MomentumDirectionInside = momDirBefore;
+               MomentumDirectionOutside = momDirAfter;
+               PhantomExitingPosition = interactionPosition;
+
+                G4String volumeName = postStep->GetPhysicalVolume()->GetLogicalVolume()->GetName();
+                G4String prevolumeName = preStep->GetPhysicalVolume()->GetLogicalVolume()->GetName();
+                if (prevolumeName == "phantomLog" && volumeName == "logicTreatmentRoom") {
+                    //std::cout<<"PhotonExitingPhantomCount++;"<<std::endl;
+                    PhotonExitingPhantomCount++;
+                }
+                }
+                break;
+
+            case FresnelReflection: FresnelReflectionCount++; PhotonReflectionCount++;
+                /*std::cout << "Photon ID " << photonID << std::endl;
+                std::cout << "FresnelReflection from " << currentVolume << " to " << nextVolume << std::endl;  
                 std::cout << "Momentum direction before: " 
                         << momDirBefore.x() << " " 
                         << momDirBefore.y() << " " 
@@ -109,29 +138,14 @@ void FlashSteppingAction::HandleBoundaryProcesses(const G4Step* aStep, G4StepPoi
                         << momDirAfter.z() << std::endl;*/
                 break;
 
-
-            case FresnelReflection: FresnelReflectionCount++; PhotonReflectionCount++;
-                /*std::cout << "FresnelReflection from " << currentVolume << " to " << nextVolume << std::endl; */
-                break;
-
             case TotalInternalReflection:
                 TotalInternalReflectionCount++; PhotonTotalInternalReflectionCount++;
                 if (PhotonTotalInternalReflectionCount > 10) {
                     track->SetTrackStatus(fStopAndKill);
+                    //forse si potrebbe mettere una flag a questi fotoni?
                 }
                 break;
             default: 
-                /*std::cout << "Photon ID " << photonID << std::endl;
-                std::cout << "Other process from " << currentVolume << " to " << nextVolume << std::endl; 
-                 std::cout << "Momentum direction before: " 
-                        << momDirBefore.x() << " " 
-                        << momDirBefore.y() << " " 
-                        << momDirBefore.z() << std::endl;
-                std::cout << "Momentum direction after: " 
-                        << momDirAfter.x() << " " 
-                        << momDirAfter.y() << " " 
-                        << momDirAfter.z() << std::endl; */
-            
             break;
         }
     }
@@ -158,8 +172,6 @@ void FlashSteppingAction::CheckPhotonExit(const G4Step* aStep, G4StepPoint* preS
         return;
     }
 
-
-
     // Get the names of the volumes
     G4String volumeName = postStep->GetPhysicalVolume()->GetLogicalVolume()->GetName();
     G4String prevolumeName = preStep->GetPhysicalVolume()->GetLogicalVolume()->GetName();
@@ -176,11 +188,6 @@ void FlashSteppingAction::CheckPhotonExit(const G4Step* aStep, G4StepPoint* preS
         G4ThreeVector postExitMomentum = aStep->GetTrack()->GetMomentum();
 
         // Log or save the positions and momentum
-        G4cout << "Photon exited the phantom at position: "
-               << exitPosition.x() / mm << " mm, "
-               << exitPosition.y() / mm << " mm, "
-               << exitPosition.z() / mm << " mm" << G4endl;
-
         G4cout << "Photon momentum before exiting (inside phantom): "
                << preExitMomentum.x() / GeV << " GeV/c, "
                << preExitMomentum.y() / GeV << " GeV/c, "
@@ -216,31 +223,13 @@ void FlashSteppingAction::HandlePhotonDetection(const G4Step* aStep, G4StepPoint
 void FlashSteppingAction::UserSteppingAction(const G4Step *aStep) {
     G4Track* track = aStep->GetTrack();
     if (track->GetDefinition() == G4OpticalPhoton::OpticalPhotonDefinition()) { 
-        TotalPhotonGeneratedCount++;
         G4StepPoint* preStep = aStep->GetPreStepPoint();
         G4StepPoint* postStep = aStep->GetPostStepPoint();
         HandleBoundaryProcesses(aStep, preStep, postStep);
 
         //CheckPhotonExit(aStep, preStep, postStep); //- > per studiare Snell 
-        HandlePhotonDetection(aStep, preStep, postStep); //-> per salvare i dati e le mappe. 
+
+
+        //HandlePhotonDetection(aStep, preStep, postStep); //-> per salvare i dati e le mappe. 
     }
 }
-
-
-/*//Save photons with telecentric
-          if (prevolumeName == "phantomLog" && volumeName ==  "logicTreatmentRoom") {
-            G4ThreeVector photonDirection = track->GetMomentumDirection();  
-            // Define a small tolerance value as cosThetaMax
-            const G4double cosThetaMax = std::cos(0.5 * CLHEP::pi / 180.0);  // conv degree in radians
-
-            // Calcola il coseno dell'angolo rispetto agli assi
-            G4double cosThetaX = photonDirection.x();  // Prodotto scalare con (1,0,0)
-            G4double cosThetaY = photonDirection.y();  // Prodotto scalare con (0,1,0)
-            G4double cosThetaZ = photonDirection.z();  // Prodotto scalare con (0,0,1)
-
-            // Se il fotone è entro 1 grado rispetto a uno degli assi principali killalo
-            if (!(cosThetaX > cosThetaMax || cosThetaY > cosThetaMax || cosThetaZ > cosThetaMax)) {
-                track->SetTrackStatus(fStopAndKill); 
-
-            } 
-            } */

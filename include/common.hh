@@ -43,53 +43,57 @@ public:
     float z;
     float theta;                    //Angoli di emissione al punto di generazione
     float phi;
+    float energy;
     uint32_t tirCount;            // Contatore per TIR = total internal reflection
     uint32_t reflectionCount;      // Contatore per riflessione 
     uint32_t refractionCount;      // Contatore per rifrazione
     AbsorptionLocation volume;
+    float x_exit;                       //Coordinate all'interfaccia scintillatore/treatment room 
+    float y_exit;
+    float z_exit;
+    float px_inside;                       //Coordinate del momento del fotone all'arrivo all'interfaccia
+    float py_inside;
+    float pz_inside;    
+    float px_outside;                       //Coordinate del momento del fotone all'uscita dell'interfaccia
+    float py_outside;
+    float pz_outside;
 
-    photonProcess(uint32_t e, float x_p, float y_p, float z_p, float theta_p, float phi_p, 
+    photonProcess(uint32_t e, float x_p, float y_p, float z_p, float theta_p, float phi_p, float en,
                   uint32_t tir_count, uint32_t reflection_count, uint32_t refraction_count, 
-                  AbsorptionLocation v)
-        : event_id(e), x(x_p), y(y_p), z(z_p), theta(theta_p), phi(phi_p), 
-          tirCount(tir_count), reflectionCount(reflection_count), refractionCount(refraction_count), 
-          volume(v) {}
+                  AbsorptionLocation v, float x_i, float y_i, float z_i, float px_i, float py_i, float pz_i, 
+                  float px_o, float py_o, float pz_o )
+        : event_id(e),
+          x(x_p), y(y_p), z(z_p), 
+          theta(theta_p), phi(phi_p), energy(en), 
+          tirCount(tir_count), reflectionCount(reflection_count), refractionCount(refraction_count), volume(v), 
+          x_exit(x_i), y_exit(y_i), z_exit(z_i), 
+          px_inside(px_i), py_inside(py_i), pz_inside(pz_i),
+          px_outside(px_o), py_outside(py_o), pz_outside(pz_o) {}
 
     void print() {
         std::cout << "Event ID: " << event_id << "\n"
-                  << "Position: (" << x << ", " << y << ", " << z << ")\n"
-                  << "Angles: Theta = " << theta << ", Phi = " << phi << "\n"
+                  << "Position of generation: (" << x << ", " << y << ", " << z << ") mm \n"
+                  << "Angles emission: Theta = " << theta << ", Phi = " << phi << "\n"
+                  << "Photon's energy = " << energy << " eV \n"
                   << "Total Internal Reflection Count: " << tirCount << "\n"
                   << "Reflection Count: " << reflectionCount << "\n"
                   << "Refraction Count: " << refractionCount << "\n"
                   << "Absorption Location: ";
-
-        // Stampa il valore corrispondente di absorption location
-        switch(volume) {
-            case PHANTOM:
-                std::cout << "PHANTOM";
-                break;
-            case TREATMENT_ROOM:
-                std::cout << "TREATMENT_ROOM";
-                break;
-            case PINHOLE:
-                std::cout << "PINHOLE";
-                break; 
-            case DETECTOR:
-                std::cout << "DETECTOR";
-                break;
-            case OUT_OF_WORLD:
-                std::cout << "OUT_OF_WORLD";
-                break;
-            case OTHER:
-                std::cout << "OTHER";
-                break;
-        }
+                    switch (volume) {
+                        case AbsorptionLocation::PHANTOM:        std::cout << "PHANTOM"; break;
+                        case AbsorptionLocation::TREATMENT_ROOM: std::cout << "TREATMENT_ROOM"; break;
+                        case AbsorptionLocation::PINHOLE:        std::cout << "PINHOLE"; break;
+                        case AbsorptionLocation::DETECTOR:       std::cout << "DETECTOR"; break;
+                        case AbsorptionLocation::OTHER:          std::cout << "OTHER"; break;
+                        case AbsorptionLocation::OUT_OF_WORLD:   std::cout << "OUT_OF_WORLD"; break;
+                    } 
+        std::cout << "\n";
+        std::cout << "Exit Position: (" << x_exit << ", " << y_exit << ", " << z_exit << ") mm \n"
+              << "Momentum Inside:  (" << px_inside << ", " << py_inside << ", " << pz_inside << ")\n"
+              << "Momentum Outside: (" << px_outside << ", " << py_outside << ", " << pz_outside << ")\n";
         std::cout << std::endl << std::endl;
     }
 };
-
-
 
 
 

@@ -32,6 +32,7 @@
 
 #include "G4UserTrackingAction.hh"
 #include "FlashSteppingAction.hh"
+#include "FlashStackingAction.hh"
 #include "common.hh"
 #include <fstream>
 //
@@ -51,6 +52,7 @@ class FlashTrackingAction : public G4UserTrackingAction {
 private:
   std::ofstream EndFile;
   FlashSteppingAction* fSteppingAction;
+  FlashStackingAction* fStackingAction;
   void ProcessPhotonData(const G4Track* aTrack, const G4Step* aStep);
   void DetermineAbsorptionLocation(const G4Step* aStep, photonProcess::AbsorptionLocation& loc);
   
@@ -63,7 +65,7 @@ private:
     int count_outOfWorld;
 
   public:
-    FlashTrackingAction(FlashSteppingAction* steppingAction);
+    FlashTrackingAction(FlashSteppingAction* steppingAction, FlashStackingAction* stackingAction );
     virtual ~FlashTrackingAction();
    
     virtual void PreUserTrackingAction(const G4Track*);
