@@ -162,64 +162,57 @@ int main(int argc, char **argv) {
 
 
   // Write results to output
-    std::ofstream file_out1("./optical_properties/n_158_Rayleight/seed6009_100evt.raw");
-    //for (uint32_t i=0; i<photonProcessIncludingRayleigh_vector.size(); i++) {
-    //  file_out1.write(reinterpret_cast<char*>(&photonProcessIncludingRayleigh_vector[i]), sizeof(photonProcessIncludingRayleigh));
-    //}
-    //file_out1.close();
+    std::ofstream file_out1("./optical_properties/n_158_Rayleight/test.raw");
+    for (const photonProcess& p : photonProcess_vector) {
 
+        // PART 1 – campi base del fotone
+        file_out1.write(reinterpret_cast<const char*>(&p.event_id), sizeof(uint32_t));
 
-for (const photonProcess& p : photonProcess_vector) {
+        file_out1.write(reinterpret_cast<const char*>(&p.x), sizeof(float));
+        file_out1.write(reinterpret_cast<const char*>(&p.y), sizeof(float));
+        file_out1.write(reinterpret_cast<const char*>(&p.z), sizeof(float));
 
-    // PART 1 – campi base del fotone
-    file_out1.write(reinterpret_cast<const char*>(&p.event_id), sizeof(uint32_t));
+        file_out1.write(reinterpret_cast<const char*>(&p.theta), sizeof(float));
+        file_out1.write(reinterpret_cast<const char*>(&p.phi), sizeof(float));
 
-    file_out1.write(reinterpret_cast<const char*>(&p.x), sizeof(float));
-    file_out1.write(reinterpret_cast<const char*>(&p.y), sizeof(float));
-    file_out1.write(reinterpret_cast<const char*>(&p.z), sizeof(float));
+        file_out1.write(reinterpret_cast<const char*>(&p.energy), sizeof(float));
 
-    file_out1.write(reinterpret_cast<const char*>(&p.theta), sizeof(float));
-    file_out1.write(reinterpret_cast<const char*>(&p.phi), sizeof(float));
+        // PART 2 – contatori
+        file_out1.write(reinterpret_cast<const char*>(&p.tirCount), sizeof(uint32_t));
+        file_out1.write(reinterpret_cast<const char*>(&p.reflectionCount), sizeof(uint32_t));
+        file_out1.write(reinterpret_cast<const char*>(&p.refractionCount), sizeof(uint32_t));
+        file_out1.write(reinterpret_cast<const char*>(&p.rayleighCount), sizeof(uint32_t));
 
-    file_out1.write(reinterpret_cast<const char*>(&p.energy), sizeof(float));
+        // PART 3 – Rayleigh extra info
+        file_out1.write(reinterpret_cast<const char*>(&p.firstRayleighTheta), sizeof(float));
 
-    // PART 2 – contatori
-    file_out1.write(reinterpret_cast<const char*>(&p.tirCount), sizeof(uint32_t));
-    file_out1.write(reinterpret_cast<const char*>(&p.reflectionCount), sizeof(uint32_t));
-    file_out1.write(reinterpret_cast<const char*>(&p.refractionCount), sizeof(uint32_t));
-    file_out1.write(reinterpret_cast<const char*>(&p.rayleighCount), sizeof(uint32_t));
+        uint32_t hasR = p.hasRayleigh ? 1 : 0;
+        file_out1.write(reinterpret_cast<const char*>(&hasR), sizeof(uint32_t));
 
-    // PART 3 – Rayleigh extra info
-    file_out1.write(reinterpret_cast<const char*>(&p.firstRayleighTheta), sizeof(float));
+        // PART 4 – absorption location (enum → uint32)
+        uint32_t v = static_cast<uint32_t>(p.volume);
+        file_out1.write(reinterpret_cast<const char*>(&v), sizeof(uint32_t));
 
-    uint32_t hasR = p.hasRayleigh ? 1 : 0;
-    file_out1.write(reinterpret_cast<const char*>(&hasR), sizeof(uint32_t));
+        // PART 5 – exit position
+        file_out1.write(reinterpret_cast<const char*>(&p.x_exit), sizeof(float));
+        file_out1.write(reinterpret_cast<const char*>(&p.y_exit), sizeof(float));
+        file_out1.write(reinterpret_cast<const char*>(&p.z_exit), sizeof(float));
 
-    // PART 4 – absorption location (enum → uint32)
-    uint32_t v = static_cast<uint32_t>(p.volume);
-    file_out1.write(reinterpret_cast<const char*>(&v), sizeof(uint32_t));
+        // PART 6 – momentum inside
+        file_out1.write(reinterpret_cast<const char*>(&p.px_inside), sizeof(float));
+        file_out1.write(reinterpret_cast<const char*>(&p.py_inside), sizeof(float));
+        file_out1.write(reinterpret_cast<const char*>(&p.pz_inside), sizeof(float));
 
-    // PART 5 – exit position
-    file_out1.write(reinterpret_cast<const char*>(&p.x_exit), sizeof(float));
-    file_out1.write(reinterpret_cast<const char*>(&p.y_exit), sizeof(float));
-    file_out1.write(reinterpret_cast<const char*>(&p.z_exit), sizeof(float));
-
-    // PART 6 – momentum inside
-    file_out1.write(reinterpret_cast<const char*>(&p.px_inside), sizeof(float));
-    file_out1.write(reinterpret_cast<const char*>(&p.py_inside), sizeof(float));
-    file_out1.write(reinterpret_cast<const char*>(&p.pz_inside), sizeof(float));
-
-    // PART 7 – momentum outside
-    file_out1.write(reinterpret_cast<const char*>(&p.px_outside), sizeof(float));
-    file_out1.write(reinterpret_cast<const char*>(&p.py_outside), sizeof(float));
-    file_out1.write(reinterpret_cast<const char*>(&p.pz_outside), sizeof(float));
-}
-
-file_out1.close();
+        // PART 7 – momentum outside
+        file_out1.write(reinterpret_cast<const char*>(&p.px_outside), sizeof(float));
+        file_out1.write(reinterpret_cast<const char*>(&p.py_outside), sizeof(float));
+        file_out1.write(reinterpret_cast<const char*>(&p.pz_outside), sizeof(float));
+    }
+    file_out1.close();
 
 
     // Write results to output
-    /*std::ofstream file_out2("./photon_dist/pinhole/test.raw");
+    /*std::ofstream file_out2("./photon_dist/test.raw");
     for (uint32_t i=0; i<detection_vector.size(); i++) {
       file_out2.write(reinterpret_cast<char*>(&detection_vector[i]), sizeof(detection));
     }

@@ -66,6 +66,7 @@ private:
     void HandleBoundaryProcesses(const G4Step* aStep, G4StepPoint* preStep, G4StepPoint* postStep);
     void CheckPhotonExit(const G4Step* aStep, G4StepPoint* preStep, G4StepPoint* postStep);
     void HandlePhotonDetection(const G4Step* aStep, G4StepPoint* preStep, G4StepPoint* postStep);
+    void HandleRayleighScattering(const G4Step* aStep, const G4StepPoint* preStep, const G4StepPoint* postStep);
 
 };
 

@@ -204,6 +204,38 @@ void FlashSteppingAction::HandlePhotonDetection(const G4Step* aStep, G4StepPoint
     }
 }
 
+void FlashSteppingAction::HandleRayleighScattering(const G4Step* aStep,
+                                                   const G4StepPoint* preStep,
+                                                   const G4StepPoint* postStep)
+{
+    // Controllo che il processo sia Rayleigh
+    const G4VProcess* process = postStep->GetProcessDefinedStep();
+    if (!process) return;
+    if (process->GetProcessName() != "OpRayleigh") return;
+
+    // Incrementa il contatore di Rayleigh (per traccia)
+    FlashTrackingAction* tracking = (FlashTrackingAction*) G4RunManager::GetRunManager()->GetUserTrackingAction();
+    tracking->fRayleighCount++;
+
+    // --- Calcolo dell'angolo DI SCATTERING FISICO ---
+    G4ThreeVector dir_in  = preStep->GetMomentumDirection().unit();
+    G4ThreeVector dir_out = postStep->GetMomentumDirection().unit();
+
+    double cosTheta = dir_in.dot(dir_out);
+    cosTheta = std::clamp(cosTheta, -1.0, 1.0);
+
+    double theta_scatt = std::acos(cosTheta);   // in radianti
+
+    // Salviamo SOLO il primo Rayleigh di questa traccia
+    if (!FlashSteppingAction::HasRayleigh)
+    {
+        FlashSteppingAction::FirstRayleighTheta = theta_scatt;
+        FlashSteppingAction::HasRayleigh        = true;
+    }
+}
+
+
+
 void FlashSteppingAction::UserSteppingAction(const G4Step *aStep) {
     G4Track* track = aStep->GetTrack();
     if (track->GetDefinition() == G4OpticalPhoton::OpticalPhotonDefinition()) { 
@@ -212,38 +244,8 @@ void FlashSteppingAction::UserSteppingAction(const G4Step *aStep) {
         HandleBoundaryProcesses(aStep, preStep, postStep);
         //HandlePhotonDetection(aStep, preStep, postStep); //-> per salvare i dati e le mappe. 
     
-    
-        //Handle Rayleigh scattering 
-        // ---------------------------------------------
-        // RAYLEIGH: salvataggio del primo theta
-        // θ = angle(k_in , ε_in)
-        // ---------------------------------------------
-        const G4VProcess* process = aStep->GetPostStepPoint()->GetProcessDefinedStep();
-        if (process && process->GetProcessName() == "OpRayleigh")
-        {
-            // Incrementa il contatore di Rayleigh
-            FlashTrackingAction* tracking =
-                (FlashTrackingAction*) G4RunManager::GetRunManager()->GetUserTrackingAction();
-            tracking->fRayleighCount++;
-
-            // --- Calcolo dell'angolo DI SCATTERING FISICO ---
-            G4ThreeVector dir_in  = preStep->GetMomentumDirection().unit();
-            G4ThreeVector dir_out = postStep->GetMomentumDirection().unit();
-
-            double cosTheta = dir_in.dot(dir_out);
-            cosTheta = std::clamp(cosTheta, -1.0, 1.0);
-
-            double theta_scatt = std::acos(cosTheta);   // in radianti
-
-            // Salviamo SOLO il primo Rayleigh
-            if (!FlashSteppingAction::HasRayleigh)
-            {
-                FlashSteppingAction::FirstRayleighTheta = theta_scatt;
-                FlashSteppingAction::HasRayleigh        = true;
-            }
-        }
-
-
+        // Rayleigh scattering: salvataggio del primo theta
+        HandleRayleighScattering(aStep, preStep, postStep);
     
     }
 
