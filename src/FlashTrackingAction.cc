@@ -14,11 +14,17 @@ FlashTrackingAction::FlashTrackingAction(FlashSteppingAction* steppingAction, Fl
       count_pinhole(0),
       count_detector(0),
       count_other(0),
-      count_outOfWorld(0) {}
+      count_outOfWorld(0),
+      fRayleighCount(0) {}
 
 FlashTrackingAction::~FlashTrackingAction() {}
 
-void FlashTrackingAction::PreUserTrackingAction(const G4Track*){
+void FlashTrackingAction::PreUserTrackingAction(const G4Track* aTrack){
+    if (aTrack->GetDefinition() == G4OpticalPhoton::OpticalPhotonDefinition()) {
+        fRayleighCount = 0;
+        FlashSteppingAction::FirstRayleighTheta = -1.0;
+        FlashSteppingAction::HasRayleigh = false;
+    }
 }
 
 
@@ -79,6 +85,9 @@ void FlashTrackingAction::ProcessPhotonData(const G4Track* aTrack, const G4Step*
         fSteppingAction->PhotonTotalInternalReflectionCount,
         fSteppingAction->PhotonReflectionCount,
         fSteppingAction->PhotonRefractionCount,
+        fRayleighCount,
+        FlashSteppingAction::FirstRayleighTheta,    
+        FlashSteppingAction::HasRayleigh,           
         loc,
         fSteppingAction->PhantomExitingPosition.x() / mm,
         fSteppingAction->PhantomExitingPosition.y() / mm,
@@ -89,27 +98,33 @@ void FlashTrackingAction::ProcessPhotonData(const G4Track* aTrack, const G4Step*
         fSteppingAction->MomentumDirectionOutside.x(),
         fSteppingAction->MomentumDirectionOutside.y(),
         fSteppingAction->MomentumDirectionOutside.z()
-
     );
     photonProcess_vector.push_back(photon); //Save the class info into the vector 
     //photon.print();
+
+
+
+
+    G4ThreeVector tmpExitPos = fSteppingAction->PhantomExitingPosition;
+    G4ThreeVector tmpMomIn = fSteppingAction->MomentumDirectionInside;
+    G4ThreeVector tmpMomOut = fSteppingAction->MomentumDirectionOutside;
 
     // Reset photon counts for the next photon
     fSteppingAction->PhotonTotalInternalReflectionCount = 0;
     fSteppingAction->PhotonRefractionCount = 0;
     fSteppingAction->PhotonReflectionCount = 0;
 
-    fSteppingAction->PhantomExitingPosition.setX(0.);
-    fSteppingAction->PhantomExitingPosition.setY(0.);
-    fSteppingAction->PhantomExitingPosition.setZ(0.);
+    fSteppingAction->PhantomExitingPosition.setX(-1000.);
+    fSteppingAction->PhantomExitingPosition.setY(-1000.);
+    fSteppingAction->PhantomExitingPosition.setZ(-1000.);
 
-    fSteppingAction->MomentumDirectionInside.setX(0.);
-    fSteppingAction->MomentumDirectionInside.setY(0.);
-    fSteppingAction->MomentumDirectionInside.setZ(0.);
+    fSteppingAction->MomentumDirectionInside.setX(-1000.);
+    fSteppingAction->MomentumDirectionInside.setY(-1000.);
+    fSteppingAction->MomentumDirectionInside.setZ(-1000.);
 
-    fSteppingAction->MomentumDirectionOutside.setX(0.);
-    fSteppingAction->MomentumDirectionOutside.setY(0.);
-    fSteppingAction->MomentumDirectionOutside.setZ(0.);
+    fSteppingAction->MomentumDirectionOutside.setX(-1000.);
+    fSteppingAction->MomentumDirectionOutside.setY(-1000.);
+    fSteppingAction->MomentumDirectionOutside.setZ(-1000.);
 
 
 }
@@ -158,12 +173,10 @@ void FlashTrackingAction::PostUserTrackingAction(const G4Track* aTrack) {
         ProcessPhotonData(aTrack, aStep); // Call the function to process photon data
         DetermineAbsorptionLocation(aStep, loc); 
     
-    /*G4cout << "Photons absorbed in Phantom: " << count_phantom << G4endl;
-    G4cout << "Photons absorbed in Treatment Room: " << count_treatmentRoom << G4endl;
-    G4cout << "Photons absorbed in Pinhole: " << count_pinhole << G4endl;
-    G4cout << "Photons absorbed in Detector: " << count_detector << G4endl;
-    G4cout << "Photons absorbed in Other location: " << count_other << G4endl;
-    G4cout << "Photons out of world: " << count_outOfWorld << G4endl<<G4endl;*/
     }
 
+    //G4cout << "Photon " << aTrack->GetTrackID()
+    //      << " had " << fRayleighCount << " Rayleigh scatterings." << G4endl;
+
 }
+

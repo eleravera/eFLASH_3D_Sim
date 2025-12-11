@@ -31,6 +31,7 @@
 #include "FlashDetectorConstruction.hh"
 #include "FlashEventAction.hh"
 #include "FlashRunAction.hh"
+#include "FlashTrackingAction.hh"
 #include "G4Electron.hh"
 #include "G4Event.hh"
 #include "G4Gamma.hh"
@@ -58,10 +59,14 @@ G4int FlashSteppingAction::AbsorptionCount = 0 ;
 G4int FlashSteppingAction::PhotonTotalInternalReflectionCount = 0 ;
 G4int FlashSteppingAction::PhotonRefractionCount = 0 ;
 G4int FlashSteppingAction::PhotonReflectionCount = 0 ;
+G4int FlashSteppingAction::RayleightScatteringCount = 0 ; 
 long long FlashSteppingAction::PhotonExitingPhantomCount = 0; 
-G4ThreeVector FlashSteppingAction::MomentumDirectionInside = G4ThreeVector(0., 0., 0.);
-G4ThreeVector FlashSteppingAction::MomentumDirectionOutside = G4ThreeVector(0., 0., 0.);
-G4ThreeVector FlashSteppingAction::PhantomExitingPosition = G4ThreeVector(0., 0., 0.);
+G4ThreeVector FlashSteppingAction::MomentumDirectionInside = G4ThreeVector(-1000., -1000., -1000.);
+G4ThreeVector FlashSteppingAction::MomentumDirectionOutside = G4ThreeVector(-1000., -1000., -1000.);
+G4ThreeVector FlashSteppingAction::PhantomExitingPosition = G4ThreeVector(-1000., -1000., -1000.);
+double FlashSteppingAction::FirstRayleighTheta = -1.0;
+bool   FlashSteppingAction::HasRayleigh = false;
+
 
 FlashSteppingAction::FlashSteppingAction(FlashEventAction *)
     : G4UserSteppingAction() {}
@@ -100,23 +105,12 @@ void FlashSteppingAction::HandleBoundaryProcesses(const G4Step* aStep, G4StepPoi
 
             case FresnelRefraction: //In case of REFRACTION we want to save the angle of exiting of photons (to study Snell law)
                 {FresnelRefractionCount++; PhotonRefractionCount++;
-                    
-                /*std::cout << "Photon ID " << photonID << std::endl;
-                std::cout << "FresnelRefraction from " << currentVolume << " to " << nextVolume << std::endl;  
-                std::cout << "Momentum direction before: " 
-                        << momDirBefore.x() << " " 
-                        << momDirBefore.y() << " " 
-                        << momDirBefore.z() << std::endl;
-                std::cout << "Momentum direction after: " 
-                        << momDirAfter.x() << " " 
-                        << momDirAfter.y() << " " 
-                        << momDirAfter.z() << std::endl;
-                */
-               MomentumDirectionInside = momDirBefore;
-               MomentumDirectionOutside = momDirAfter;
-               PhantomExitingPosition = interactionPosition;
 
-                G4String volumeName = postStep->GetPhysicalVolume()->GetLogicalVolume()->GetName();
+               MomentumDirectionInside = preStep->GetMomentumDirection();
+               MomentumDirectionOutside = postStep->GetMomentumDirection();
+               PhantomExitingPosition = postStep->GetPosition();
+
+                 G4String volumeName = postStep->GetPhysicalVolume()->GetLogicalVolume()->GetName();
                 G4String prevolumeName = preStep->GetPhysicalVolume()->GetLogicalVolume()->GetName();
                 if (prevolumeName == "phantomLog" && volumeName == "logicTreatmentRoom") {
                     //std::cout<<"PhotonExitingPhantomCount++;"<<std::endl;
@@ -126,16 +120,6 @@ void FlashSteppingAction::HandleBoundaryProcesses(const G4Step* aStep, G4StepPoi
                 break;
 
             case FresnelReflection: FresnelReflectionCount++; PhotonReflectionCount++;
-                /*std::cout << "Photon ID " << photonID << std::endl;
-                std::cout << "FresnelReflection from " << currentVolume << " to " << nextVolume << std::endl;  
-                std::cout << "Momentum direction before: " 
-                        << momDirBefore.x() << " " 
-                        << momDirBefore.y() << " " 
-                        << momDirBefore.z() << std::endl;
-                std::cout << "Momentum direction after: " 
-                        << momDirAfter.x() << " " 
-                        << momDirAfter.y() << " " 
-                        << momDirAfter.z() << std::endl;*/
                 break;
 
             case TotalInternalReflection:
@@ -226,10 +210,42 @@ void FlashSteppingAction::UserSteppingAction(const G4Step *aStep) {
         G4StepPoint* preStep = aStep->GetPreStepPoint();
         G4StepPoint* postStep = aStep->GetPostStepPoint();
         HandleBoundaryProcesses(aStep, preStep, postStep);
-
-        //CheckPhotonExit(aStep, preStep, postStep); //- > per studiare Snell 
-
-
         //HandlePhotonDetection(aStep, preStep, postStep); //-> per salvare i dati e le mappe. 
+    
+    
+        //Handle Rayleigh scattering 
+        // ---------------------------------------------
+        // RAYLEIGH: salvataggio del primo theta
+        // θ = angle(k_in , ε_in)
+        // ---------------------------------------------
+        const G4VProcess* process = aStep->GetPostStepPoint()->GetProcessDefinedStep();
+        if (process && process->GetProcessName() == "OpRayleigh")
+        {
+            // Incrementa il contatore di Rayleigh
+            FlashTrackingAction* tracking =
+                (FlashTrackingAction*) G4RunManager::GetRunManager()->GetUserTrackingAction();
+            tracking->fRayleighCount++;
+
+            // --- Calcolo dell'angolo DI SCATTERING FISICO ---
+            G4ThreeVector dir_in  = preStep->GetMomentumDirection().unit();
+            G4ThreeVector dir_out = postStep->GetMomentumDirection().unit();
+
+            double cosTheta = dir_in.dot(dir_out);
+            cosTheta = std::clamp(cosTheta, -1.0, 1.0);
+
+            double theta_scatt = std::acos(cosTheta);   // in radianti
+
+            // Salviamo SOLO il primo Rayleigh
+            if (!FlashSteppingAction::HasRayleigh)
+            {
+                FlashSteppingAction::FirstRayleighTheta = theta_scatt;
+                FlashSteppingAction::HasRayleigh        = true;
+            }
+        }
+
+
+    
     }
+
 }
+

@@ -47,6 +47,9 @@ public:
     uint32_t tirCount;            // Contatore per TIR = total internal reflection
     uint32_t reflectionCount;      // Contatore per riflessione 
     uint32_t refractionCount;      // Contatore per rifrazione
+    uint32_t rayleighCount;   // Numero di scattering Rayleigh
+    float firstRayleighTheta;
+    bool hasRayleigh;
     AbsorptionLocation volume;
     float x_exit;                       //Coordinate all'interfaccia scintillatore/treatment room 
     float y_exit;
@@ -58,17 +61,27 @@ public:
     float py_outside;
     float pz_outside;
 
+
     photonProcess(uint32_t e, float x_p, float y_p, float z_p, float theta_p, float phi_p, float en,
-                  uint32_t tir_count, uint32_t reflection_count, uint32_t refraction_count, 
-                  AbsorptionLocation v, float x_i, float y_i, float z_i, float px_i, float py_i, float pz_i, 
-                  float px_o, float py_o, float pz_o )
+                uint32_t tir_count, uint32_t reflection_count, uint32_t refraction_count, 
+                uint32_t ray_count, float first_rayleigh_theta, bool has_rayleigh,   // <-- AGGIUNTI QUI
+                AbsorptionLocation v,
+                float x_i, float y_i, float z_i,
+                float px_i, float py_i, float pz_i, 
+                float px_o, float py_o, float pz_o)
         : event_id(e),
-          x(x_p), y(y_p), z(z_p), 
-          theta(theta_p), phi(phi_p), energy(en), 
-          tirCount(tir_count), reflectionCount(reflection_count), refractionCount(refraction_count), volume(v), 
-          x_exit(x_i), y_exit(y_i), z_exit(z_i), 
-          px_inside(px_i), py_inside(py_i), pz_inside(pz_i),
-          px_outside(px_o), py_outside(py_o), pz_outside(pz_o) {}
+        x(x_p), y(y_p), z(z_p), 
+        theta(theta_p), phi(phi_p), energy(en), 
+        tirCount(tir_count), reflectionCount(reflection_count),
+        refractionCount(refraction_count), rayleighCount(ray_count),
+        firstRayleighTheta(first_rayleigh_theta),
+        hasRayleigh(has_rayleigh ? 1 : 0),        
+        volume(v),
+        x_exit(x_i), y_exit(y_i), z_exit(z_i), 
+        px_inside(px_i), py_inside(py_i), pz_inside(pz_i),
+        px_outside(px_o), py_outside(py_o), pz_outside(pz_o)
+    {}
+
 
     void print() {
         std::cout << "Event ID: " << event_id << "\n"
@@ -90,11 +103,12 @@ public:
         std::cout << "\n";
         std::cout << "Exit Position: (" << x_exit << ", " << y_exit << ", " << z_exit << ") mm \n"
               << "Momentum Inside:  (" << px_inside << ", " << py_inside << ", " << pz_inside << ")\n"
-              << "Momentum Outside: (" << px_outside << ", " << py_outside << ", " << pz_outside << ")\n";
+              << "Momentum Outside: (" << px_outside << ", " << py_outside << ", " << pz_outside << ")\n"
+              << "Rayleigh count: " << rayleighCount << "\n";
+
         std::cout << std::endl << std::endl;
     }
 };
-
 
 
 extern tbb::concurrent_vector<detection> detection_vector;

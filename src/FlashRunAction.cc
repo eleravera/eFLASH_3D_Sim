@@ -73,5 +73,6 @@ void FlashRunAction::EndOfRunAction(const G4Run *run) {
   G4cout << "  Absorption: " << FlashSteppingAction::AbsorptionCount << G4endl;
   G4cout << "  Total photons generated: " << FlashStackingAction::TotalPhotonGeneratedCount << G4endl; 
   G4cout << "  Photons exiting the phantom: " << FlashSteppingAction::PhotonExitingPhantomCount << G4endl; 
+  G4cout << "  Rayleight scattering: " << FlashSteppingAction::RayleightScatteringCount << G4endl; 
 
 }

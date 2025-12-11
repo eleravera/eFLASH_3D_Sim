@@ -205,7 +205,14 @@ void FlashDetectorConstruction::DefineMaterials() {
     MPT_Phantom->AddConstProperty("RESOLUTIONSCALE", 1.0);
     MPT_Phantom->AddConstProperty("SCINTILLATIONTIMECONSTANT1", 2.1*ns);
     MPT_Phantom->AddConstProperty("SCINTILLATIONRISETIME1", 0.9*ns);   
-    fPhantomMaterial->SetMaterialPropertiesTable(MPT_Phantom);
+    
+    std::vector<G4double> rayleigh_length_phantom(energy_eV.size(), 300*mm);
+    MPT_Phantom->AddProperty(
+        "RAYLEIGH",
+        energy_eV.data(),
+        rayleigh_length_phantom.data(),
+        energy_eV.size()
+    );    fPhantomMaterial->SetMaterialPropertiesTable(MPT_Phantom);
 
     G4PhysicsOrderedFreeVector* spectrum = MPT_Phantom->GetProperty("SCINTILLATIONCOMPONENT1");
     std::cout << "Scint. spectrum: "<< std::endl;
