@@ -170,8 +170,8 @@ void FlashTrackingAction::PostUserTrackingAction(const G4Track* aTrack) {
         const G4StepPoint* postStep = aStep->GetPostStepPoint();
         photonProcess::AbsorptionLocation loc;
         
-        ProcessPhotonData(aTrack, aStep); // Call the function to process photon data
-        DetermineAbsorptionLocation(aStep, loc); 
+        //ProcessPhotonData(aTrack, aStep); // Call the function to process photon data
+        //DetermineAbsorptionLocation(aStep, loc); 
     
     }
 
