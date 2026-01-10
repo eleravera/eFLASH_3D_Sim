@@ -172,7 +172,7 @@ void FlashDetectorConstruction::DefineMaterials() {
     fPhantomMaterial = nist->FindOrBuildMaterial("G4_PLASTIC_SC_VINYLTOLUENE");//(EJ200
     std::vector<G4double> rindex_phantom(energy_eV.size(), 1.58);
     std::vector<G4double> absorption_phantom(energy_eV.size(), 380*cm);
-    std::vector<G4double> scint_spectrum = {
+    /*std::vector<G4double> scint_spectrum = {
     1.29325823e-03, 1.37725624e-03, 1.49392523e-03, 1.62872116e-03,
     1.76709994e-03, 1.89678442e-03, 2.02925932e-03, 2.18866545e-03,
     2.37045550e-03, 2.54485733e-03, 2.70392592e-03, 2.86984544e-03,
@@ -197,8 +197,8 @@ void FlashDetectorConstruction::DefineMaterials() {
     2.98042520e-03, 2.05731965e-03, 1.31345370e-03, 8.00507676e-04,
     4.88459520e-04, 3.20924352e-04, 2.42354569e-04, 1.99351353e-04,
     1.63441527e-04, 1.25298758e-04, 8.73247099e-05, 6.44140957e-05,
-    6.23114217e-05, 7.03130337e-05, 7.61461225e-05, 6.75378790e-05 };
-
+    6.23114217e-05, 7.03130337e-05, 7.61461225e-05, 6.75378790e-05 };*/
+    std::vector<G4double> scint_spectrum(energy_eV.size(), 1.0);
     G4MaterialPropertiesTable* MPT_Phantom = new G4MaterialPropertiesTable();
     MPT_Phantom->AddProperty("RINDEX", energy_eV, rindex_phantom);
     MPT_Phantom->AddProperty("ABSLENGTH", energy_eV, absorption_phantom);
