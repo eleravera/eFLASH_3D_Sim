@@ -119,7 +119,7 @@ FlashDetectorConstruction::~FlashDetectorConstruction() {
 void FlashDetectorConstruction::DefineMaterials() {
 
 
-    std::vector<G4double> energy_eV =  {2.48 * eV, 2.48554 * eV, 2.49111 * eV, 2.49671 * eV, 2.50232 * eV,
+    /*std::vector<G4double> energy_eV =  {2.48 * eV, 2.48554 * eV, 2.49111 * eV, 2.49671 * eV, 2.50232 * eV,
                                         2.50797 * eV, 2.51364 * eV, 2.51933 * eV, 2.52505 * eV, 2.5308 * eV,
                                         2.53657 * eV, 2.54237 * eV, 2.5482 * eV, 2.55405 * eV, 2.55993 * eV,
                                         2.56584 * eV, 2.57177 * eV, 2.57774 * eV, 2.58372 * eV, 2.58974 * eV,
@@ -138,7 +138,9 @@ void FlashDetectorConstruction::DefineMaterials() {
                                         3.01859 * eV, 3.02681 * eV, 3.03507 * eV, 3.04337 * eV, 3.05173 * eV,
                                         3.06013 * eV, 3.06857 * eV, 3.07706 * eV, 3.0856 * eV, 3.09419 * eV,
                                         3.10282 * eV, 3.1115 * eV, 3.12023 * eV, 3.12901 * eV, 3.13784 * eV,
-                                        3.14672 * eV, 3.15565 * eV, 3.16464 * eV, 3.17367 * eV, 3.18275 * eV};
+                                        3.14672 * eV, 3.15565 * eV, 3.16464 * eV, 3.17367 * eV, 3.18275 * eV};*/
+    std::vector<G4double> energy_eV = {2.48*eV, 3.10*eV};
+
 
     // Filled with air
     std::vector<G4double> rindex_air(energy_eV.size(), 1.0);
