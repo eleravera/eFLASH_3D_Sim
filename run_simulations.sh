@@ -17,8 +17,8 @@ do
   seed=$((7000 + i))
 
   # Definisce il nome del file di output
-  output_file="$output_dir/d15cm_hole400um_${seed}.raw" 
-  log_file="$output_dir/d15cm_log_hole400um_${seed}.log"
+  output_file="$output_dir/d15cm_hole300um_${seed}.raw" 
+  log_file="$output_dir/d15cm_log_hole300um_${seed}.log"
   
   # Comando per lanciare la simulazione
   ./flash run.mac $seed $output_file | tee "$log_file"
