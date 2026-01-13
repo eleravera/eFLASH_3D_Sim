@@ -116,10 +116,10 @@ int main(int argc, char **argv) {
 /*int main(int argc, char **argv) {
 
   auto *runManager=G4RunManagerFactory::CreateRunManager();
-  G4int nThreads = 1;
+  G4int nThreads = 10;
   runManager->SetNumberOfThreads(nThreads);
  
-  G4Random::setTheSeed(6009);
+  G4Random::setTheSeed(6000);
 
   runManager->SetUserInitialization(new FlashDetectorConstruction);
 
@@ -159,11 +159,11 @@ int main(int argc, char **argv) {
     }
     
     timer.Stop();
-    */
+    
 
 
   // Write results to output
-    /*std::ofstream file_out1("./optical_properties/n_158_Rayleight/test.raw");
+    std::ofstream file_out1("./optical_properties/n_158_Rayleight/1m/seed6009_100evt.raw");
     for (const photonProcess& p : photonProcess_vector) {
 
         // PART 1 – campi base del fotone
@@ -209,11 +209,11 @@ int main(int argc, char **argv) {
         file_out1.write(reinterpret_cast<const char*>(&p.py_outside), sizeof(float));
         file_out1.write(reinterpret_cast<const char*>(&p.pz_outside), sizeof(float));
     }
-    file_out1.close();*/
+    file_out1.close();
 
 
     // Write results to output - SEMPRE PER RUNNURE SUL MIO PC
-    /*std::ofstream file_out2("./photon_dist/test.raw");
+    std::ofstream file_out2("./photon_dist/pinhole/test.raw");
     for (uint32_t i=0; i<detection_vector.size(); i++) {
       file_out2.write(reinterpret_cast<char*>(&detection_vector[i]), sizeof(detection));
     }

@@ -242,10 +242,9 @@ void FlashSteppingAction::UserSteppingAction(const G4Step *aStep) {
         G4StepPoint* preStep = aStep->GetPreStepPoint();
         G4StepPoint* postStep = aStep->GetPostStepPoint();
         HandleBoundaryProcesses(aStep, preStep, postStep);
-        //HandleRayleighScattering(aStep, preStep, postStep);
+        HandleRayleighScattering(aStep, preStep, postStep);
 
         HandlePhotonDetection(aStep, preStep, postStep); //-> per salvare i dati e le mappe. 
-    
     
     }
 
