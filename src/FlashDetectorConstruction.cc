@@ -105,8 +105,8 @@ FlashDetectorConstruction::FlashDetectorConstruction()
 
     SetAirGap(0.011*cm); // Set the air gap between the water phantom and the end of the applicator
     SetPhantomSize(10. *cm, 10. *cm, 10. *cm);
-    SetPinholeDistance(15 *cm); // Set the air gap between the water phantom and the pinhole
-    SetDetectorDistance(20*cm); // Set the air gap between the water phantom and the detector
+    SetPinholeDistance(10 *cm); // Set the air gap between the water phantom and the pinhole
+    SetDetectorDistance(15*cm); // Set the air gap between the water phantom and the detector
 
 }
 
@@ -338,7 +338,7 @@ std::vector<G4VPhysicalVolume*> FlashDetectorConstruction::ConstructPinhole(G4do
     */
     G4double pinholeThickness = 0.11*mm;
     G4double pinholeSquareSize = fPhantomSizeX + PinholeDistance * 2;
-    G4double innerRadius = 0.400 * mm;
+    G4double innerRadius = 0.250 * mm;
 
     // Geometry
     G4Trd* squareSolid = new G4Trd("BlackSheet", (pinholeSquareSize + pinholeThickness) / 2, 
