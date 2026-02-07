@@ -14,11 +14,11 @@ for i in {0..1499}
 do
 
   # Imposta il seed uguale all'indice 'i', o un altro calcolo se preferisci
-  seed=$((7000 + i))
+  seed=$((8500 + i))
 
   # Definisce il nome del file di output
-  output_file="$output_dir/d30cm_hole300um_${seed}.raw" 
-  log_file="$output_dir/d30cm_log_hole300um_${seed}.log"
+  output_file="$output_dir/d15cm_hole300um_${seed}.raw" 
+  log_file="$output_dir/d15cm_log_hole300um_${seed}.log"
   
   # Comando per lanciare la simulazione
   ./flash run.mac $seed $output_file | tee "$log_file"
