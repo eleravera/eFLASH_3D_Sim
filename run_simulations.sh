@@ -10,11 +10,11 @@ output_dir="$base_dir/simulations_$timestamp"
 mkdir "$output_dir"
 
 # Ciclo che esegue la simulazione 100 volte
-for i in {0..1499}
+for i in {0..1304}
 do
 
   # Imposta il seed uguale all'indice 'i', o un altro calcolo se preferisci
-  seed=$((8500 + i))
+  seed=$((8696 + i))
 
   # Definisce il nome del file di output
   output_file="$output_dir/d15cm_hole300um_${seed}.raw" 
