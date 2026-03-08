@@ -225,6 +225,12 @@ void FlashSteppingAction::HandlePhotonDetection(const G4Step* aStep,
     if (preVolumeName == "logicTreatmentRoom" && postVolumeName == "DetectorLog") {
         G4cout << "DEBUG: photon reached detector" << G4endl;
     }
+
+    auto* info = dynamic_cast<FlashPhotonTrackInfo*>(aStep->GetTrack()->GetUserInformation());
+    if (!info) {
+    G4cout << "DEBUG: no track info!" << G4endl;
+    return;
+}
 }
 
 void FlashSteppingAction::HandleRayleighScattering(const G4Step* aStep,
