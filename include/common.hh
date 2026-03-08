@@ -3,11 +3,13 @@
 
 #include <cstdint>
 #include <tbb/tbb.h>
+#include "G4VUserTrackInformation.hh"
+
 
 /* Detection of photons detected by the imaging system.
    The class has 3 attributes and a print member. 
 */
-class detection {
+/*class detection {
     float x;
     float y;
     float z;
@@ -21,6 +23,18 @@ public:
                   << "  y: " << std::fixed << std::setprecision(2) << y << "\n"
                   << "  z: " << std::fixed << std::setprecision(2) << z << "\n";
     }
+};*/
+
+
+class detection {
+public:
+    detection(double x_, double y_, double z_, int nReflections_)
+        : x(x_), y(y_), z(z_), nReflections(nReflections_) {}
+
+    double x;
+    double y;
+    double z;
+    int nReflections;
 };
 
 /* photonProcess --.
@@ -113,5 +127,17 @@ public:
 
 extern tbb::concurrent_vector<detection> detection_vector;
 extern tbb::concurrent_vector<photonProcess> photonProcess_vector;
+
+
+
+class FlashPhotonTrackInfo : public G4VUserTrackInformation {
+public:
+    FlashPhotonTrackInfo() = default;
+    virtual ~FlashPhotonTrackInfo() = default;
+
+    int nInternalReflections = 0;
+
+    bool exitedPhantomByRefraction = false;
+};
 
 #endif

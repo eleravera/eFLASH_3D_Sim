@@ -75,10 +75,11 @@ FlashSteppingAction::~FlashSteppingAction() {}
 
 
 
-void FlashSteppingAction::HandleBoundaryProcesses(const G4Step* aStep, G4StepPoint* preStep, G4StepPoint* postStep) {
+void FlashSteppingAction::HandleBoundaryProcesses(const G4Step* aStep,
+                                                  G4StepPoint* preStep,
+                                                  G4StepPoint* postStep) {
     G4Track* track = aStep->GetTrack();
-    G4OpBoundaryProcessStatus theStatus = Undefined;
-    static G4ThreadLocal G4OpBoundaryProcess* boundary = NULL;
+    static G4ThreadLocal G4OpBoundaryProcess* boundary = nullptr;
 
     if (!boundary) {
         G4ProcessManager* pm = track->GetDefinition()->GetProcessManager();
@@ -91,47 +92,53 @@ void FlashSteppingAction::HandleBoundaryProcesses(const G4Step* aStep, G4StepPoi
             }
         }
     }
-    
-    if (postStep->GetStepStatus() == fGeomBoundary) {
-        G4String currentVolume = track->GetVolume() ? track->GetVolume()->GetName() : "OutOfWorld";
-        G4String nextVolume = track->GetNextVolume() ? track->GetNextVolume()->GetName() : "OutOfWorld";
-        G4ThreeVector momDirBefore = preStep->GetMomentumDirection();
-        G4ThreeVector momDirAfter = postStep->GetMomentumDirection();
-        G4ThreeVector interactionPosition = postStep->GetPosition();
-        G4int photonID = track->GetTrackID();
-        
-        switch (boundary->GetStatus()) {
-            case Absorption: AbsorptionCount++; break;
 
-            case FresnelRefraction: //In case of REFRACTION we want to save the angle of exiting of photons (to study Snell law)
-                {FresnelRefractionCount++; PhotonRefractionCount++;
+    if (!boundary) return;
+    if (postStep->GetStepStatus() != fGeomBoundary) return;
 
-               MomentumDirectionInside = preStep->GetMomentumDirection();
-               MomentumDirectionOutside = postStep->GetMomentumDirection();
-               PhantomExitingPosition = postStep->GetPosition();
+    auto* info = dynamic_cast<FlashPhotonTrackInfo*>(track->GetUserInformation());
+    if (!info) return;
 
-                 G4String volumeName = postStep->GetPhysicalVolume()->GetLogicalVolume()->GetName();
-                G4String prevolumeName = preStep->GetPhysicalVolume()->GetLogicalVolume()->GetName();
-                if (prevolumeName == "phantomLog" && volumeName == "logicTreatmentRoom") {
-                    //std::cout<<"PhotonExitingPhantomCount++;"<<std::endl;
-                    PhotonExitingPhantomCount++;
-                }
-                }
-                break;
+    auto* prePV  = preStep->GetPhysicalVolume();
+    auto* postPV = postStep->GetPhysicalVolume();
 
-            case FresnelReflection: FresnelReflectionCount++; PhotonReflectionCount++;
-                break;
+    G4String preVolumeName  = prePV  ? prePV->GetLogicalVolume()->GetName()  : "OutOfWorld";
+    G4String postVolumeName = postPV ? postPV->GetLogicalVolume()->GetName() : "OutOfWorld";
 
-            case TotalInternalReflection:
-                TotalInternalReflectionCount++; PhotonTotalInternalReflectionCount++;
-                if (PhotonTotalInternalReflectionCount > 10) {
-                    track->SetTrackStatus(fStopAndKill);
-                    //forse si potrebbe mettere una flag a questi fotoni?
-                }
-                break;
-            default: 
+    switch (boundary->GetStatus()) {
+
+        case FresnelRefraction:
+            FresnelRefractionCount++;
+
+            if (preVolumeName == "phantomLog" && postVolumeName == "logicTreatmentRoom") {
+                info->exitedPhantomByRefraction = true;
+            }
             break;
-        }
+
+        case FresnelReflection:
+            FresnelReflectionCount++;
+            info->nInternalReflections++;
+
+            if (info->nInternalReflections > 10) {
+                track->SetTrackStatus(fStopAndKill);
+            }
+            break;
+
+        case TotalInternalReflection:
+            TotalInternalReflectionCount++;
+            info->nInternalReflections++;
+
+            if (info->nInternalReflections > 10) {
+                track->SetTrackStatus(fStopAndKill);
+            }
+            break;
+
+        case Absorption:
+            AbsorptionCount++;
+            break;
+
+        default:
+            break;
     }
 }
 
@@ -193,7 +200,7 @@ void FlashSteppingAction::CheckPhotonExit(const G4Step* aStep, G4StepPoint* preS
 }
 
 
-void FlashSteppingAction::HandlePhotonDetection(const G4Step* aStep, G4StepPoint* preStep, G4StepPoint* postStep) {
+/*void FlashSteppingAction::HandlePhotonDetection(const G4Step* aStep, G4StepPoint* preStep, G4StepPoint* postStep) {
     G4String preVolumeName = preStep->GetPhysicalVolume()->GetLogicalVolume()->GetName();
     G4String postVolumeName = postStep->GetPhysicalVolume()->GetLogicalVolume()->GetName();
     if (preVolumeName == "logicTreatmentRoom" && postVolumeName == "DetectorLog") {
@@ -201,6 +208,48 @@ void FlashSteppingAction::HandlePhotonDetection(const G4Step* aStep, G4StepPoint
         detection photon_maps(position.x() / mm, position.y() / mm, position.z() / mm);
         detection_vector.push_back(photon_maps);
         //photon_maps.print();
+    }
+}*/
+
+
+void FlashSteppingAction::HandlePhotonDetection(const G4Step* aStep,
+                                                G4StepPoint* preStep,
+                                                G4StepPoint* postStep) {
+    auto* prePV  = preStep->GetPhysicalVolume();
+    auto* postPV = postStep->GetPhysicalVolume();
+
+    G4String preVolumeName  = prePV  ? prePV->GetLogicalVolume()->GetName()  : "OutOfWorld";
+    G4String postVolumeName = postPV ? postPV->GetLogicalVolume()->GetName() : "OutOfWorld";
+
+    if (preVolumeName == "logicTreatmentRoom" && postVolumeName == "DetectorLog") {
+
+        auto* info = dynamic_cast<FlashPhotonTrackInfo*>(aStep->GetTrack()->GetUserInformation());
+        if (!info) return;
+
+        G4ThreeVector position = postStep->GetPosition();
+
+        detection photon_map(position.x()/mm,
+                             position.y()/mm,
+                             position.z()/mm,
+                             info->nInternalReflections);
+
+        detection_vector.push_back(photon_map);
+
+        if (info->nInternalReflections == 0) {
+            detection_vector_0.push_back(photon_map);
+        }
+        else if (info->nInternalReflections == 1) {
+            detection_vector_1.push_back(photon_map);
+        }
+        else if (info->nInternalReflections == 2) {
+            detection_vector_2.push_back(photon_map);
+        }
+        else if (info->nInternalReflections == 3) {
+            detection_vector_3.push_back(photon_map);
+        }
+        else {
+            detection_vector_ge4.push_back(photon_map);
+        }
     }
 }
 

@@ -24,8 +24,15 @@ void FlashTrackingAction::PreUserTrackingAction(const G4Track* aTrack){
         fRayleighCount = 0;
         FlashSteppingAction::FirstRayleighTheta = -1.0;
         FlashSteppingAction::HasRayleigh = false;
+    
+
+        G4Track* nonConstTrack = const_cast<G4Track*>(aTrack);
+        if (!nonConstTrack->GetUserInformation()) {
+            nonConstTrack->SetUserInformation(new FlashPhotonTrackInfo());
+        }
     }
 }
+
 
 
 void FlashTrackingAction::ProcessPhotonData(const G4Track* aTrack, const G4Step* aStep) {
@@ -161,6 +168,8 @@ void FlashTrackingAction::DetermineAbsorptionLocation(const G4Step* aStep, photo
 
 
 
+
+
 void FlashTrackingAction::PostUserTrackingAction(const G4Track* aTrack) {
 
     const G4ParticleDefinition* particle = aTrack->GetParticleDefinition();
@@ -176,4 +185,5 @@ void FlashTrackingAction::PostUserTrackingAction(const G4Track* aTrack) {
     }
 
 }
+
 

@@ -34,6 +34,7 @@
 #include "G4Step.hh"
 #include "globals.hh"
 #include <fstream>
+#include <common.hh>
 
 class FlashEventAction;
 class G4LogicalVolume;
@@ -61,6 +62,13 @@ public:
   static double FirstRayleighTheta;   // theta del primo Rayleigh (rad)
   static bool   HasRayleigh;          // per sapere se l'abbiamo già registrato
 
+
+  std::vector<detection> detection_vector;
+  std::vector<detection> detection_vector_0;
+  std::vector<detection> detection_vector_1;
+  std::vector<detection> detection_vector_2;
+  std::vector<detection> detection_vector_3;
+  std::vector<detection> detection_vector_ge4;
 
 private:
     void HandleBoundaryProcesses(const G4Step* aStep, G4StepPoint* preStep, G4StepPoint* postStep);
