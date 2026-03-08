@@ -126,6 +126,11 @@ public:
 
 
 extern tbb::concurrent_vector<detection> detection_vector;
+extern tbb::concurrent_vector<detection> detection_vector_0;
+extern tbb::concurrent_vector<detection> detection_vector_1;
+extern tbb::concurrent_vector<detection> detection_vector_2;
+extern tbb::concurrent_vector<detection> detection_vector_3;
+extern tbb::concurrent_vector<detection> detection_vector_ge4;
 extern tbb::concurrent_vector<photonProcess> photonProcess_vector;
 
 

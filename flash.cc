@@ -50,58 +50,94 @@
 // concurrent vector to write output in multithread mode without conflicts 
 tbb::concurrent_vector<photonProcess> photonProcess_vector;
 tbb::concurrent_vector<detection> detection_vector;
+tbb::concurrent_vector<detection> detection_vector_0;
+tbb::concurrent_vector<detection> detection_vector_1;
+tbb::concurrent_vector<detection> detection_vector_2;
+tbb::concurrent_vector<detection> detection_vector_3;
+tbb::concurrent_vector<detection> detection_vector_ge4;
 
 int main(int argc, char **argv) {
 
   if (argc < 4) {
-        G4cerr << "Usage: " << argv[0] << " <macro_file> <seed> <output_file>" << G4endl;
-        return 1;
-    }
+    G4cerr << "Usage: " << argv[0] << " <macro_file> <seed> <output_file>" << G4endl;
+    return 1;
+  }
 
   G4String macroFile = argv[1];
   int seed = std::stoi(argv[2]);
   G4String outputFileName = argv[3];
 
   G4Random::setTheSeed(seed);
-  auto *runManager = new G4MTRunManager();
+
+  auto* runManager = new G4MTRunManager();
   G4int nThreads = 235;
   runManager->SetNumberOfThreads(nThreads);
- 
+
   runManager->SetUserInitialization(new FlashDetectorConstruction);
   runManager->SetUserInitialization(new FlashPhysicsList);
   runManager->SetUserInitialization(new FlashActionInitialization);
 
-  G4VisManager *visManager = new G4VisExecutive;
+  G4VisManager* visManager = new G4VisExecutive;
   visManager->Initialize();
 
-  // clears output vectors before run
-  detection_vector.clear();  
-  G4UImanager *UImanager = G4UImanager::GetUIpointer();
+  // Clear output vectors before run
+  photonProcess_vector.clear();
+  detection_vector.clear();
+  detection_vector_0.clear();
+  detection_vector_1.clear();
+  detection_vector_2.clear();
+  detection_vector_3.clear();
+  detection_vector_ge4.clear();
+
+  G4UImanager* UImanager = G4UImanager::GetUIpointer();
   G4Timer timer;
-  timer.Start();  
+  timer.Start();
   UImanager->ApplyCommand("/control/execute " + macroFile);
   timer.Stop();
 
-  std::ofstream file_out2(outputFileName.c_str());
-  if (!file_out2.is_open()) {
-    G4cerr << "Error: unable to open file " << outputFileName << G4endl;
-  }
-  else{
-  // Write results to output
-  for (uint32_t i=0; i<detection_vector.size(); i++) {
-      file_out2.write(reinterpret_cast<char*>(&detection_vector[i]), sizeof(detection));
+  auto writeDetectionFile = [](const G4String& filename,
+                               const tbb::concurrent_vector<detection>& vec)
+  {
+    std::ofstream fout(filename.c_str(), std::ios::binary);
+    if (!fout.is_open()) {
+      G4cerr << "Error: unable to open file " << filename << G4endl;
+      return;
     }
+
+    for (uint32_t i = 0; i < vec.size(); i++) {
+      fout.write(reinterpret_cast<const char*>(&vec[i]), sizeof(detection));
+    }
+    fout.close();
+  };
+
+  // Remove .raw extension if present
+  G4String outputStem = outputFileName;
+  if (outputStem.size() >= 4 &&
+      outputStem.substr(outputStem.size() - 4, 4) == ".raw") {
+    outputStem = outputStem.substr(0, outputStem.size() - 4);
   }
-  
-  //print some interesting information
-  std::cout<< "Photons passing the selection: " << detection_vector.size() << std::endl;
-  file_out2.close();
+
+  // Write all hits + separated files by number of reflections
+  writeDetectionFile(outputStem + ".raw",      detection_vector);
+  writeDetectionFile(outputStem + "_0.raw",    detection_vector_0);
+  writeDetectionFile(outputStem + "_1.raw",    detection_vector_1);
+  writeDetectionFile(outputStem + "_2.raw",    detection_vector_2);
+  writeDetectionFile(outputStem + "_3.raw",    detection_vector_3);
+  writeDetectionFile(outputStem + "_ge4.raw",  detection_vector_ge4);
+
+  // Print summary
+  std::cout << "Photons passing the selection: " << detection_vector.size() << std::endl;
+  std::cout << "Hits with 0 reflections:  " << detection_vector_0.size() << std::endl;
+  std::cout << "Hits with 1 reflection:   " << detection_vector_1.size() << std::endl;
+  std::cout << "Hits with 2 reflections:  " << detection_vector_2.size() << std::endl;
+  std::cout << "Hits with 3 reflections:  " << detection_vector_3.size() << std::endl;
+  std::cout << "Hits with >=4 reflections:" << detection_vector_ge4.size() << std::endl;
 
   std::cout << "        ------      " << std::endl;
-  std::cout << "Number of threds: " << runManager->GetNumberOfThreads() << std::endl;
+  std::cout << "Number of threads: " << runManager->GetNumberOfThreads() << std::endl;
   std::cout << "Elapsed time: " << timer.GetRealElapsed() << " seconds" << std::endl;
-  std::cout<<"outputFileName: " << outputFileName <<std::endl;
-  std::cout<<"Seed: " << seed << std::endl;
+  std::cout << "outputFileName: " << outputFileName << std::endl;
+  std::cout << "Seed: " << seed << std::endl;
 
   delete visManager;
   delete runManager;
@@ -141,6 +177,11 @@ int main(int argc, char **argv) {
   // clears output vectors before run
   photonProcess_vector.clear();    
   detection_vector.clear();    
+  detection_vector_0.clear();
+  detection_vector_1.clear();
+  detection_vector_2.clear();
+  detection_vector_3.clear();
+  detection_vector_ge4.clear();
 
 
   G4UIExecutive *ui = 0;
@@ -211,13 +252,50 @@ int main(int argc, char **argv) {
     }
     file_out1.close();
 
+    G4cout << "WRITE DEBUG: all = " << detection_vector.size() << G4endl;
+    G4cout << "WRITE DEBUG: 0   = " << detection_vector_0.size() << G4endl;
+    G4cout << "WRITE DEBUG: 1   = " << detection_vector_1.size() << G4endl;
+    G4cout << "WRITE DEBUG: 2   = " << detection_vector_2.size() << G4endl;
+    G4cout << "WRITE DEBUG: 3   = " << detection_vector_3.size() << G4endl;
+    G4cout << "WRITE DEBUG: ge4 = " << detection_vector_ge4.size() << G4endl;
 
-    // Write results to output - SEMPRE PER RUNNURE SUL MIO PC
+    // Write results to output
     std::ofstream file_out2("./photon_dist/pinhole/test_new_maps.raw");
     for (uint32_t i=0; i<detection_vector.size(); i++) {
       file_out2.write(reinterpret_cast<char*>(&detection_vector[i]), sizeof(detection));
     }
     file_out2.close();
+
+
+    std::ofstream f0("./photon_dist/pinhole/test_new_maps_0.raw", std::ios::binary);
+    for (uint32_t i = 0; i < detection_vector_0.size(); i++) {
+        f0.write(reinterpret_cast<char*>(&detection_vector_0[i]), sizeof(detection));
+    }
+    f0.close();
+
+  std::ofstream f1("./photon_dist/pinhole/test_new_maps_1.raw", std::ios::binary);
+  for (uint32_t i = 0; i < detection_vector_1.size(); i++) {
+      f1.write(reinterpret_cast<char*>(&detection_vector_1[i]), sizeof(detection));
+  }
+  f1.close();
+
+  std::ofstream f2("./photon_dist/pinhole/test_new_maps_2.raw", std::ios::binary);
+  for (uint32_t i = 0; i < detection_vector_2.size(); i++) {
+      f2.write(reinterpret_cast<char*>(&detection_vector_2[i]), sizeof(detection));
+  }
+  f2.close();
+
+  std::ofstream f3("./photon_dist/pinhole/test_new_maps_3.raw", std::ios::binary);
+  for (uint32_t i = 0; i < detection_vector_3.size(); i++) {
+      f3.write(reinterpret_cast<char*>(&detection_vector_3[i]), sizeof(detection));
+  }
+  f3.close();
+
+  std::ofstream f4("./photon_dist/pinhole/test_new_maps_ge4.raw", std::ios::binary);
+  for (uint32_t i = 0; i < detection_vector_ge4.size(); i++) {
+      f4.write(reinterpret_cast<char*>(&detection_vector_ge4[i]), sizeof(detection));
+  }
+  f4.close();
 
 
   std::cout << "Elapsed time: " << timer.GetRealElapsed() << " seconds" << std::endl;

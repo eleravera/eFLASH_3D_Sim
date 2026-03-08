@@ -230,10 +230,6 @@ void FlashSteppingAction::HandlePhotonDetection(const G4Step* aStep,
             return;
         }
 
-        // 👇 DEBUG CHE TI DICE QUANTE RIFLESSIONI HA FATTO IL FOTONE
-        G4cout << "DEBUG: detector hit, nInternalReflections = "
-               << info->nInternalReflections << G4endl;
-
         G4ThreeVector position = postStep->GetPosition();
 
         detection photon_map(position.x()/mm,
@@ -241,7 +237,25 @@ void FlashSteppingAction::HandlePhotonDetection(const G4Step* aStep,
                              position.z()/mm,
                              info->nInternalReflections);
 
+        // vettore totale
         detection_vector.push_back(photon_map);
+
+        // vettori separati per numero di riflessioni
+        if (info->nInternalReflections == 0) {
+            detection_vector_0.push_back(photon_map);
+        }
+        else if (info->nInternalReflections == 1) {
+            detection_vector_1.push_back(photon_map);
+        }
+        else if (info->nInternalReflections == 2) {
+            detection_vector_2.push_back(photon_map);
+        }
+        else if (info->nInternalReflections == 3) {
+            detection_vector_3.push_back(photon_map);
+        }
+        else {
+            detection_vector_ge4.push_back(photon_map);
+        }
     }
 }
 
