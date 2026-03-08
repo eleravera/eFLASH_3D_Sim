@@ -223,14 +223,26 @@ void FlashSteppingAction::HandlePhotonDetection(const G4Step* aStep,
     G4String postVolumeName = postPV ? postPV->GetLogicalVolume()->GetName() : "OutOfWorld";
 
     if (preVolumeName == "logicTreatmentRoom" && postVolumeName == "DetectorLog") {
-        G4cout << "DEBUG: photon reached detector" << G4endl;
-    }
 
-    auto* info = dynamic_cast<FlashPhotonTrackInfo*>(aStep->GetTrack()->GetUserInformation());
-    if (!info) {
-    G4cout << "DEBUG: no track info!" << G4endl;
-    return;
-}
+        auto* info = dynamic_cast<FlashPhotonTrackInfo*>(aStep->GetTrack()->GetUserInformation());
+        if (!info) {
+            G4cout << "DEBUG: no track info!" << G4endl;
+            return;
+        }
+
+        // 👇 DEBUG CHE TI DICE QUANTE RIFLESSIONI HA FATTO IL FOTONE
+        G4cout << "DEBUG: detector hit, nInternalReflections = "
+               << info->nInternalReflections << G4endl;
+
+        G4ThreeVector position = postStep->GetPosition();
+
+        detection photon_map(position.x()/mm,
+                             position.y()/mm,
+                             position.z()/mm,
+                             info->nInternalReflections);
+
+        detection_vector.push_back(photon_map);
+    }
 }
 
 void FlashSteppingAction::HandleRayleighScattering(const G4Step* aStep,
