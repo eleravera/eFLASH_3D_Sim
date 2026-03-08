@@ -51,7 +51,7 @@
 tbb::concurrent_vector<photonProcess> photonProcess_vector;
 tbb::concurrent_vector<detection> detection_vector;
 
-/*int main(int argc, char **argv) {
+int main(int argc, char **argv) {
 
   if (argc < 4) {
         G4cerr << "Usage: " << argv[0] << " <macro_file> <seed> <output_file>" << G4endl;
@@ -108,12 +108,12 @@ tbb::concurrent_vector<detection> detection_vector;
   return 0;
 }
 
-*/
+
 
 
 
 //QUESTO MAIL È PER ME PER RUNNARE TEST SUL MIO PC
-int main(int argc, char **argv) {
+/*int main(int argc, char **argv) {
 
   auto *runManager=G4RunManagerFactory::CreateRunManager();
   G4int nThreads = 10;
@@ -163,7 +163,7 @@ int main(int argc, char **argv) {
 
 
   // Write results to output
-  /*  std::ofstream file_out1("./optical_properties/n_158_Rayleight/1m/seed6009_100evt.raw");
+  std::ofstream file_out1("./optical_properties/n_158_Rayleight/1m/seed6009_100evt.raw");
     for (const photonProcess& p : photonProcess_vector) {
 
         // PART 1 – campi base del fotone
@@ -209,7 +209,7 @@ int main(int argc, char **argv) {
         file_out1.write(reinterpret_cast<const char*>(&p.py_outside), sizeof(float));
         file_out1.write(reinterpret_cast<const char*>(&p.pz_outside), sizeof(float));
     }
-    file_out1.close();*/
+    file_out1.close();
 
 
     // Write results to output - SEMPRE PER RUNNURE SUL MIO PC
@@ -225,6 +225,6 @@ int main(int argc, char **argv) {
   delete visManager;
   delete runManager;
   return 0;
-}
+}*/
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo.....
